@@ -2,7 +2,7 @@
   "name": "long-essay-service",
   "version": "1.0.1",
   "dependencies": {
-    "long-essay-corrector": "github:fneumann/long-essay-corrector",
-    "long-essay-writer": "github:fneumann/long-essay-writer"
+    "long-essay-corrector": "github:EDUTIEK/long-essay-corrector",
+    "long-essay-writer": "github:EDUTIEK/long-essay-writer"
   }
 }
