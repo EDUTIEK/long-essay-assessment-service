@@ -1,5 +1,5 @@
 {
-  "name": "long-essay-service",
+  "name": "long-essay-assessment-service",
   "version": "1.0.1",
   "dependencies": {
     "long-essay-corrector": "github:EDUTIEK/long-essay-corrector",
