@@ -1,6 +1,6 @@
 {
-  "name": "edutiek/long-essay-service",
-  "description": "Backend service for writing long essays",
+  "name": "edutiek/long-essay-assessment-service",
+  "description": "Backend service for writing long essay assessments",
   "minimum-stability": "dev",
   "license": "GPL-3.0-or-later",
   "authors": [
@@ -11,7 +11,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Edutiek\\LongEssayService\\": "src"
+      "Edutiek\\LEAS\\": "src"
     }
   },
   "require": {
