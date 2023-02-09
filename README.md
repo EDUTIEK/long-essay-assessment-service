@@ -1,4 +1,4 @@
-# LongEssayService
+# LongEssayAssessmentService
 
 This service can be integrated by PHP based systems to use two javascript applications which provide user interfaces 
 for the writing and correction of long text-based exams:
@@ -20,7 +20,7 @@ Add the following dependency to your application:
     "repositories": [
         {
         "type": "vcs",
-        "url": "https://github.com/EDUTIEK/LongEssayService"
+        "url": "https://github.com/EDUTIEK/LongEssayAssessmentService"
         }
     ],
     "require": {
