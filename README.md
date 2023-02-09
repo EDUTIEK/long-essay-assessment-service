@@ -2,8 +2,8 @@
 
 This service can be integrated by PHP based systems to use two javascript applications which provide user interfaces 
 for the writing and correction of long text-based exams:
-* [long-essay-writer](https://github.com/fneumann/long-essay-writer) 
-* [long-essay corrector](https://github.com/fneumann/long-essay-corrector)  
+* [long-essay-writer](https://github.com/EDUTIEK/long-essay-writer) 
+* [long-essay corrector](https://github.com/EDUTIEK/long-essay-corrector)  
 
 The service has no own status. It provides API functions:
 
@@ -20,7 +20,7 @@ Add the following dependency to your application:
     "repositories": [
         {
         "type": "vcs",
-        "url": "https://github.com/fneumann/LongEssayService"
+        "url": "https://github.com/EDUTIEK/LongEssayService"
         }
     ],
     "require": {
