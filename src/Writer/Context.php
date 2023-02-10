@@ -1,18 +1,18 @@
 <?php
 
-namespace Edutiek\LongEssayService\Writer;
-use Edutiek\LongEssayService\Base;
-use Edutiek\LongEssayService\Data\Alert;
-use Edutiek\LongEssayService\Data\WritingSettings;
-use Edutiek\LongEssayService\Data\WritingStep;
-use Edutiek\LongEssayService\Data\WritingTask;
-use Edutiek\LongEssayService\Data\WrittenEssay;
+namespace Edutiek\LongEssayAssessmentService\Writer;
+use Edutiek\LongEssayAssessmentService\Base;
+use Edutiek\LongEssayAssessmentService\Data\Alert;
+use Edutiek\LongEssayAssessmentService\Data\WritingSettings;
+use Edutiek\LongEssayAssessmentService\Data\WritingStep;
+use Edutiek\LongEssayAssessmentService\Data\WritingTask;
+use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
 
 /**
  * Required interface of a context application (e.g. an LMS) calling the writer service
  * A class implementing this interface must be provided in the constructor of the writer service
  *
- * @package Edutiek\LongEssayService\Writer
+ * @package Edutiek\LongEssayAssessmentService\Writer
  */
 interface Context extends Base\BaseContext
 {

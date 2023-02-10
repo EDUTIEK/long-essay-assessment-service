@@ -1,22 +1,22 @@
 <?php
 
-namespace Edutiek\LongEssayService\Corrector;
-use Edutiek\LongEssayService\Base;
-use Edutiek\LongEssayService\Data\CorrectionItem;
-use Edutiek\LongEssayService\Data\CorrectionSettings;
-use Edutiek\LongEssayService\Data\CorrectionSummary;
-use Edutiek\LongEssayService\Data\CorrectionTask;
-use Edutiek\LongEssayService\Data\Corrector;
-use Edutiek\LongEssayService\Data\CorrectionGradeLevel;
-use Edutiek\LongEssayService\Data\EnvResource;
-use Edutiek\LongEssayService\Data\WrittenEssay;
-use Edutiek\LongEssayService\Exceptions\ContextException;
+namespace Edutiek\LongEssayAssessmentService\Corrector;
+use Edutiek\LongEssayAssessmentService\Base;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionItem;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionSettings;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionSummary;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionTask;
+use Edutiek\LongEssayAssessmentService\Data\Corrector;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionGradeLevel;
+use Edutiek\LongEssayAssessmentService\Data\EnvResource;
+use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
+use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 
 /**
  * Required interface of a context application (e.g. an LMS) calling the corrector service
  * A class implementing this interface must be provided in the constructor of the corrector service
  *
- * @package Edutiek\LongEssayService\Corrector
+ * @package Edutiek\LongEssayAssessmentService\Corrector
  */
 interface Context extends Base\BaseContext
 {

@@ -1,11 +1,11 @@
 <?php
 
-namespace Edutiek\LongEssayService\Base;
+namespace Edutiek\LongEssayAssessmentService\Base;
 
-use Edutiek\LongEssayService\Data\EnvResource;
-use Edutiek\LongEssayService\Exceptions\ContextException;
-use Edutiek\LongEssayService\Internal\Authentication;
-use Edutiek\LongEssayService\Internal\Dependencies;
+use Edutiek\LongEssayAssessmentService\Data\EnvResource;
+use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
+use Edutiek\LongEssayAssessmentService\Internal\Authentication;
+use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;

@@ -1,13 +1,13 @@
 <?php
 
-namespace Edutiek\LongEssayService\Corrector;
+namespace Edutiek\LongEssayAssessmentService\Corrector;
 
-use Edutiek\LongEssayService\Base;
-use Edutiek\LongEssayService\Base\BaseContext;
-use Edutiek\LongEssayService\Data\CorrectionSummary;
-use Edutiek\LongEssayService\Exceptions\ContextException;
-use Edutiek\LongEssayService\Internal\Authentication;
-use Edutiek\LongEssayService\Internal\Dependencies;
+use Edutiek\LongEssayAssessmentService\Base;
+use Edutiek\LongEssayAssessmentService\Base\BaseContext;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionSummary;
+use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
+use Edutiek\LongEssayAssessmentService\Internal\Authentication;
+use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Http\StatusCode;

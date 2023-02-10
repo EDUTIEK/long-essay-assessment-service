@@ -1,6 +1,6 @@
 <?php
 
-namespace Edutiek\LongEssayService\Internal;
+namespace Edutiek\LongEssayAssessmentService\Internal;
 
 /**
  * Tool for processing HTML code coming from the rich text editor

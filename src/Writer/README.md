@@ -1,14 +1,14 @@
 # Writer API
 
-Public API of the _Long Essay Service_ to integrate the writer frontend in a PHP based _System_ (e.g. a Learning Management System ). The writer frontend is a Single Page Application (SPA) written in JavaScript. it is included as a pre-built Node.js module in this service. All communication between the system and the writer frontend goes through this pure PHP based API.
+Public API of the _Long Essay Assessment Service_ to integrate the writer frontend in a PHP based _System_ (e.g. a Learning Management System ). The writer frontend is a Single Page Application (SPA) written in JavaScript. it is included as a pre-built Node.js module in this service. All communication between the system and the writer frontend goes through this pure PHP based API.
 
 ## Usage
 
 The API is provided by a writer [Service](Service.php) object. The system that uses it must provide a context object that implements the [Context](Context.php) interface of this API. 
 
 ````
-use Edutiek\LongEssayService\Writer\Context;
-use Edutiek\LongEssayService\Writer\Service;
+use Edutiek\LongEssayAssessmentService\Writer\Context;
+use Edutiek\LongEssayAssessmentService\Writer\Service;
 
 class MyContext implements Context
 {

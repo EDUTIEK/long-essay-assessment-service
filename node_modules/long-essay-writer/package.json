@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fneumann/long-essay-writer.git"
+    "url": "git+https://github.com/EDUTIEK/long-essay-writer.git"
   },
   "files": [
     "dist"

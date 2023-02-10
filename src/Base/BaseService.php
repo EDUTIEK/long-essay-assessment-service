@@ -1,13 +1,13 @@
 <?php
 
-namespace Edutiek\LongEssayService\Base;
+namespace Edutiek\LongEssayAssessmentService\Base;
 
-use Edutiek\LongEssayService\Internal\Authentication;
-use Edutiek\LongEssayService\Internal\Dependencies;
+use Edutiek\LongEssayAssessmentService\Internal\Authentication;
+use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
 
 /**
  * Common API of the Writer and Corrector services
- * @package Edutiek\LongEssayService\Internal
+ * @package Edutiek\LongEssayAssessmentService\Internal
  */
 abstract class BaseService
 {

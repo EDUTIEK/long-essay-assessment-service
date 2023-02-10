@@ -1,12 +1,12 @@
 <?php
 
-namespace Edutiek\LongEssayService\Corrector;
-use Edutiek\LongEssayService\Base;
-use Edutiek\LongEssayService\Data\DocuItem;
+namespace Edutiek\LongEssayAssessmentService\Corrector;
+use Edutiek\LongEssayAssessmentService\Base;
+use Edutiek\LongEssayAssessmentService\Data\DocuItem;
 
 /**
- * API of the LongEssayService for an LMS related to the correction of essays
- * @package Edutiek\LongEssayService\Corrector
+ * API of the LongEssayAssessmentService for an LMS related to the correction of essays
+ * @package Edutiek\LongEssayAssessmentService\Corrector
  */
 class Service extends Base\BaseService
 {

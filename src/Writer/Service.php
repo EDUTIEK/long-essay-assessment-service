@@ -1,13 +1,13 @@
 <?php
 
-namespace Edutiek\LongEssayService\Writer;
+namespace Edutiek\LongEssayAssessmentService\Writer;
 use DiffMatchPatch\DiffMatchPatch;
-use Edutiek\LongEssayService\Base;
-use Edutiek\LongEssayService\Data\WritingStep;
+use Edutiek\LongEssayAssessmentService\Base;
+use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 
 /**
- * API of the LongEssayService for an LMS related to the writing of essays
- * @package Edutiek\LongEssayService\Writer
+ * API of the LongEssayAssessmentService for an LMS related to the writing of essays
+ * @package Edutiek\LongEssayAssessmentService\Writer
  */
 class Service extends Base\BaseService
 {

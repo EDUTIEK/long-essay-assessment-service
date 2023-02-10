@@ -1,6 +1,6 @@
 <?php
 
-namespace Edutiek\LongEssayService\Internal;
+namespace Edutiek\LongEssayAssessmentService\Internal;
 
 
 class PdfGeneration

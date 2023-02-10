@@ -14,7 +14,7 @@ THIS STYLESHEET IS NOT USED!
 
     <!-- don't copy the html element -->
     <xsl:template match="html">
-        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayService\Internal\HtmlProcessing::initCounter')" />
+        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::initCounter')" />
         <xsl:apply-templates select="node()" />
     </xsl:template>
 
@@ -39,7 +39,7 @@ THIS STYLESHEET IS NOT USED!
 
     <!--  Add numbers to the paragraph like elements -->
     <xsl:template match="h1|h2|h3|h4|h5|h6|p|ul|ol">
-        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayService\Internal\HtmlProcessing::nextCounter')" />
+        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::nextCounter')" />
 
         <xsl:copy>
             <xsl:attribute name="class">long-essay-block</xsl:attribute>

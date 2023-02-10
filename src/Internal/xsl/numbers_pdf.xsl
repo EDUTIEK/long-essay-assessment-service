@@ -9,7 +9,7 @@
 
     <!-- don't copy the html element -->
     <xsl:template match="html">
-        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayService\Internal\HtmlProcessing::initCounter')" />
+        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::initCounter')" />
         <xsl:apply-templates select="node()" />
     </xsl:template>
 
@@ -21,7 +21,7 @@
 
     <!--  Add numbers to the paragraph like elements -->
     <xsl:template match="body/h1|body/h2|body/h3|body/h4|body/h5|body/h6|body/p|body/ul|body/ol">
-        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayService\Internal\HtmlProcessing::nextCounter')" />
+        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::nextCounter')" />
         <tr style="vertical-align:top;">
             <td width="10%">
                 <xsl:value-of select="$counter" />

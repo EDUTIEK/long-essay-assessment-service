@@ -1,14 +1,14 @@
 # Corrector API
 
-Public API of the _Long Essay Corrector_ to integrate the writer frontend in a PHP based _System_ (e.g. a Learning Management System ). The corrector frontend is a Single Page Application (SPA) written in JavaScript. it is included as a pre-built Node.js module in this service. All communication between the system and the corrector frontend goes through this pure PHP based API.
+Public API of the _Long Essay Assessment Service _ to integrate the corrector frontend in a PHP based _System_ (e.g. a Learning Management System ). The corrector frontend is a Single Page Application (SPA) written in JavaScript. it is included as a pre-built Node.js module in this service. All communication between the system and the corrector frontend goes through this pure PHP based API.
 
 ## Usage
 
 The API is provided by a corrector [Service](Service.php) object. The system that uses it must provide a context object that implements the [Context](Context.php) interface of this API.
 
 ````
-use Edutiek\LongEssayService\Corrector\Context;
-use Edutiek\LongEssayService\Corrector\Service;
+use Edutiek\LongEssayAssessmentService\Corrector\Context;
+use Edutiek\LongEssayAssessmentService\Corrector\Service;
 
 class MyContext implements Context
 {

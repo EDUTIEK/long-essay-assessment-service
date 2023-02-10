@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fneumann/long-essay-corrector.git"
+    "url": "git+https://github.com/EDUTIEK/long-essay-corrector.git"
   },
   "files": [
     "dist"

@@ -1,7 +1,7 @@
 <?php
-namespace Edutiek\LongEssayService\Internal;
+namespace Edutiek\LongEssayAssessmentService\Internal;
 
-use Edutiek\LongEssayService\Data\ApiToken;
+use Edutiek\LongEssayAssessmentService\Data\ApiToken;
 
 class Authentication
 {

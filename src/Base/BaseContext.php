@@ -1,9 +1,9 @@
 <?php
 
-namespace Edutiek\LongEssayService\Base;
-use Edutiek\LongEssayService\Data\EnvResource;
-use Edutiek\LongEssayService\Exceptions\ContextException;
-use Edutiek\LongEssayService\Data\ApiToken;
+namespace Edutiek\LongEssayAssessmentService\Base;
+use Edutiek\LongEssayAssessmentService\Data\EnvResource;
+use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
+use Edutiek\LongEssayAssessmentService\Data\ApiToken;
 
 /**
  * Common interface for Writer and Corrector contexts
@@ -53,7 +53,7 @@ interface BaseContext
     /**
      * Get the Url of the frontend
      * This URL should point to the index.html of the frontend
-     * Standard is to use the base URL of the installed LongEssayService and add the FRONTEND_RELATIVE_PATH
+     * Standard is to use the base URL of the installed LongEssayAssessmentService and add the FRONTEND_RELATIVE_PATH
      * @see Service::FRONTEND_RELATIVE_PATH
      */
     public function getFrontendUrl(): string;

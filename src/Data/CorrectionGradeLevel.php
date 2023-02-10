@@ -1,6 +1,6 @@
 <?php
 
-namespace Edutiek\LongEssayService\Data;
+namespace Edutiek\LongEssayAssessmentService\Data;
 
 class CorrectionGradeLevel
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Edutiek\LongEssayService\Exceptions;
+namespace Edutiek\LongEssayAssessmentService\Exceptions;
 
 class Exception extends \Exception
 {
