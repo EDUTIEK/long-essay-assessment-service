@@ -8,6 +8,19 @@ class Authentication
     public const PURPOSE_DATA = 'data';
     public const PURPOSE_FILE = 'file';
 
+
+    public function getTokenExpireTime(string $purpose)
+    {
+        switch ($purpose) {
+            case self::PURPOSE_FILE:
+                return 0;                   // no expiration
+
+            case self::PURPOSE_DATA:
+            default:
+                return time() + 3600;       // one hour, will be extended with each polling request
+        }
+    }
+
     /**
      * Generate a new token
      * @param string $purpose
@@ -15,16 +28,6 @@ class Authentication
      */
     public function generateApiToken(string $purpose): ApiToken
     {
-        switch ($purpose) {
-            case self::PURPOSE_FILE:
-                $expires = 0;           // no expiration
-                break;
-            case self::PURPOSE_DATA:
-            default:
-                $expires = time() + 3600;
-                break;
-        }
-
         // generate a random uuid like string for the token
         $value = sprintf('%04x%04x%04x%04x%04x%04x%04x%04x',
             mt_rand(0, 65535),
@@ -36,7 +39,7 @@ class Authentication
             mt_rand(0, 65535),
             mt_rand(0, 65535));
 
-        return new ApiToken($value, $_SERVER['REMOTE_ADDR'], $expires);
+        return new ApiToken($value, $_SERVER['REMOTE_ADDR'], $this->getTokenExpireTime($purpose));
     }
 
     /**

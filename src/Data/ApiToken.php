@@ -63,4 +63,14 @@ class ApiToken
     {
         return $this->expires;
     }
+
+    /**
+     * Set a new expiration timestamp
+     */
+    public function withExpires(int $expires): self
+    {
+        $clone = clone $this;
+        $clone->expires = $expires;
+        return $clone;
+    }
 }

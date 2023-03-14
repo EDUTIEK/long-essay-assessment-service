@@ -138,7 +138,7 @@ class Rest extends Base\BaseRest
             'alerts' => $alerts
         ];
 
-        $this->setNewDataToken();
+        $this->refreshDataToken();
         // don't set a new file token - it should not expire
         return $this->setResponse(StatusCode::HTTP_OK, $json);
     }
@@ -168,7 +168,7 @@ class Rest extends Base\BaseRest
         $essay = $essay->withEditStarted($data['started']);
         $this->context->setWrittenEssay($essay);
 
-        $this->setNewDataToken();
+        $this->refreshDataToken();
         $this->context->setAlive();
         return $this->setResponse(StatusCode::HTTP_OK);
     }
@@ -192,7 +192,7 @@ class Rest extends Base\BaseRest
         $essay = $this->context->getWrittenEssay();
         $this->saveWritingSteps($essay, $data['steps']);
 
-        $this->setNewDataToken();
+        $this->refreshDataToken();
         $this->context->setAlive();
         return $this->setResponse(StatusCode::HTTP_OK);
     }
@@ -236,7 +236,7 @@ class Rest extends Base\BaseRest
             );
         }
 
-        $this->setNewDataToken();
+        $this->refreshDataToken();
         $this->context->setAlive();
         return $this->setResponse(StatusCode::HTTP_OK);
     }

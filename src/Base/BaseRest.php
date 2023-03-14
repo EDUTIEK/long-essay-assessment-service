@@ -103,10 +103,11 @@ abstract class BaseRest extends App
             $this->setResponse(StatusCode::HTTP_UNAUTHORIZED, 'current token is expired');
             return false;
         }
-        if (!$this->dependencies->auth()->checkRemoteAddress($token)) {
-            $this->setResponse(StatusCode::HTTP_UNAUTHORIZED, 'client ip is not valid');
-            return false;
-        }
+//        todo: client ip may change in mobile clients, perhaps make the check configurable
+//        if (!$this->dependencies->auth()->checkRemoteAddress($token)) {
+//            $this->setResponse(StatusCode::HTTP_UNAUTHORIZED, 'client ip is not valid');
+//            return false;
+//        }
         if (!$this->dependencies->auth()->checkSignature($token, $user_key, $env_key, $signature)) {
             $this->setResponse(StatusCode::HTTP_UNAUTHORIZED, 'signature is wrong');
             return false;
@@ -114,6 +115,18 @@ abstract class BaseRest extends App
 
         return true;
     }
+
+    /**
+     * Set a new expiration time for the data token and set it in the response
+     */
+    protected function refreshDataToken()
+    {
+        $token = $this->context->getApiToken(Authentication::PURPOSE_DATA);
+        $token = $token->withExpires($this->dependencies->auth()->getTokenExpireTime(Authentication::PURPOSE_DATA));
+        $this->context->setApiToken($token, Authentication::PURPOSE_DATA);
+        $this->response = $this->response->withHeader('LongEssayDataToken', $token->getValue());
+    }
+
 
     /**
      * Generate a new data token and set it in the response

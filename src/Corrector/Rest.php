@@ -218,7 +218,7 @@ class Rest extends Base\BaseRest
                     ],
                 ];
 
-                $this->setNewDataToken();
+                $this->refreshDataToken();
                 return $this->setResponse(StatusCode::HTTP_OK, $json);
             }
         }
@@ -257,7 +257,7 @@ class Rest extends Base\BaseRest
                             isset($data['is_authorized']) ? (bool) $data['is_authorized'] : null,
                         );
                         $this->context->setCorrectionSummary($item->getKey(), $CurrentCorrectorKey, $summary);
-                        $this->setNewDataToken();
+                        $this->refreshDataToken();
                         $this->context->setAlive();
                         return $this->setResponse(StatusCode::HTTP_OK);
                     }
@@ -291,7 +291,7 @@ class Rest extends Base\BaseRest
             !empty($data['grade_key']) ? (string) $data['grade_key'] : null,
             !empty($data['stitch_comment']) ? (string) $data['stitch_comment'] : null
             )) {
-            $this->setNewDataToken();
+            $this->refreshDataToken();
             $this->context->setAlive();
             return $this->setResponse(StatusCode::HTTP_OK);
         }
