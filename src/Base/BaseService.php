@@ -52,9 +52,10 @@ abstract class BaseService
         $this->setSpecificFrontendParams();
 
         // use this if browsers prevent cookies being saved for a redirection
-        //$this->redirectByHtml($this->context->getFrontendUrl());
+        // $this->redirectByHtml($this->context->getFrontendUrl());
 
         header('Location: ' . $this->context->getFrontendUrl());
+        exit;
     }
 
     /**
