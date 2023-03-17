@@ -1,4 +1,4 @@
-# Long EssayAssessment Service
+# Long Essay Assessment Service (Pilot Version)
 
 This service can be integrated by PHP based systems to use two javascript applications which provide user interfaces 
 for the writing and correction of long text-based exams:
@@ -10,6 +10,10 @@ The service has no own status. It provides API functions:
 * [Writer](./src/Writer/README.md) includes the service functions to user the writer.
 * [Corrector](./src/Corrector/README.md) includes the service functions to user the corrector.
 * [Data](./src/Data/README.md) defines data objects for the use of the writer and corrector APIs.
+
+This pilot version is currently **under development** to complete the functionality required by the [EDUTIEK project](https://www.edutiek.de).
+
+An initial set of features is available in the **pre-test version** named LongEssayService which is maintained in a different [GitHub repository](https://github.com/fneumann/LongEssayService)
 
 ### Usage
 
