@@ -13,7 +13,7 @@ class Service extends Base\BaseService
     /**
      * @const Path of the frontend web app, relative to the service root directory, without starting slash
      */
-    public const FRONTEND_RELATIVE_PATH = 'node_modules/long-essay-corrector/dist/index.html';
+    public const FRONTEND_RELATIVE_PATH = 'node_modules/long-essay-assessment-corrector/dist/index.html';
 
     /** @var Context */
     protected $context;
