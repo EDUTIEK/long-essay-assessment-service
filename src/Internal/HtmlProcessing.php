@@ -2,12 +2,15 @@
 
 namespace Edutiek\LongEssayAssessmentService\Internal;
 
+use DOMDocument;
+
 /**
  * Tool for processing HTML code coming from the rich text editor
  */
 class HtmlProcessing
 {
-    static $counter = 1;
+    static $paraCounter = 0;
+    static $wordCounter = 0;
 
     /**
      * Process the written text
@@ -16,7 +19,7 @@ class HtmlProcessing
     {
         $html = $html ?? '';
         $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl');
-        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers_pdf.xsl');
+        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl');
 
         return $html;
     }
@@ -57,13 +60,71 @@ class HtmlProcessing
     }
 
 
-    static function initCounter(): void
+    static function initParaCounter(): void
     {
-        self::$counter = 1;
+        self::$paraCounter = 0;
     }
 
-    static function nextCounter(): string
+    static function currentParaCounter(): string
     {
-        return self::$counter++;
+        return self::$paraCounter;
+    }
+
+    static function nextParaCounter(): string
+    {
+        self::$paraCounter++;
+        return self::$paraCounter;
+    }
+
+    static function initWordCounter(): void
+    {
+        self::$wordCounter = 0;
+    }
+
+    static function currentWordCounter(): string
+    {
+        return self::$wordCounter;
+    }
+
+    static function nextWordCounter(): string
+    {
+        self::$wordCounter++;
+        return self::$wordCounter;
+    }
+
+    /**
+     * Split a text into single words
+     * Single spaces are added to the last word
+     * Multiple spaces are treated as separate words
+     * @param $text
+     * @return \DOMElement
+     * @throws \DOMException
+     */
+    static function splitWords($text): \DOMElement
+    {
+       $words = preg_split("/([\s]+)/", $text, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+
+       $doc = new DOMDocument;
+       $root = $doc->createElement("root");
+
+       $current = '';
+       foreach ($words as $word) {
+           if ($word == ' ' && (trim($current) == $current || trim($current) == '')) {
+               // append a space to the last word if it is pure text or pure space
+               // (don't add if a text space is already added to the last word)
+               $current .= $word;
+           }
+           else {
+               if ($current != '') {
+                   $root->appendChild(new \DOMText($current));
+               }
+               $current = $word;
+           }
+       }
+        if ($current != '') {
+            $root->appendChild(new \DOMText($current));
+        }
+
+        return $root;
     }
 }

@@ -78,6 +78,16 @@ class Service extends Base\BaseService
         );
     }
 
+    /**
+     * Get the html the text that has been processed for the corrector
+     */
+    public function getProcessedTextAsHtml() : string
+    {
+        $essay = $this->context->getWrittenEssay();
+        return  $this->dependencies->html()->processWrittenText($essay->getWrittenText());
+    }
+
+
 
 
     /**
