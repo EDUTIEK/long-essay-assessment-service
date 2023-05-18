@@ -8,9 +8,11 @@ use Edutiek\LongEssayAssessmentService\Data\CorrectionSummary;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionTask;
 use Edutiek\LongEssayAssessmentService\Data\Corrector;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionGradeLevel;
-use Edutiek\LongEssayAssessmentService\Data\EnvResource;
 use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
 use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionRatingCriterion;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 
 /**
  * Required interface of a context application (e.g. an LMS) calling the corrector service
@@ -37,6 +39,12 @@ interface Context extends Base\BaseContext
      * @return CorrectionGradeLevel[]
      */
     public function getGradeLevels(): array;
+
+    /**
+     * Get the rating criteria defined in the environment
+     * @return CorrectionRatingCriterion[]
+     */
+    public function getRatingCriteria(): array;
 
 
     /**
@@ -82,6 +90,18 @@ interface Context extends Base\BaseContext
      */
     public function getCorrectionSummary(string $item_key, string $corrector_key): ?CorrectionSummary;
 
+
+    /**
+     * Get the correction comments given by a corrector for a correction item
+     * @return CorrectionComment[]
+     */
+    public function getCorrectionComments(string $item_key, string $corrector_key): array;
+
+    /**
+     * Get the correction points given by a corrector for a correction item
+     * @return CorrectionPoints[]
+     */
+    public function getCorrectionPoints(string $item_key, string $corrector_key): array;
 
     /**
      * Set the text of the written essay that is processed for display in the corrector (e.g. line numbers added)

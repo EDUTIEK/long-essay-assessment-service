@@ -92,6 +92,15 @@ class Rest extends Base\BaseRest
                 'min_points' => $level->getMinPoints()
             ];
         }
+        $criteria = [];
+        foreach ($this->context->getRatingCriteria() as $criterion) {
+            $criteria[] = [
+                'key' => $criterion->getKey(),
+                'title' => $criterion->getTitle(),
+                'description' => $criterion->getDescription(),
+                'points' => $criterion->getPoints()
+            ];
+        }
         $items = [];
         foreach ($this->context->getCorrectionItems(true) as $item) {
             $items[] = [
@@ -118,6 +127,7 @@ class Rest extends Base\BaseRest
             ],
             'resources' => $resources,
             'levels' => $levels,
+            'criteria' => $criteria,
             'items' => $items
         ];
 
@@ -160,8 +170,33 @@ class Rest extends Base\BaseRest
                 }
 
                 $correctors = [];
+                $comments = [];
+                $points = [];
                 foreach ($this->context->getCorrectorsOfItem($item->getKey()) as $corrector) {
-                    // add only other correctors
+
+                    // PILOT style: comments and points are commonly transmitted for current and other correctors
+                    foreach ($this->context->getCorrectionComments($item->getKey(), $corrector->getKey()) as $comment) {
+                        $comments[] = [
+                            'key' => $comment->getKey(),
+                            'item_key' => $item->getKey(),
+                            'corrector_key' => $corrector->getKey(),
+                            'start_position' => $comment->getStartPosition(),
+                            'end_position' => $comment->getEndPosition(),
+                            'parent_number' => $comment->getParentNumber(),
+                            'comment' => $comment->getComment(),
+                            'rating' => $comment->getRating()
+                        ];
+                    }
+                    foreach ($this->context->getCorrectionPoints($item->getKey(), $corrector->getKey()) as $point) {
+                        $points[] = [
+                            'key' => $point->getKey(),
+                            'comment_key' => $point->getCommentKey(),
+                            'criterion_key' => $point->getCriterionKey(),
+                            'points' => $point->getPoints()
+                        ];
+                    }
+
+                    // PRE-TEST style: summaries are provided separately for other correctors
                     if ($corrector->getKey() == $CurrentCorrectorKey) {
                         continue;
                     }
@@ -209,6 +244,8 @@ class Rest extends Base\BaseRest
                         'authorized' => isset($essay) ? $essay->isAuthorized() : null
                     ],
                     'correctors' => $correctors,
+                    'comments' => $comments,
+                    'points' => $points,
                     'summary' => [
                         'text' => isset($summary) ? $summary->getText() : null,
                         'points' => isset($summary) ? $summary->getPoints() : null,
