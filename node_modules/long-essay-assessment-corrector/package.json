@@ -23,6 +23,7 @@
     "diff-match-patch": "^1.0.5",
     "js-cookie": "^3.0.1",
     "localforage": "^1.10.0",
+    "long-essay-image-marker": "github:EDUTIEK/long-essay-image-marker",
     "md5": "^2.3.0",
     "pinia": "^2.0.23",
     "roboto-fontface": "*",
