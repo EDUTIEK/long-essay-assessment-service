@@ -132,6 +132,23 @@ interface Context extends Base\BaseContext
 
 
     /**
+     * Save a correction points object if it belongs to a corrector
+     * Returns the id of the saved or deleted points
+     * Returns null if the points can't be saved
+     */
+    public function saveCorrectionPoints(CorrectionPoints $points, string $corrector_key): ?int;
+
+
+    /**
+     * Delete a correction points object if it belongs to a corrector
+     *
+     * Returns true if the object is deleted afterwards
+     * Returns false if the object can't be deleted
+     */
+    public function deleteCorrectionPoints(string $points_key, string $corrector_key): bool;
+
+
+    /**
      * Save a stitch decision
      */
     public function saveStitchDecision(string $item_key, int $timestamp, ?float $points, ?string $grade_key, ?string $stitch_comment) : bool;

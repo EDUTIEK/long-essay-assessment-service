@@ -12,6 +12,7 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Http\StatusCode;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 
 /**
  * Handler of REST requests from the corrector app
@@ -300,16 +301,36 @@ class Rest extends Base\BaseRest
                 );
 
                 if (!empty($id = $this->context->saveCorrectionComment($comment, $currentCorrectorKey))) {
-                    $comment_matching[$key] = (string) ($id);
+                    $comment_matching[$key] = (string) $id;
                 }
             }
             elseif ($this->context->deleteCorrectionComment($key, $currentCorrectorKey)) {
                 $comment_matching[$key] = null;
             }
         }
+
+        $points_matching = [];
+        foreach ((array) $data['points'] as $key => $pdata) {
+            if (isset($pdata)) {
+                $points = new CorrectionPoints(
+                    (string) $pdata['key'],
+                    (string) ($comment_matching[$pdata['comment_key']] ?? $pdata['comment_key']),
+                    (string) $pdata['criterion_key'],
+                    (int) $pdata['points']
+                );
+                
+                if (!empty($id = $this->context->saveCorrectionPoints($points, $currentCorrectorKey))) {
+                    $points_matching[$key] = (string) $id;
+                }
+                elseif ($this->context->deleteCorrectionPoints($key, $currentCorrectorKey)) {
+                    $points_matching[$key] = null;
+                }
+            }
+        }
         
         $json = [
-          'comments' => $comment_matching
+          'comments' => $comment_matching,
+          'points' => $points_matching
         ];
 
         $this->refreshDataToken();
