@@ -11,6 +11,7 @@ use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Http\StatusCode;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 
 /**
  * Handler of REST requests from the corrector app
@@ -32,6 +33,7 @@ class Rest extends Base\BaseRest
         $this->get('/data', [$this,'getData']);
         $this->get('/item/{key}', [$this,'getItem']);
         $this->get('/file/{key}', [$this,'getFile']);
+        $this->put('/changes/{key}', [$this, 'putChanges']);
         $this->put('/summary/{key}', [$this, 'putSummary']);
         $this->put('/stitch/{key}', [$this, 'putStitchDecision']);
     }
@@ -271,6 +273,58 @@ class Rest extends Base\BaseRest
      * @param array $args
      * @return Response
      */
+    public function putChanges(Request $request, Response $response, array $args): Response
+    {
+        // common checks and initializations
+        if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_DATA)) {
+            return $this->response;
+        }
+        $data = $this->request->getParsedBody();
+
+        $currentCorrector = $this->context->getCurrentCorrector();
+        $currentCorrectorKey = isset($currentCorrector) ? $currentCorrector->getKey() : '';
+
+        $comment_matching = [];
+        foreach ((array) $data['comments'] as $key => $cdata) {
+            
+            if (isset($cdata)) {
+                $comment = new CorrectionComment(
+                    (string) $cdata['key'],
+                    (string) $cdata['item_key'],
+                    (string) $cdata['corrector_key'],
+                    (int) $cdata['start_position'],
+                    (int) $cdata['end_position'],
+                    (int) $cdata['parent_number'],
+                    (string) $cdata['comment'],
+                    (string) $cdata['rating']
+                );
+
+                if (!empty($id = $this->context->saveCorrectionComment($comment, $currentCorrectorKey))) {
+                    $comment_matching[$key] = (string) ($id);
+                }
+            }
+            elseif ($this->context->deleteCorrectionComment($key, $currentCorrectorKey)) {
+                $comment_matching[$key] = null;
+            }
+        }
+        
+        $json = [
+          'comments' => $comment_matching
+        ];
+
+        $this->refreshDataToken();
+        $this->context->setAlive();
+        return $this->setResponse(StatusCode::HTTP_OK, $json);
+    }
+
+    
+    /**
+     * PUT the summary of a correction item
+     * @param Request  $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
     public function putSummary(Request $request, Response $response, array $args): Response
     {
         // common checks and initializations
@@ -279,13 +333,13 @@ class Rest extends Base\BaseRest
         }
         $data = $this->request->getParsedBody();
 
-        $CurrentCorrector = $this->context->getCurrentCorrector();
-        $CurrentCorrectorKey = isset($CurrentCorrector) ? $CurrentCorrector->getKey() : '';
+        $currentCorrector = $this->context->getCurrentCorrector();
+        $currentCorrectorKey = isset($currentCorrector) ? $currentCorrector->getKey() : '';
 
         foreach ($this->context->getCorrectionItems() as $item) {
             if ($item->getKey() == $args['key']) {
                 foreach ($this->context->getCorrectorsOfItem($item->getKey()) as $corrector) {
-                    if ($corrector->getKey() == $CurrentCorrectorKey) {
+                    if ($corrector->getKey() == $currentCorrectorKey) {
                         $summary = new CorrectionSummary(
                             isset($data['text']) ? (string) $data['text'] : null,
                             isset($data['points']) ? (float) $data['points'] : null,
@@ -293,7 +347,7 @@ class Rest extends Base\BaseRest
                             isset($data['last_change']) ? (int) $data['last_change'] : time(),
                             isset($data['is_authorized']) ? (bool) $data['is_authorized'] : null,
                         );
-                        $this->context->setCorrectionSummary($item->getKey(), $CurrentCorrectorKey, $summary);
+                        $this->context->setCorrectionSummary($item->getKey(), $currentCorrectorKey, $summary);
                         $this->refreshDataToken();
                         $this->context->setAlive();
                         return $this->setResponse(StatusCode::HTTP_OK);

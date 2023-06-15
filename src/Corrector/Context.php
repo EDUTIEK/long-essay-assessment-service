@@ -114,6 +114,22 @@ interface Context extends Base\BaseContext
      */
     public function setCorrectionSummary(string $item_key, string $corrector_key, CorrectionSummary $summary) : void;
 
+    /**
+     * Save a correction comment if it belongs to a corrector
+     * Returns the id of the saved or deleted comment 
+     * Returns null if the comment can't be saved
+     */
+    public function saveCorrectionComment(CorrectionComment $comment, string $corrector_key): ?int;
+
+
+    /**
+     * Delete a correction comment if it belongs to a corrector
+     * 
+     * Returns true if the comment is deleted afterwards
+     * Returns false if the comment can't be deleted
+     */
+    public function deleteCorrectionComment(string $comment_key, string $corrector_key): bool;
+
 
     /**
      * Save a stitch decision
