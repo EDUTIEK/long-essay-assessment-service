@@ -154,8 +154,9 @@ class Rest extends Base\BaseRest
             return $this->response;
         }
 
-        $CurrentCorrector = $this->context->getCurrentCorrector();
-        $CurrentCorrectorKey = isset($CurrentCorrector) ? $CurrentCorrector->getKey() : '';
+        // corrector can be null in review and stitch decision
+        $currentCorrector = $this->context->getCurrentCorrector();
+        $currentCorrectorKey = isset($currentCorrector) ? $currentCorrector->getKey() : '';
 
         foreach ($this->context->getCorrectionItems() as $item) {
 
@@ -200,7 +201,7 @@ class Rest extends Base\BaseRest
                     }
 
                     // PRE-TEST style: summaries are provided separately for other correctors
-                    if ($corrector->getKey() == $CurrentCorrectorKey) {
+                    if ($corrector->getKey() == $currentCorrectorKey) {
                         continue;
                     }
                     $summary = $this->context->getCorrectionSummary($item->getKey(), $corrector->getKey());
@@ -230,7 +231,10 @@ class Rest extends Base\BaseRest
                     }
                 }
                 $task = $this->context->getCorrectionTask();
-                $summary = $this->context->getCorrectionSummary($item->getKey(), $CurrentCorrectorKey);
+                
+                if (!empty($currentCorrectorKey)) {
+                    $summary = $this->context->getCorrectionSummary($item->getKey(), $currentCorrectorKey);
+                }
 
                 $json = [
                     'task' => [
