@@ -8,21 +8,26 @@ class DocuItem
     private WrittenEssay $writtenEssay;
     /** @var CorrectionSummary[] */
     private array $correctionSummaries = [];
+    /** @var correctionComment[] */
+    private array $correctionComments = [];
 
     /**
      * @param WritingTask $writingTask
      * @param WrittenEssay $writtenEssay
      * @param CorrectionSummary[] $correctionSummaries
+     * @param CorrectionComment[] $correctionComments                                               
      */
     public function __construct(
         WritingTask $writingTask,
         WrittenEssay $writtenEssay,
-        array $correctionSummaries
+        array $correctionSummaries,
+        array $correctionComments
     ) {
 
         $this->writingTask = $writingTask;
         $this->writtenEssay = $writtenEssay;
         $this->correctionSummaries = $correctionSummaries;
+        $this->correctionComments = $correctionComments;
     }
 
     /**
@@ -49,5 +54,25 @@ class DocuItem
         return $this->correctionSummaries;
     }
 
+    /**
+     * @return CorrectionComment[]
+     */
+    public function getCorrectionComments(): array
+    {
+        return $this->correctionComments;
+    }
 
+    /**
+     * @return CorrectionComment[]
+     */
+    public function getCommentsByCorrectorKey(string $correctorKey): array
+    {
+        $comments = [];
+        foreach ($this->correctionComments as $comment) {
+            if ($comment->getCorrectorKey() == $correctorKey) {
+                $comments[] = $comment;
+            }
+        }
+        return $comments;
+    }
 }

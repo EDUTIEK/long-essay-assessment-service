@@ -3,15 +3,40 @@
 namespace Edutiek\LongEssayAssessmentService\Internal;
 
 use DOMDocument;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
+use ILIAS\Plugin\LongEssayAssessment\Data\Essay\CorrectorComment;
 
 /**
  * Tool for processing HTML code coming from the rich text editor
  */
 class HtmlProcessing
 {
+    const COLOR_NORMAL = '#D8E5F4';
+    const COLOR_EXCELLENT = '#E3EFDD';
+    const COLOR_CARDINAL = '#FBDED1';
+
+
+    /** @var int */
     static $paraCounter = 0;
+
+    /** @var int */
     static $wordCounter = 0;
 
+    /** @var int */
+    static $commentCounter = 0;
+
+    /**
+     * All Comments that should be merged
+     * @var CorrectionComment[]
+     */
+    static $allComments = [];
+
+    /**
+     * Comments for the current paragraph
+     * @var CorrectionComment[]
+     */
+    static $currentComments = [];
+    
     /**
      * Process the written text
      */
@@ -23,7 +48,30 @@ class HtmlProcessing
 
         return $html;
     }
+    
 
+    /**
+     * Add comments to a text
+     * The text must have been processed with processedWrittenText()
+     * @param string|null $html
+     * @param CorrectionComment[]  $comments
+     * @return string
+     */
+    public function processComments(?string $html, array $comments) : string
+    {
+        self::$allComments = $comments;
+        self::$currentComments = [];
+        
+        $html = $html ?? '';
+        
+        $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','<span data-w="$1" data-p="$2">', $html);
+        $html = str_replace('</w-p>','</span>', $html);
+        
+        $html = $this->processXslt($html, __DIR__ . '/xsl/comments.xsl');
+
+        return $html;
+    }
+    
 
     /**
      * Get the XSLt Processor for an XSL file
@@ -123,6 +171,77 @@ class HtmlProcessing
        }
         if ($current != '') {
             $root->appendChild(new \DOMText($current));
+        }
+
+        return $root;
+    }
+
+    /**
+     * Initialize the collection of comments for the current paragraph
+     */
+    static function initCurrentComments() 
+    {
+        self::$currentComments = [];
+        self::$commentCounter = 0;
+    }
+
+    /**
+     * Get a label if a comment starts at the given word
+     * @param $wordNumber
+     * @param $paraNumber
+     * @return string
+     */
+    static function commentLabel(string $wordNumber, string $paraNumber) : string
+    {
+        $labels = [];
+        foreach(self::$allComments as $comment) {
+            if ($wordNumber == (int) $comment->getStartPosition()) {
+                self::$commentCounter++;
+                $label = $paraNumber . '.' .  self::$commentCounter;
+                self::$currentComments[$label] = $comment;
+                $labels[] = $label;
+            }
+        }
+        return(implode(',', $labels));
+    }
+
+    /**
+     * Get the background color for the word
+     * @param $wordNumber
+     * @return string
+     */
+    static function commentColor($wordNumber) : string
+    {
+        $color= '';
+        foreach(self::$allComments as $comment) {
+            if ($wordNumber >= (int) $comment->getStartPosition() && $wordNumber <= $comment->getEndPosition()) {
+                if ($comment->getRating() == CorrectorComment::RATING_CARDINAL) {
+                    $color = self::COLOR_CARDINAL;
+                }
+                elseif ($comment->getRating() == CorrectorComment::RAITNG_EXCELLENT) {
+                    $color = self::COLOR_EXCELLENT;
+                }
+                elseif ($color == '') {
+                    $color = self::COLOR_NORMAL;
+                }
+            }
+        }
+        return $color;
+    }
+
+    /**
+     * Get the comments for the current paragraph
+     * @return \DOMElement
+     * @throws \DOMException
+     */
+    static function getCurrentComments(): \DOMElement 
+    {
+        $doc = new DOMDocument;
+        $root = $doc->createElement("root");
+        
+        foreach (self::$currentComments as $label => $comment) {
+            // todo: wrap label in color
+            $root->appendChild(new \DOMText($label . ': '.  $comment->getComment()));
         }
 
         return $root;

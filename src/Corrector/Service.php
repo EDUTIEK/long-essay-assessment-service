@@ -72,7 +72,8 @@ class Service extends Base\BaseService
     {
         $task = $item->getWritingTask();
         $essay = $item->getWrittenEssay();
-
+        $processedText = $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
+        
         $allHtml = '';
         $allHtml .= "<b>Bearbeitung gestartet:</b> " . $this->formatDates($essay->getEditStarted()) . '<br>';
         $allHtml .= "<b>Bearbeitung beeendet:</b> " . $this->formatDates($essay->getEditEnded()) . '<br>';
@@ -103,7 +104,7 @@ class Service extends Base\BaseService
 
         $allHtml .= '<br><b>Abgegebener Text:</b>';
         $allHtml .= '<hr>';
-        $allHtml .= $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
+        $allHtml .= $processedText;
 
         foreach ($item->getCorrectionSummaries() as $summary) {
             $allHtml .= '<hr><p></p>';
@@ -121,9 +122,14 @@ class Service extends Base\BaseService
             }
             else {
                 $allHtml .= '<b>Korrektur:</b> noch nicht abgeschlossen<br>';
-            } 
+            }
+//            $allHtml .= '<br><b>Einzelkommentare:</b>';
+//            $allHtml .= $this->dependencies->html()->processComments($processedText, $item->getCommentsByCorrectorKey($summary->getCorrectorKey()));
         };
 
+//        echo $allHtml;
+//        exit;
+        
         return $this->dependencies->pdfGeneration()->generatePdfFromHtml(
             $allHtml,
             $this->context->getSystemName(),

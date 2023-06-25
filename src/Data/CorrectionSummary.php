@@ -4,15 +4,19 @@ namespace Edutiek\LongEssayAssessmentService\Data;
 
 class CorrectionSummary
 {
-    protected $text;
-    protected $points;
-    protected $grade_key;
-    protected $last_change;
-    protected $is_authorized;
-    protected $corrector_name;
-    protected $grade_title;
+    private string $item_key;
+    private string $corrector_key;
+    private ?string $text;
+    private ?float $points;
+    private ?string $grade_key;
+    private ?string $last_change;
+    private ?bool $is_authorized;
+    private ?string $corrector_name;
+    private ?string $grade_title;
 
     public function __construct(
+        string $item_key,
+        string $corrector_key,
         ?string $text,
         ?float $points,
         ?string $grade_key,
@@ -24,6 +28,8 @@ class CorrectionSummary
         ?string $grade_title = ''
     )
     {
+        $this->item_key = $item_key;
+        $this->corrector_key = $corrector_key;
         $this->text = $text;
         $this->points = $points;
         $this->grade_key = $grade_key;
@@ -31,6 +37,22 @@ class CorrectionSummary
         $this->is_authorized = $is_authorized;
         $this->corrector_name = $corrector_name;
         $this->grade_title = $grade_title;
+   }
+    
+    /**
+     * @return string
+     */
+    public function getItemKey(): string
+    {
+        return $this->item_key;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCorrectorKey(): string
+    {
+        return $this->corrector_key;
     }
 
     /**
