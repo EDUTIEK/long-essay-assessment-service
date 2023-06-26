@@ -29,7 +29,7 @@ class PdfGeneration
     /**
      * Size of the main text
      */
-    protected $main_font_size = 14;
+    protected $main_font_size = 10;
 
     /**
      * Font used in the header

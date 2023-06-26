@@ -48,16 +48,29 @@ class HtmlProcessing
 
         return $html;
     }
-    
 
     /**
-     * Add comments to a text
+     * Process the text for inclusion in a pdf
+     */
+    public function processTextForPdf(?string $html) : string
+    {
+        $html = $html ?? '';
+        $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','', $html);
+        $html = str_replace('</w-p>','', $html);
+
+        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_text.xsl');
+        return $html;
+    }
+
+
+    /**
+     * Add comments to a text for inclusion in a pdf
      * The text must have been processed with processedWrittenText()
      * @param string|null $html
      * @param CorrectionComment[]  $comments
      * @return string
      */
-    public function processComments(?string $html, array $comments) : string
+    public function processCommentsForPdf(?string $html, array $comments) : string
     {
         self::$allComments = $comments;
         self::$currentComments = [];
@@ -66,8 +79,7 @@ class HtmlProcessing
         
         $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','<span data-w="$1" data-p="$2">', $html);
         $html = str_replace('</w-p>','</span>', $html);
-        
-        $html = $this->processXslt($html, __DIR__ . '/xsl/comments.xsl');
+        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl');
 
         return $html;
     }
@@ -97,8 +109,12 @@ class HtmlProcessing
             $dom_doc = new \DOMDocument('1.0', 'UTF-8');
             $dom_doc->loadHTML('<?xml encoding="UTF-8"?'.'>'. $html);
 
-            $xml = $xslt->transformToXml($dom_doc);
-            $xml = str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
+            //$xml = $xslt->transformToXml($dom_doc);
+            $result = $xslt->transformToDoc($dom_doc);
+            $xml= $result->saveHTML();
+            
+            $xml = preg_replace('/<\?xml.*\?>/', '', $xml);
+            $xml = str_replace( ' xmlns:php="http://php.net/xsl"', '', $xml);
 
             return $xml;
         }

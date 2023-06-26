@@ -104,7 +104,7 @@ class Service extends Base\BaseService
 
         $allHtml .= '<br><b>Abgegebener Text:</b>';
         $allHtml .= '<hr>';
-        $allHtml .= $processedText;
+        $allHtml .= $this->dependencies->html()->processTextForPdf($processedText);
 
         foreach ($item->getCorrectionSummaries() as $summary) {
             $allHtml .= '<hr><p></p>';
@@ -123,9 +123,10 @@ class Service extends Base\BaseService
             else {
                 $allHtml .= '<b>Korrektur:</b> noch nicht abgeschlossen<br>';
             }
-//            $allHtml .= '<br><b>Einzelkommentare:</b>';
-//            $allHtml .= $this->dependencies->html()->processComments($processedText, $item->getCommentsByCorrectorKey($summary->getCorrectorKey()));
-        };
+            
+            $allHtml .= '<br><b>Einzelkommentare:</b><br>';
+            $allHtml .= $this->dependencies->html()->processCommentsForPdf($processedText, $item->getCommentsByCorrectorKey($summary->getCorrectorKey()));
+        }
 
 //        echo $allHtml;
 //        exit;

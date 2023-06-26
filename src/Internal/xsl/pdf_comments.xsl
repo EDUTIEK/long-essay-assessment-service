@@ -7,29 +7,33 @@
         <xsl:copy><xsl:apply-templates select="@*|node()" /></xsl:copy>
     </xsl:template>
 
-    <!-- don't copy the html element -->
-    <xsl:template match="html">
+    <!-- elements to leave out -->
+    <xsl:template match="html|body">
         <xsl:apply-templates select="node()" />
     </xsl:template>
 
+    <!-- remove the number attributes -->
+    <xsl:template match="@long-essay-number">
+    </xsl:template>
+    
+    
     <!-- add the comments column -->
     <xsl:template match="tr">
         <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::initCurrentComments')" />
         <xsl:copy>
             <xsl:copy-of select="@*" />
-            <td width="5%">
+            <td style="width: 5%;">
                 <!-- paragraph number -->
                 <xsl:copy-of select="td[1]/node()" />
             </td>
-            <td width="60%">
+            <td style="width: 60%;">
                 <!-- text -->
                 <xsl:apply-templates select="td[2]/node()" />
             </td>   
-            <td width="35%">
+            <td style="width: 35%;">
                 <!-- comments -->
                 <xsl:for-each select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::getCurrentComments')/text()">
-                    <p>
-                        <xsl:attribute name="style">font-family: sans-serif; font-size:12px;</xsl:attribute>
+                    <p style="font-family: sans-serif; font-size:8px;">
                         <xsl:value-of select="." />
                     </p>
                 </xsl:for-each>
@@ -46,8 +50,7 @@
                 <xsl:choose>
                     <xsl:when test="$color">
                         <xsl:if test="$label">
-                            <sup>
-                                <xsl:attribute name="style">background-color: grey; color:white; padding:2px; font-family: sans-serif; font-size:10px;</xsl:attribute>
+                            <sup style="background-color: grey; color:white; padding:2px; font-family: sans-serif; font-size: 8px;">
                                 <xsl:value-of select="$label" />
                             </sup>
                         </xsl:if>

@@ -14,7 +14,7 @@
     </xsl:template>
 
     <xsl:template match="body">
-        <table cellspacing="10">
+        <table style="border-spacing: 10px;">
             <xsl:apply-templates select="node()" />
         </table>
     </xsl:template>
@@ -23,10 +23,10 @@
     <xsl:template match="body/h1|body/h2|body/h3|body/h4|body/h5|body/h6|body/p|body/ul|body/ol">
         <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::nextParaCounter')" />
         <tr style="vertical-align:top;">
-            <td width="10%">
+            <td style="width: 10%;">
                 <xsl:value-of select="$counter" />
              </td>
-            <td width="90%">
+            <td style="width: 90%;">
                 <xsl:copy>
                     <xsl:attribute name="class">long-essay-block</xsl:attribute>
                     <xsl:attribute name="long-essay-number">
