@@ -3,6 +3,7 @@
 namespace Edutiek\LongEssayAssessmentService\Corrector;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\DocuItem;
+use Mustache_Engine;
 
 /**
  * API of the LongEssayAssessmentService for an LMS related to the correction of essays
@@ -74,62 +75,42 @@ class Service extends Base\BaseService
         $essay = $item->getWrittenEssay();
         $processedText = $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
         
-        $allHtml = '';
-        $allHtml .= "<b>Bearbeitung gestartet:</b> " . $this->formatDates($essay->getEditStarted()) . '<br>';
-        $allHtml .= "<b>Bearbeitung beeendet:</b> " . $this->formatDates($essay->getEditEnded()) . '<br>';
-        if (!empty($task->getWritingExcluded())) {
-            $allHtml .= "<b>Von Bearbeitung ausgeschlossen:</b> " . $this->formatDates($task->getWritingExcluded()) . '<br>';
-        }
-        if ($essay->isAuthorized()) {
-            $allHtml .= "<b>Bearbeitung autorisiert:</b> " . $this->formatDates($essay->getWritingAuthorized()). '<br>';
-            $allHtml .= "<b>Bearbeitung autorisiert durch:</b> " . $essay->getWritingAuthorizedBy(). '<br>';
-        }
-        else {
-            $allHtml .= "<b>Bearbeitung autorisiert:</b> nicht autorisiert<br>";
-        }
-
-        if ($essay->getCorrectionFinalized()) {
-            $allHtml .= '<br>';
-            $allHtml .= "<b>Korrektur beeendet:</b> " . $this->formatDates($essay->getCorrectionFinalized()) . '<br>';
-            $allHtml .= "<b>Korrektur beeendet durch:</b> " . $essay->getCorrectionFinalizedBy() . '<br>';
-            $allHtml .= "<b>Finale Punktzahl:</b> " . $essay->getFinalPoints() . '<br>';
-            $allHtml .= "<b>Finale Bewertung:</b> " . $essay->getFinalGrade() . '<br>';
-            if (!empty($essay->getStitchComment())) {
-                $allHtml .= "<b>Stichentscheid mit Begründung:</b><br> " . $essay->getStitchComment() . '<br>';
-            }
-        }
-        else {
-            $allHtml .= "<b>Korrektur beeendet:</b> nicht beendet";
-        }
-
-        $allHtml .= '<br><b>Abgegebener Text:</b>';
-        $allHtml .= '<hr>';
-        $allHtml .= $this->dependencies->html()->processTextForPdf($processedText);
-
+        $context = [
+            'writing' => [
+                   'edit_started' =>  $this->formatDates($essay->getEditStarted()),
+                   'edit_ended' =>  $this->formatDates($essay->getEditEnded()),
+                   'writing_excluded' => $this->formatDates($task->getWritingExcluded()),
+                   'is_authorized' => $essay->isAuthorized(),
+                   'writing_authorized' =>  $this->formatDates($essay->getWritingAuthorized()),
+                   'writing_authorized_by' => $essay->getWritingAuthorizedBy(),
+                   ],
+            'correction' => [
+                   'correction_finalized' => $this->formatDates($essay->getCorrectionFinalized()),
+                   'correction_finalized_by' => $essay->getCorrectionFinalizedBy(),
+                   'final_points' => $essay->getFinalPoints(),
+                   'final_grade' => $essay->getFinalGrade(),
+                   'stitch_comment' => $essay->getStitchComment()
+            ],
+            'text' => $this->dependencies->html()->processTextForPdf($processedText),
+            'summaries' => []
+        ];
+        
         foreach ($item->getCorrectionSummaries() as $summary) {
-            $allHtml .= '<hr><p></p>';
-            $allHtml .= "<b>Korrektor:</b> " . $summary->getCorrectorName() . '<br>';
-            if ($summary->isAuthorized()) {
-                $allHtml .= "<b>Korrigiert:</b> " . $this->formatDates($summary->getLastChange()) . '<br>';
-                $allHtml .= "<b>Vergebene Punkte:</b> " . $summary->getPoints() . '<br>';
-                $allHtml .= "<b>Bewertung:</b> " . $summary->getGradeTitle() . '<br>';
-                if (!empty($summary->getText())) {
-                    $allHtml .= "<b>Kommentar:</b>" . $summary->getText();
-                }
-                else {
-                    $allHtml .= "<b>Kommentar:</b> ohne Kommentar";
-                }
-            }
-            else {
-                $allHtml .= '<b>Korrektur:</b> noch nicht abgeschlossen<br>';
-            }
-            
-            $allHtml .= '<br><b>Einzelkommentare:</b><br>';
-            $allHtml .= $this->dependencies->html()->processCommentsForPdf($processedText, $item->getCommentsByCorrectorKey($summary->getCorrectorKey()));
+            $context['summaries'][] = [
+                'corrector_name' =>  $summary->getCorrectorName(),
+                'is_authorized' => $summary->isAuthorized(),
+                'last_change' => $this->formatDates($summary->getLastChange()),
+                'points' => $summary->getPoints(),
+                'grade_title' => $summary->getGradeTitle(),
+                'text' => $summary->getText(),
+                'comments' => $this->dependencies->html()->processCommentsForPdf(
+                    $processedText, $item->getCommentsByCorrectorKey($summary->getCorrectorKey()))
+            ];
         }
-
-//        echo $allHtml;
-//        exit;
+        
+        $mustache = new Mustache_Engine(array('entity_flags' => ENT_QUOTES));
+        $template = file_get_contents(__DIR__ . '/templates/correction_de.html');
+        $allHtml = $mustache->render($template, $context);
         
         return $this->dependencies->pdfGeneration()->generatePdfFromHtml(
             $allHtml,

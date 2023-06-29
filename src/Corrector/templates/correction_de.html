@@ -1,0 +1,58 @@
+<h1>Ergebnis</h1>
+
+{{#writing}}
+<b>Bearbeitung gestartet:</b> {{edit_started}}<br>
+{{#edit_ended}}
+<b>Bearbeitung beeendet:</b> {{.}}<br>
+{{/edit_ended}}
+{{#writing_excluded}}
+<b>Von Bearbeitung ausgeschlossen:</b>{{.}}<br>
+{{/writing_excluded}}
+
+{{#is_authorized}}
+<b>Bearbeitung autorisiert:</b> {{writing_authorized}}<br>
+<b>Bearbeitung autorisiert durch:</b> {{writing_authorized_by}}<br>
+{{/is_authorized}}
+{{^is_authorized}}
+<b>Bearbeitung autorisiert:</b> nicht autorisiert<br>
+{{/is_authorized}}
+{{/writing}}
+
+{{#correction}}
+{{#correction_finalized}}
+<br>
+<b>Korrektur beeendet:</b> {{correction_finalized}}<br>
+<b>Korrektur beeendet durch:</b> {{correction_finalized_by}}<br>
+<b>Finale Punktzahl:</b> {{final_points}}<br>
+<b>Finale Bewertung:</b> {{final_grade}}<br>
+{{#stitch_comment}}
+<b>Stichentscheid mit Begründung:</b><br> {{.}}
+{{/stitch_comment}}
+{{/correction_finalized}}
+{{/correction}}
+
+
+<h1>Abgegebener Text</h1>
+{{{text}}}
+
+{{#summaries}}
+<h1>Korrektur von {{corrector_name}}</h1>
+
+{{#is_authorized}}
+<b>Korrigiert:</b> {{last_change}}<br>
+<b>Vergebene Punkte:</b> {{points}}<br>
+<b>Bewertung:</b> {{grade_title}}<br>
+{{#text}}
+<b>Kommentar:</b> {{{.}}}
+{{/text}}
+{{^text}}
+<b>Kommentar:</b> ohne Kommentar
+{{/text}}
+{{/is_authorized}}
+{{^is_authorized}}
+<b>Korrektur:</b> noch nicht abgeschlossen<br>
+{{/is_authorized}}
+
+<br><b>Einzelkommentare:</b><br>
+{{{comments}}}
+{{/summaries}}
