@@ -366,6 +366,8 @@ class Rest extends Base\BaseRest
                 foreach ($this->context->getCorrectorsOfItem($item->getKey()) as $corrector) {
                     if ($corrector->getKey() == $currentCorrectorKey) {
                         $summary = new CorrectionSummary(
+                            (string) $item->getKey(),
+                            (string) $currentCorrectorKey,
                             isset($data['text']) ? (string) $data['text'] : null,
                             isset($data['points']) ? (float) $data['points'] : null,
                             isset($data['grade_key']) ? (string) $data['grade_key'] : null,
