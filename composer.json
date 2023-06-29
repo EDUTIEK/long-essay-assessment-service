@@ -23,6 +23,7 @@
     "ext-curl": "*",
     "slim/slim": "^3.11",
     "yetanotherape/diff-match-patch": "^1.1",
-    "tecnickcom/tcpdf": "^6.3"
+    "tecnickcom/tcpdf": "^6.3",
+    "mustache/mustache": "^2.14"
   }
 }
