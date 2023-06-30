@@ -32,9 +32,9 @@
             </td>   
             <td style="width: 35%;">
                 <!-- comments -->
-                <xsl:for-each select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::getCurrentComments')/text()">
+                <xsl:for-each select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::getCurrentComments')/node()">
                     <p style="font-family: sans-serif; font-size:8px;">
-                        <xsl:value-of select="." />
+                        <xsl:copy-of select="." />
                     </p>
                 </xsl:for-each>
             </td>

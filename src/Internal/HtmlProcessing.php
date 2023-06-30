@@ -256,8 +256,23 @@ class HtmlProcessing
         $root = $doc->createElement("root");
         
         foreach (self::$currentComments as $label => $comment) {
-            // todo: wrap label in color
-            $root->appendChild(new \DOMText($label . ': '.  $comment->getComment()));
+            
+            if ($comment->getRating() == CorrectorComment::RAITNG_EXCELLENT) {
+                $color = self::COLOR_EXCELLENT;
+                $label1 = $label . ' (exzellent): ';
+            }
+            elseif ($comment->getRating() == CorrectorComment::RATING_CARDINAL) {
+                $color = self::COLOR_CARDINAL;
+                $label1 = $label . ' (Kardinalfehler): ';
+            }
+            else {
+                $color = self::COLOR_NORMAL;
+                $label1 = $label . ': ';
+            }
+            
+            $span = $doc->createElement('span', $label1 .  $comment->getComment());
+            $span->setAttribute('style', "background-color:$color;");
+            $root->appendChild($span);
         }
 
         return $root;
