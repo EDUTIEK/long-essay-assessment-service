@@ -188,6 +188,7 @@ class Rest extends Base\BaseRest
                             'end_position' => $comment->getEndPosition(),
                             'parent_number' => $comment->getParentNumber(),
                             'comment' => $comment->getComment(),
+                            'points' => $comment->getPoints(),
                             'rating' => $comment->getRating()
                         ];
                     }
@@ -301,7 +302,8 @@ class Rest extends Base\BaseRest
                     (int) $cdata['end_position'],
                     (int) $cdata['parent_number'],
                     (string) $cdata['comment'],
-                    (string) $cdata['rating']
+                    (string) $cdata['rating'],
+                    (int) $cdata['points'],
                 );
 
                 if (!empty($id = $this->context->saveCorrectionComment($comment, $currentCorrectorKey))) {

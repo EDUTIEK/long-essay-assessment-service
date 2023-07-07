@@ -16,6 +16,7 @@ class CorrectionComment
     protected int $parent_number = 0;
     protected string $comment = '';
     protected string $rating = '';
+    protected int $points = 0;
 
     public function __construct(
         string $key,
@@ -25,7 +26,8 @@ class CorrectionComment
         int $end_position,
         int $parent_number,
         string $comment,
-        string $rating
+        string $rating,
+        int $points
     )
     {
         $this->key = $key;
@@ -36,6 +38,7 @@ class CorrectionComment
         $this->parent_number = $parent_number;
         $this->comment = $comment;
         $this->rating = $rating;
+        $this->points = $points;
     }
 
     /**
@@ -103,6 +106,14 @@ class CorrectionComment
     public function getRating(): string
     {
         return $this->rating;
+    }
+
+    /**
+     * Get the points directly assigned to this comment (not to a criterion)
+     */
+    public function getPoints(): int
+    {
+        return $this->points;
     }
 
 }
