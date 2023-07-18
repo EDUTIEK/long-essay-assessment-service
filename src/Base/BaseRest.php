@@ -199,7 +199,7 @@ abstract class BaseRest extends App
         }
 
         foreach ($this->context->getResources() as $resource) {
-            if ($resource->getKey() == $args['key'] && $resource->getType() == EnvResource::TYPE_FILE) {
+            if ($resource->getKey() == $args['key'] && $resource->getType() != EnvResource::TYPE_URL) {
                 $this->context->sendFileResource($resource->getKey());
                 return $response;
             }

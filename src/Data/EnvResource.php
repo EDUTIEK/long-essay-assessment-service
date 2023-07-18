@@ -10,6 +10,8 @@ class EnvResource
 {
     const TYPE_FILE = 'file';
     const TYPE_URL = 'url';
+    const TYPE_INSTRUCTION = 'instruct';
+    const TYPE_SOLUTION = 'solution';
 
     protected $key;
     protected $title;
