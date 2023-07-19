@@ -116,6 +116,7 @@ class Rest extends Base\BaseRest
             'task' => [
                 'title' => $task->getTitle(),
                 'instructions' => $task->getInstructions(),
+                'solution' => $task->getSolution(),
                 'correction_end' => $task->getCorrectionEnd(),
                 'correction_allowed' => false,      // will be set when item is loaded
                 'authorization_allowed' => false    // will be set when item is loaded
@@ -241,6 +242,7 @@ class Rest extends Base\BaseRest
                     'task' => [
                         'title' => $task->getTitle(),
                         'instructions' => $task->getInstructions(),
+                        'solution' => $task->getSolution(),
                         'correction_end' => $task->getCorrectionEnd(),
                         'correction_allowed' => $item->isCorrectionAllowed(),
                         'authorization_allowed' => $item->isAuthorizationAllowed()

@@ -9,15 +9,17 @@ class CorrectionTask
 {
     protected $title;
     protected $instructions;
+    protected $solution;
     protected $correction_end;
 
     /**
      * Constructor (see getters)
      */
-    public function __construct(string $title, string $instructions, ?int $correction_end)
+    public function __construct(string $title, string $instructions, string $solution, ?int $correction_end)
     {
         $this->title = $title;
         $this->instructions = $instructions;
+        $this->solution = $solution;
         $this->correction_end = $correction_end;
     }
 
@@ -36,7 +38,15 @@ class CorrectionTask
         return $this->instructions;
     }
 
+    /**
+     * Solution hints that are shown to the student after a defined date
+     */
+    public function getSolution(): string
+    {
+        return $this->solution;
+    }
 
+    
     /**
      * Unix timestamp for the end of correction
      * If set, no input will be accepted after the end
@@ -45,4 +55,5 @@ class CorrectionTask
     {
         return $this->correction_end;
     }
+
 }
