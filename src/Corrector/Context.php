@@ -42,6 +42,9 @@ interface Context extends Base\BaseContext
 
     /**
      * Get the rating criteria defined in the environment
+     * these can be either fixed or individual criteria of the correctors
+     * @see CorrectionRatingCriterion::getCorrectorKey()
+     *                                                  
      * @return CorrectionRatingCriterion[]
      */
     public function getRatingCriteria(): array;

@@ -99,6 +99,7 @@ class Rest extends Base\BaseRest
         foreach ($this->context->getRatingCriteria() as $criterion) {
             $criteria[] = [
                 'key' => $criterion->getKey(),
+                'corrector_key' => $criterion->getCorrectorKey(),
                 'title' => $criterion->getTitle(),
                 'description' => $criterion->getDescription(),
                 'points' => $criterion->getPoints()

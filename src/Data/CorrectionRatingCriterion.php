@@ -4,18 +4,20 @@ namespace Edutiek\LongEssayAssessmentService\Data;
 
 class CorrectionRatingCriterion
 {
-    protected $key;
-    protected $title;
-    protected $description;
-    protected $points;
+    protected string $key;
+    protected string $corrector_key;
+    protected string $title;
+    protected string $description;
+    protected string $points;
 
 
     /**
      * Constructor (see getters)
      */
-    public function __construct(string $key, string $title, string $description, int $points)
+    public function __construct(string $key, string $corrector_key, string $title, string $description, int $points)
     {
         $this->key = $key;
+        $this->corrector_key = $corrector_key;
         $this->title = $title;
         $this->description = $description;
         $this->points = $points;
@@ -27,6 +29,17 @@ class CorrectionRatingCriterion
     public function getKey(): string
     {
         return $this->key;
+    }
+
+    /**
+     * Get the key of the corrector to which the criterion belongs
+     * Depending on the environment setting rating criteria can be fixed or individually defined by correctors
+     * - If fixed, the corrector key is always an empty string and the criterion is used for all correctors
+     * - If individually, the corrector key is always set and a criterion is only used by this corrector
+     */
+    public function getCorrectorKey(): string
+    {
+        return $this->corrector_key;
     }
 
     /**
@@ -45,7 +58,6 @@ class CorrectionRatingCriterion
         return $this->description;
     }
 
-
     /**
      * Get the points that can be assigned to the criterion
      */
@@ -53,6 +65,4 @@ class CorrectionRatingCriterion
     {
         return $this->points;
     }
-
-
 }
