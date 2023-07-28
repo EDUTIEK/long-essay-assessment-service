@@ -32,9 +32,8 @@
     "ext-xml": "*",
     "ext-xsl": "*",
     "ext-curl": "*",
-    "edutiek/long-essay-pdf-converter": "dev-main",
-    "edutiek/long-essay-image-sketch": "dev-main",
-
+    "EDUTIEK/long-essay-pdf-converter": "dev-main",
+    "EDUTIEK/long-essay-image-sketch": "dev-main",
     "mustache/mustache": "^2.14",
     "slim/slim": "^3.11",
     "tecnickcom/tcpdf": "^6.3",
