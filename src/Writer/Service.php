@@ -4,6 +4,9 @@ namespace Edutiek\LongEssayAssessmentService\Writer;
 use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
+use Edutiek\LongEssayAssessmentService\Data\PageImage;
+use LongEssayPDFConverter\ImageMagick\PDFImage;
+use Imagick;
 
 /**
  * API of the LongEssayAssessmentService for an LMS related to the writing of essays
@@ -118,5 +121,34 @@ class Service extends Base\BaseService
         }
 
         return $after;
+    }
+
+    /**
+     * @param resource[] $pdfs - file handlers of pdf fines
+     * @return PageImage[]
+     */
+    public function createPageImagesFromPdfs(array $pdfs) : array 
+    {
+        $PDFImage = new PDFImage();
+        $magic = new Imagick();
+        
+        $images = [];
+        foreach ($pdfs as $pdf) {
+            $pngs = $PDFImage->asOnePerPage($pdf, PDFImage::NORMAL);
+            
+            foreach ($pngs as $png) {
+                $magic->readImageFile($png);
+                $magic->resetIterator();
+                $width = $magic->getImageWidth();
+                $height = $magic->getImageHeight();
+                $images[] = new PageImage(
+                    $png,
+                    $width,
+                    $height
+                );
+            }
+        }
+        
+        return $images;
     }
 }
