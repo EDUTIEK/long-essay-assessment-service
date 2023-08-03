@@ -17,6 +17,7 @@ class CorrectionComment
     protected string $comment = '';
     protected string $rating = '';
     protected int $points = 0;
+    protected string $mark;
 
     public function __construct(
         string $key,
