@@ -13,6 +13,8 @@ use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionRatingCriterion;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
+use Edutiek\LongEssayAssessmentService\Data\PageImage;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionPage;
 
 /**
  * Required interface of a context application (e.g. an LMS) calling the corrector service
@@ -80,6 +82,11 @@ interface Context extends Base\BaseContext
      */
     public function getEssayOfItem(string $item_key): ?WrittenEssay;
 
+    /**
+     * Get the list of pdf pages from an uploaded essay of a correction item
+     * @return CorrectionPage[]
+     */
+    public function getPagesOfItem(string $item_key): array;
 
     /**
      * Get the correctors assigned to a correction item

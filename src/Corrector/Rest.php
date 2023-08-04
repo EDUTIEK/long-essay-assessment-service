@@ -34,6 +34,7 @@ class Rest extends Base\BaseRest
         $this->get('/data', [$this,'getData']);
         $this->get('/item/{key}', [$this,'getItem']);
         $this->get('/file/{key}', [$this,'getFile']);
+        $this->get('/image/{item_key}/{key}', [$this,'getPageImage']);
         $this->put('/changes/{key}', [$this, 'putChanges']);
         $this->put('/summary/{key}', [$this, 'putSummary']);
         $this->put('/stitch/{key}', [$this, 'putStitchDecision']);
@@ -175,6 +176,19 @@ class Rest extends Base\BaseRest
                     }
                 }
 
+                $pages = [];
+                foreach ($this->context->getPagesOfItem($item->getKey()) as $page) {
+                    $pages[] = [
+                        'key' => $page->getKey(),
+                        'item_key' => $page->getItemKey(),
+                        'page_no' => $page->getPageNo(),
+                        'width' => $page->getWidth(),
+                        'height' => $page->getHeight(),
+                        'thumb_width' => $page->getThumbWidth(),
+                        'thumb_height' => $page->getThumbHeight()
+                    ];
+                }
+                
                 $correctors = [];
                 $comments = [];
                 $points = [];
@@ -254,6 +268,7 @@ class Rest extends Base\BaseRest
                         'ended' => isset($essay) ? $essay->getEditEnded() : null,
                         'authorized' => isset($essay) ? $essay->isAuthorized() : null
                     ],
+                    'pages' => $pages,
                     'correctors' => $correctors,
                     'comments' => $comments,
                     'points' => $points,
@@ -419,6 +434,33 @@ class Rest extends Base\BaseRest
             return $this->setResponse(StatusCode::HTTP_OK);
         }
         return $this->setResponse(StatusCode::HTTP_BAD_REQUEST, 'not saved');
+    }
+
+
+    /**
+     * GET a page image
+     */
+    public function getPageImage(Request $request, Response $response, array $args): Response
+    {
+        
+        // common checks and initializations
+        if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_FILE)) {
+            return $this->response;
+        }
+
+        $key = (string) ($args['key'] ?? '');
+        $item_key = (string) ($args['item_key'] ?? '');
+
+        // todo: check if allowed for corrector
+
+        foreach ($this->context->getPagesOfItem($item_key) as $page) {
+            if ($page->getKey() == $key) {
+                $this->context->sendPageImage($page->getKey());
+                return $response;
+            }
+        }
+
+        return $this->setResponse(StatusCode::HTTP_NOT_FOUND, 'resource not found');
     }
 
 }

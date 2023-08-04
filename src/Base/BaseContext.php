@@ -130,4 +130,12 @@ interface BaseContext
      */
     public function sendFileResource(string $key): void;
 
+    /**
+     * Send a pdf page image resource to the browser
+     * The 'Content-Disposition' HTTP response header must be inline
+     * The 'Content-Type' HTTP response header must give the correct mime type
+     */
+    public function sendPageImage(string $key): void;
+
+
 }
