@@ -5,7 +5,6 @@ namespace Edutiek\LongEssayAssessmentService\Data;
 class CorrectionComment
 {
     const RATING_CARDINAL = 'cardinal';
-    const RAITNG_FAILURE = 'failure';
     const RAITNG_EXCELLENT = 'excellent';
 
     protected string $key = '';
@@ -17,8 +16,20 @@ class CorrectionComment
     protected string $comment = '';
     protected string $rating = '';
     protected int $points = 0;
-    protected string $mark;
+    protected array $marks = [];
 
+    /**
+     * @param string $key
+     * @param string $item_key
+     * @param string $corrector_key
+     * @param int    $start_position
+     * @param int    $end_position
+     * @param int    $parent_number
+     * @param string $comment
+     * @param string $rating
+     * @param int    $points
+     * @param CorrectionMark[]  $marks
+     */
     public function __construct(
         string $key,
         string $item_key,
@@ -28,7 +39,8 @@ class CorrectionComment
         int $parent_number,
         string $comment,
         string $rating,
-        int $points
+        int $points,
+        array $marks = []
     )
     {
         $this->key = $key;
@@ -40,6 +52,7 @@ class CorrectionComment
         $this->comment = $comment;
         $this->rating = $rating;
         $this->points = $points;
+        $this->marks = $marks;
     }
 
     /**
@@ -117,4 +130,12 @@ class CorrectionComment
         return $this->points;
     }
 
+    /**
+     * Get the correction marks which are assigned to this comment
+     * @return CorrectionMark[]
+     */
+    public function getMarks(): array
+    {
+        return $this->marks;
+    }
 }

@@ -11,7 +11,7 @@ class CorrectionMark
     const SHAPE_LINE = 'line';
     const SHAPE_WAVE = 'wave';
 
-    
+    const ALLOWED_SHAPES = [self::SHAPE_CIRCLE, self::SHAPE_RECTANGLE, self::SHAPE_POLYGON, self::SHAPE_LINE, self::SHAPE_WAVE];
     
     private string $key;
     private string $shape;
@@ -47,21 +47,9 @@ class CorrectionMark
         $this->width = $width;
         $this->polygon = $polygon;
     }
+
     
-    public static function fromJson($json) : self
-    {
-        try {
-            $array = (array) json_decode($json);
-        }
-        catch (\Exception $e)  {
-            $array = [];
-        }
-        
-        return self::fromArray($array);
-    }
-    
-    
-    public static function fromArray($data = [])  : self
+    public static function fromArray(array $data = [])  : self
     {
         $key = '';
         $shape = self::SHAPE_NONE;
@@ -77,15 +65,15 @@ class CorrectionMark
         }
         
         if (isset($data['shape'])) {
-            if (in_array($data['shape'], [self::SHAPE_CIRCLE, self::SHAPE_LINE, self::SHAPE_WAVE, self::SHAPE_RECTANGLE, self::SHAPE_POLYGON])) {
+            if (in_array($data['shape'], self::ALLOWED_SHAPES)) {
                 $shape = (string) $data['shape'];
             }
         }
-        if (isset($data['pos']) && isset($data['pos']['x']) && isset($data['pos']['y'])) {
-            $pos = new CorrectionMarkPoint((int) $data['pos']['x'], (int)$data['pos']['y']);
+        if (isset($data['pos'])) {
+            $pos = CorrectionMarkPoint::fromArray((array) $data['pos']);
         }
-        if (isset($data['end']) && isset($data['end']['x']) && isset($data['end']['y'])) {
-            $end = new CorrectionMarkPoint((int) $data['end']['x'], (int)$data['end']['y']);
+        if (isset($data['end'])) {
+            $end = CorrectionMarkPoint::fromArray((array) $data['end']);
         }
         if (isset($data['width'])) {
             $width = (int) $data['width'];
@@ -93,23 +81,43 @@ class CorrectionMark
         if (isset($data['height'])) {
             $height = (int) $data['height'];
         }
-        if (isset($data['polygon']) && is_array($data['polygon'])) {
-            foreach ($data['polygon'] as $point) {
-                if (isset($point['x']) && isset($point['y'])) {
-                    $polygon[] = new CorrectionMarkPoint((int) $point['x'], (int) $point['y']);
-                }
+        if (isset($data['polygon'])) {
+            foreach ((array) $data['polygon'] as $point) {
+                $polygon[] = CorrectionMarkPoint::fromArray((array) $point);
             }
         }
 
         return new self($key, $shape, $pos, $end, $width, $height, $polygon);
     }
-    
-    
-    public function toJson() : string
+
+
+    /**
+     * Get multiple mark objects from a list of mark data
+     * @return self[]
+     */
+    public static function multiFromArray(array $data = []) : array 
     {
-        return json_encode($this->toArray());   
+        $marks = [];
+        foreach ($data as $mark_data)  {
+            $marks[] = self::fromArray((array) $mark_data);
+        }
+        return $marks;
     }
-    
+
+    /**
+     * Get a list of mark data from multiple mark objects
+     * @param self[] $marks
+     */
+    public static function multiToArray(array $marks = []) : array
+    {
+        $data = [];
+        foreach ($marks as $mark) {
+            $data[] = $mark->toArray();
+        }
+        return $data;
+    }
+
+
     public function toArray() : array
     {
         $polygon = [];
@@ -128,7 +136,7 @@ class CorrectionMark
         ];
     }
     
-    
+
     /**
      * @return string
      */

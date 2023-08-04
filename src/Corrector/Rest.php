@@ -13,6 +13,7 @@ use Slim\Http\Response;
 use Slim\Http\StatusCode;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionMark;
 
 /**
  * Handler of REST requests from the corrector app
@@ -205,7 +206,8 @@ class Rest extends Base\BaseRest
                             'parent_number' => $comment->getParentNumber(),
                             'comment' => $comment->getComment(),
                             'points' => $comment->getPoints(),
-                            'rating' => $comment->getRating()
+                            'rating' => $comment->getRating(),
+                            'marks' => CorrectionMark::multiToArray($comment->getMarks())
                         ];
                     }
                     foreach ($this->context->getCorrectionPoints($item->getKey(), $corrector->getKey()) as $point) {
@@ -322,6 +324,7 @@ class Rest extends Base\BaseRest
                     (string) $cdata['comment'],
                     (string) $cdata['rating'],
                     (int) $cdata['points'],
+                    CorrectionMark::multiFromArray((array) ($cdata['marks'] ?? []))
                 );
 
                 if (!empty($id = $this->context->saveCorrectionComment($comment, $currentCorrectorKey))) {

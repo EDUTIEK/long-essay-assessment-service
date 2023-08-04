@@ -12,6 +12,17 @@ class CorrectionMarkPoint
         $this->x = $x;
         $this->y = $y;
     }
+    
+    public static function fromArray($data): self
+    {
+        $x = 0;
+        $y = 0;
+        if (is_array($data)) {
+            $x = (int) ($data['x'] ?? 0);
+            $y = (int) ($data['y'] ?? 0);
+        }
+        return new self($x, $y);
+    }
 
     /**
      * @return array
@@ -20,7 +31,7 @@ class CorrectionMarkPoint
     {
         return [
             'x' => $this->getX(),
-            'y'=> $this->getY()
+            'y' => $this->getY()
         ];
     }
     
