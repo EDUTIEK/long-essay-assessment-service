@@ -12,6 +12,7 @@ class CorrectionMark
     const SHAPE_WAVE = 'wave';
 
     const ALLOWED_SHAPES = [self::SHAPE_CIRCLE, self::SHAPE_RECTANGLE, self::SHAPE_POLYGON, self::SHAPE_LINE, self::SHAPE_WAVE];
+    const FILLED_SHAPES = [self::SHAPE_CIRCLE, self::SHAPE_RECTANGLE, self::SHAPE_POLYGON];
     
     private string $key;
     private string $shape;

@@ -75,7 +75,7 @@ class PdfGeneration
     /**
      * Bottom margin.
      */
-    protected $bottom_margin = 25;
+    protected $bottom_margin = 5;
 
     /**
      * Left margin.
@@ -148,6 +148,41 @@ class PdfGeneration
 
 
 
+        // Print text using writeHTMLCell()
+        //$pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
+        $pdf->writeHtml($html, false, true);
+
+        // Close and output PDF document
+        // This method has several options, check the source code documentation for more information.
+        return $pdf->Output('dummy.pdf', 'S');
+    }
+
+    /**
+     * Generate a plain pdf (without header/footer) that can be used fpr conversion to a correction omage
+     * @param string $html
+     * @return string
+     */
+    public function generatePlainPdfFromHtml(string $html) 
+    {
+        $pdf = new \TCPDF($this->page_orientation, $this->pdf_unit, $this->page_format, true, 'UTF-8', false, 2);
+
+        //$pdf->SetMargins(0, 0, 0);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        
+        $pdf->SetAutoPageBreak(true, $this->bottom_margin);
+
+        // set default font subsetting mode
+        $pdf->setFontSubsetting(true);
+
+        // Set font
+        $pdf->SetFont($this->main_font, '', $this->main_font_size, '', true);
+
+        // Add a page
+        // This method has several options, check the source code documentation for more information.
+        $pdf->AddPage();
+
+        
         // Print text using writeHTMLCell()
         //$pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
         $pdf->writeHtml($html, false, true);

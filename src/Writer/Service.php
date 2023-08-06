@@ -5,8 +5,6 @@ use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
-use LongEssayPDFConverter\ImageMagick\PDFImage;
-use Imagick;
 
 /**
  * API of the LongEssayAssessmentService for an LMS related to the writing of essays
@@ -82,6 +80,17 @@ class Service extends Base\BaseService
     }
 
     /**
+     * Get a plain pdf (without header/hooter) from the text that has been processed for the corrector
+     */
+    public function getProcessedTextAsPlainPdf() : string
+    {
+        $essay = $this->context->getWrittenEssay();
+        return $this->dependencies->pdfGeneration()->generatePlainPdfFromHtml(
+            $this->dependencies->html()->processWrittenText($essay->getWrittenText())
+        );
+    }
+
+    /**
      * Get the html the text that has been processed for the corrector
      */
     public function getProcessedTextAsHtml() : string
@@ -124,31 +133,16 @@ class Service extends Base\BaseService
     }
 
     /**
-     * @param resource[] $pdfs - file handlers of pdf fines
+     * Create the page images from pdf files
+     * @param resource[] $pdfs - file handlers of pdf files
      * @return PageImage[]
      */
     public function createPageImagesFromPdfs(array $pdfs) : array 
     {
-        $PDFImage = new PDFImage();
-        $magic = new Imagick();
-        
         $images = [];
         foreach ($pdfs as $pdf) {
-            $pngs = $PDFImage->asOnePerPage($pdf, PDFImage::NORMAL);
-            
-            foreach ($pngs as $png) {
-                $magic->readImageFile($png);
-                $magic->resetIterator();
-                $width = $magic->getImageWidth();
-                $height = $magic->getImageHeight();
-                $images[] = new PageImage(
-                    $png,
-                    $width,
-                    $height
-                );
-            }
+            $images = array_merge($images,  $this->dependencies->image()->createImagesFromPdf($pdf));
         }
-        
         return $images;
     }
 }

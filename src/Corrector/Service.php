@@ -4,6 +4,9 @@ namespace Edutiek\LongEssayAssessmentService\Corrector;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\DocuItem;
 use Mustache_Engine;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionPage;
+use ILIAS\Plugin\LongEssayAssessment\Data\Essay\CorrectorComment;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 
 /**
  * API of the LongEssayAssessmentService for an LMS related to the correction of essays
@@ -74,6 +77,7 @@ class Service extends Base\BaseService
         $task = $item->getWritingTask();
         $essay = $item->getWrittenEssay();
         $processedText = $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
+        $pages = $this->context->getPagesOfItem($item->getKey());
         
         $context = [
             'writing' => [
@@ -92,10 +96,14 @@ class Service extends Base\BaseService
                    'stitch_comment' => $essay->getStitchComment()
             ],
             'text' => $this->dependencies->html()->processTextForPdf($processedText),
+            'pages' => $this->getOriginalPageImageDataForPdf($pages),
             'summaries' => []
         ];
         
         foreach ($item->getCorrectionSummaries() as $summary) {
+            
+            $comments = $item->getCommentsByCorrectorKey($summary->getCorrectorKey());
+            
             $context['summaries'][] = [
                 'corrector_name' =>  $summary->getCorrectorName(),
                 'is_authorized' => $summary->isAuthorized(),
@@ -103,14 +111,18 @@ class Service extends Base\BaseService
                 'points' => $summary->getPoints(),
                 'grade_title' => $summary->getGradeTitle(),
                 'text' => $summary->getText(),
+                'pages' => $this->getCommentedPageImageDataForPdf($pages, $comments),
                 'comments' => $this->dependencies->html()->processCommentsForPdf(
-                    $processedText, $item->getCommentsByCorrectorKey($summary->getCorrectorKey()))
+                    $processedText, $comments)
             ];
         }
         
         $mustache = new Mustache_Engine(array('entity_flags' => ENT_QUOTES));
         $template = file_get_contents(__DIR__ . '/templates/correction_de.html');
         $allHtml = $mustache->render($template, $context);
+        
+//        echo $allHtml;
+//        exit;
         
         return $this->dependencies->pdfGeneration()->generatePdfFromHtml(
             $allHtml,
@@ -119,5 +131,48 @@ class Service extends Base\BaseService
             $task->getTitle(),
             $task->getWriterName() . ' ' . $this->formatDates($essay->getEditStarted(), $essay->getEditEnded())
         );
+    }
+
+    /**
+     * Get the data of the original writer pages for pdf processing 
+     * @param CorrectionPage[] $pages
+     * @return array
+     */
+    protected function getOriginalPageImageDataForPdf(array $pages) : array
+    {
+        $data = [];
+        foreach ($pages as $page) {
+            $image = $this->context->getPageImage($page->getKey());
+            if (isset($image)) {
+                $data[] = [
+                    'page_no' => $page->getPageNo(),
+                    'src' => $this->dependencies->image()->getImageSrcAsPath($image)
+                ];
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Get the data of the original writer pages for pdf processing
+     * @param CorrectionPage[] $pages
+     * @param CorrectionComment[] $comments
+     * @return array
+     */
+    protected function getCommentedPageImageDataForPdf(array $pages, array $comments) : array
+    {
+        $data = [];
+        foreach ($pages as $page) {
+            $image = $this->context->getPageImage($page->getKey());
+            $commented = $this->dependencies->image()->applyCommentsMarks($page, $image, $comments);
+            
+            if (isset($commented)) {
+                $data[] = [
+                    'page_no' => $page->getPageNo(),
+                    'src' => $this->dependencies->image()->getImageSrcAsPath($commented)
+                ];
+            }
+        }
+        return $data;
     }
 }

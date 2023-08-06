@@ -10,6 +10,9 @@ class Dependencies
     /** @var HtmlProcessing */
     protected $htmlProcessing;
 
+    /** @var ImageProcessing */
+    protected $imageProcessing;
+    
     /** @var PdfGeneration */
     protected $pdfGeneration;
 
@@ -35,6 +38,18 @@ class Dependencies
         }
 
         return $this->htmlProcessing;
+    }
+
+    /**
+     * Get the object for Image processing
+     */
+    public function image(): ImageProcessing 
+    {
+        if (!isset($this->imageProcessing)) {
+            $this->imageProcessing = new ImageProcessing();
+        }
+
+        return $this->imageProcessing;
     }
 
     /**

@@ -31,9 +31,15 @@
 {{/correction_finalized}}
 {{/correction}}
 
-
+{{#pages}}
+<br pagebreak="true" />
+<h2>Abgabe Seite {{page_no}}</h2>
+<img src="{{src}}" />
+{{/pages}}
+{{^pages}}
 <h1>Abgegebener Text</h1>
 {{{text}}}
+{{/pages}}
 
 {{#summaries}}
 <h1>Korrektur von {{corrector_name}}</h1>
@@ -53,6 +59,15 @@
 <b>Korrektur:</b> noch nicht abgeschlossen<br>
 {{/is_authorized}}
 
+{{#pages}}
+<br pagebreak="true" />
+<h2>Seite {{page_no}} von Korrektor {{corrector_name}}</h2>
+<img src="{{src}}" />
+{{/pages}}
+{{^pages}}
 <br><b>Einzelkommentare:</b><br>
 {{{comments}}}
+{{{text}}}
+{{/pages}}
+
 {{/summaries}}

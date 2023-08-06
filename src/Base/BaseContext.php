@@ -4,6 +4,7 @@ namespace Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\EnvResource;
 use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 use Edutiek\LongEssayAssessmentService\Data\ApiToken;
+use Edutiek\LongEssayAssessmentService\Data\PageImage;
 
 /**
  * Common interface for Writer and Corrector contexts
@@ -137,5 +138,11 @@ interface BaseContext
      */
     public function sendPageImage(string $key): void;
 
+    /**
+     * Get the page image with loaded resources by its key
+     * @param string $key
+     * @return PageImage|null
+     */
+    public function getPageImage(string $key): ?PageImage;
 
 }
