@@ -71,7 +71,7 @@ class ImageProcessing
     /**
      * Get the data that can be used as src for an image
      */
-    public function getImageDataSrc(PageImage $page_image) 
+    public function getImageSrcAsData(PageImage $page_image) 
     {
         $content = stream_get_contents($page_image->getImage());
         $mime = $page_image->getMime();
@@ -80,14 +80,14 @@ class ImageProcessing
     }
 
     /**
-     * Get a file path for the image
+     * Get the data that can be used as src for an image
      */
-    public function getImageSrcAsPath(PageImage $image)
+    public function getImageSrcAsDataForTCPDF(PageImage $page_image)
     {
-        $content = stream_get_contents($image->getImage());
-        $path = tempnam(sys_get_temp_dir(), 'LAS');
-        file_put_contents ($path, $content);
-        return $path;
+        $content = stream_get_contents($page_image->getImage());
+        $mime = $page_image->getMime();
+        $base64 = base64_encode($content);
+        return "@{$base64}";
     }
 
     /**

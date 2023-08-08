@@ -146,7 +146,7 @@ class Service extends Base\BaseService
             if (isset($image)) {
                 $data[] = [
                     'page_no' => $page->getPageNo(),
-                    'src' => $this->dependencies->image()->getImageSrcAsPath($image)
+                    'src' => $this->dependencies->image()->getImageSrcAsDataForTCPDF($image)
                 ];
             }
         }
@@ -169,7 +169,7 @@ class Service extends Base\BaseService
             if (isset($commented)) {
                 $data[] = [
                     'page_no' => $page->getPageNo(),
-                    'src' => $this->dependencies->image()->getImageSrcAsPath($commented)
+                    'src' => $this->dependencies->image()->getImageSrcAsDataForTCPDF($commented)
                 ];
             }
         }
