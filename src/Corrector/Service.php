@@ -121,9 +121,6 @@ class Service extends Base\BaseService
         $template = file_get_contents(__DIR__ . '/templates/correction_de.html');
         $allHtml = $mustache->render($template, $context);
         
-//        echo $allHtml;
-//        exit;
-        
         return $this->dependencies->pdfGeneration()->generatePdfFromHtml(
             $allHtml,
             $this->context->getSystemName(),
@@ -146,7 +143,10 @@ class Service extends Base\BaseService
             if (isset($image)) {
                 $data[] = [
                     'page_no' => $page->getPageNo(),
-                    'src' => $this->dependencies->image()->getImageSrcAsDataForTCPDF($image)
+                    'src' => $this->dependencies->image()->getImageSrcAsPathForTCPDF(
+                        $image, 
+                        $this->context->getAbsoluteTempPath(),
+                        $this->context->getRelativeTempPath())
                 ];
             }
         }
@@ -169,7 +169,11 @@ class Service extends Base\BaseService
             if (isset($commented)) {
                 $data[] = [
                     'page_no' => $page->getPageNo(),
-                    'src' => $this->dependencies->image()->getImageSrcAsDataForTCPDF($commented)
+                    'src' => $this->dependencies->image()->getImageSrcAsPathForTCPDF(
+                        $commented,
+                        $this->context->getAbsoluteTempPath(),
+                        $this->context->getRelativeTempPath()
+                    )
                 ];
             }
         }

@@ -145,4 +145,20 @@ interface BaseContext
      */
     public function getPageImage(string $key): ?PageImage;
 
+    
+    /**
+     * Get a path for temp files which is relative to the executing php script file
+     * It must be without a trailing slash
+     * The PDF generation will store temporary images there
+     * TCPDF requires this path for image sources
+     */
+    public function getRelativeTempPath() : string;
+
+    /**
+     * Get the absolute path for temp files which must correspond to getRelativeTempPath
+     * It must be without a trailing slash
+     * The PDF generation will store temporary images there
+     */
+    public function getAbsoluteTempPath() : string;
+
 }

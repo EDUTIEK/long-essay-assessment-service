@@ -81,6 +81,7 @@ class ImageProcessing
 
     /**
      * Get the data that can be used as src for an image
+     * This avoids working with file pathes but may cause out of memory with Mustache
      */
     public function getImageSrcAsDataForTCPDF(PageImage $page_image)
     {
@@ -88,6 +89,20 @@ class ImageProcessing
         $mime = $page_image->getMime();
         $base64 = base64_encode($content);
         return "@{$base64}";
+    }
+    
+    /**
+     * Get a file path for the image
+     * @param PageImage$image
+     * @param string $create_dir - directory where the image is created
+     * @param string $src_path - path which is used in the src attribute o an img tag                   
+     */
+    public function getImageSrcAsPathForTCPDF(PageImage $image, string $create_dir, string $src_path)
+    {
+        $content = stream_get_contents($image->getImage());
+        $file = tempnam($create_dir, 'LAS');
+        file_put_contents ($file, $content);
+        return $src_path . '/' . basename($file);
     }
 
     /**

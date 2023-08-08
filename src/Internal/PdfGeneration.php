@@ -108,6 +108,8 @@ class PdfGeneration
         // note the last parameter for compliance with PDF/A-2B
         $pdf = new \TCPDF($this->page_orientation, $this->pdf_unit, $this->page_format, true, 'UTF-8', false, 2);
 
+        $pdf->setAllowLocalFiles(true);
+        
         // set document information
         $pdf->SetCreator($creator);
         $pdf->SetAuthor($author);
@@ -165,6 +167,8 @@ class PdfGeneration
     public function generatePlainPdfFromHtml(string $html) 
     {
         $pdf = new \TCPDF($this->page_orientation, $this->pdf_unit, $this->page_format, true, 'UTF-8', false, 2);
+
+        $pdf->setAllowLocalFiles(true);
 
         //$pdf->SetMargins(0, 0, 0);
         $pdf->setPrintHeader(false);
