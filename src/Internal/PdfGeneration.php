@@ -70,12 +70,12 @@ class PdfGeneration
     /**
      * Top margin.
      */
-    protected $top_margin = 27;
+    protected $top_margin = 20;
 
     /**
      * Bottom margin.
      */
-    protected $bottom_margin = 5;
+    protected $bottom_margin = 10;
 
     /**
      * Left margin.

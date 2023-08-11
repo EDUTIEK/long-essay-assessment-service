@@ -71,55 +71,70 @@ class Service extends Base\BaseService
 
     /**
      * Get a pdf from a corrected essay
+     * If a corrector key is given then only the correction of this corrector is exported
      */
-    public function getCorrectionAsPdf(DocuItem $item) : string
+    public function getCorrectionAsPdf(DocuItem $item, string $forCorrectorKey = null) : string
     {
         $task = $item->getWritingTask();
         $essay = $item->getWrittenEssay();
         $processedText = $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
         $pages = $this->context->getPagesOfItem($item->getKey());
         
-        $context = [
-            'writing' => [
-                   'edit_started' =>  $this->formatDates($essay->getEditStarted()),
-                   'edit_ended' =>  $this->formatDates($essay->getEditEnded()),
-                   'writing_excluded' => $this->formatDates($task->getWritingExcluded()),
-                   'is_authorized' => $essay->isAuthorized(),
-                   'writing_authorized' =>  $this->formatDates($essay->getWritingAuthorized()),
-                   'writing_authorized_by' => $essay->getWritingAuthorizedBy(),
-                   ],
-            'correction' => [
-                   'correction_finalized' => $this->formatDates($essay->getCorrectionFinalized()),
-                   'correction_finalized_by' => $essay->getCorrectionFinalizedBy(),
-                   'final_points' => $essay->getFinalPoints(),
-                   'final_grade' => $essay->getFinalGrade(),
-                   'stitch_comment' => $essay->getStitchComment()
-            ],
-            'text' => $this->dependencies->html()->processTextForPdf($processedText),
-            'pages' => $this->getOriginalPageImageDataForPdf($pages),
-            'summaries' => []
-        ];
+        $renderContext = [];
+
         
+        if (!isset($forCorrectorKey)) {
+            $renderContext['writing'] = [
+                'edit_started' =>  $this->formatDates($essay->getEditStarted()),
+                'edit_ended' =>  $this->formatDates($essay->getEditEnded()),
+                'writing_excluded' => $this->formatDates($task->getWritingExcluded()),
+                'is_authorized' => $essay->isAuthorized(),
+                'writing_authorized' =>  $this->formatDates($essay->getWritingAuthorized()),
+                'writing_authorized_by' => $essay->getWritingAuthorizedBy(),
+            ];
+
+            $renderContext['correction'] =  [
+                'correction_finalized' => $this->formatDates($essay->getCorrectionFinalized()),
+                'correction_finalized_by' => $essay->getCorrectionFinalizedBy(),
+                'final_points' => $essay->getFinalPoints(),
+                'final_grade' => $essay->getFinalGrade(),
+                'stitch_comment' => $essay->getStitchComment()
+            ];
+            
+            if (!empty($pages)) {
+                $renderContext['pages'] = $this->getOriginalPageImageDataForPdf($pages);
+            }
+            else {
+                $renderContext['text'] = $this->dependencies->html()->processTextForPdf($processedText);
+            }
+        }
+
+        $renderContext['summaries'] = [];
         foreach ($item->getCorrectionSummaries() as $summary) {
             
-            $comments = $item->getCommentsByCorrectorKey($summary->getCorrectorKey());
-            
-            $context['summaries'][] = [
-                'corrector_name' =>  $summary->getCorrectorName(),
-                'is_authorized' => $summary->isAuthorized(),
-                'last_change' => $this->formatDates($summary->getLastChange()),
-                'points' => $summary->getPoints(),
-                'grade_title' => $summary->getGradeTitle(),
-                'text' => $summary->getText(),
-                'pages' => $this->getCommentedPageImageDataForPdf($pages, $comments),
-                'comments' => $this->dependencies->html()->processCommentsForPdf(
-                    $processedText, $comments)
-            ];
+            if (!isset($forCorrectorKey) || $summary->getCorrectorKey() == $forCorrectorKey) {
+                $comments = $item->getCommentsByCorrectorKey($summary->getCorrectorKey());
+                $renderSummary = [
+                    'corrector_name' =>  $summary->getCorrectorName(),
+                    'is_authorized' => $summary->isAuthorized(),
+                    'last_change' => $this->formatDates($summary->getLastChange()),
+                    'points' => $summary->getPoints(),
+                    'grade_title' => $summary->getGradeTitle(),
+                ];
+                if (!empty($pages)) {
+                    $renderSummary['pages'] = $this->getCommentedPageImageDataForPdf($pages, $comments);
+                }
+                else {
+                    $renderSummary['text'] = $this->dependencies->html()->processCommentsForPdf(
+                        $processedText, $comments);
+                }
+                $renderContext['summaries'][] = $renderSummary;
+            }
         }
         
         $mustache = new Mustache_Engine(array('entity_flags' => ENT_QUOTES));
         $template = file_get_contents(__DIR__ . '/templates/correction_de.html');
-        $allHtml = $mustache->render($template, $context);
+        $allHtml = $mustache->render($template, $renderContext);
         
         return $this->dependencies->pdfGeneration()->generatePdfFromHtml(
             $allHtml,

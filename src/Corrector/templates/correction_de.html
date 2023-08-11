@@ -1,4 +1,6 @@
+{{#correction}}
 <h1>Ergebnis</h1>
+{{/correction}}
 
 {{#writing}}
 <b>Bearbeitung gestartet:</b> {{edit_started}}<br>
@@ -32,14 +34,13 @@
 {{/correction}}
 
 {{#pages}}
-<br pagebreak="true" />
-<h2>Abgabe Seite {{page_no}}</h2>
+<p pagebreak="true"><strong>Abgabe Seite {{page_no}}</strong></p>
 <img src="{{src}}" />
 {{/pages}}
-{{^pages}}
+{{#text}}
 <h1>Abgegebener Text</h1>
-{{{text}}}
-{{/pages}}
+{{{.}}}
+{{/text}}
 
 {{#summaries}}
 <h1>Korrektur von {{corrector_name}}</h1>
@@ -60,14 +61,13 @@
 {{/is_authorized}}
 
 {{#pages}}
-<br pagebreak="true" />
-<h2>Seite {{page_no}} von Korrektor {{corrector_name}}</h2>
+<p pagebreak="true"><strong>Seite {{page_no}} von Korrektor {{corrector_name}}</strong></p>
 <img src="{{src}}" />
 {{/pages}}
-{{^pages}}
+{{#text}}
 <br><b>Einzelkommentare:</b><br>
 {{{comments}}}
-{{{text}}}
-{{/pages}}
+{{{.}}}
+{{/text}}
 
 {{/summaries}}
