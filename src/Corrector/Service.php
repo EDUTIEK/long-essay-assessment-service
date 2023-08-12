@@ -7,6 +7,8 @@ use Mustache_Engine;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPage;
 use ILIAS\Plugin\LongEssayAssessment\Data\Essay\CorrectorComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPage;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
 
 /**
  * API of the LongEssayAssessmentService for an LMS related to the correction of essays
@@ -132,12 +134,12 @@ class Service extends Base\BaseService
             }
         }
         
-        $mustache = new Mustache_Engine(array('entity_flags' => ENT_QUOTES));
-        $template = file_get_contents(__DIR__ . '/templates/correction_de.html');
-        $allHtml = $mustache->render($template, $renderContext);
+        $allHtml = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/correction_de.html', $renderContext);
         
-        return $this->dependencies->pdfGeneration()->generatePdfFromHtml(
-            $allHtml,
+        $page = new PdfPage();
+        $page->addElement(new PdfHtml($allHtml));
+        return $this->dependencies->pdfGeneration()->generatePdf(
+            [$page],
             $this->context->getSystemName(),
             $task->getWriterName(),
             $task->getTitle(),

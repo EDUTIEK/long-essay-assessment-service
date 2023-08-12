@@ -5,6 +5,7 @@ namespace Edutiek\LongEssayAssessmentService\Internal;
 use DOMDocument;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use ILIAS\Plugin\LongEssayAssessment\Data\Essay\CorrectorComment;
+use Mustache_Engine;
 
 /**
  * Tool for processing HTML code coming from the rich text editor
@@ -36,6 +37,19 @@ class HtmlProcessing
      * @var CorrectionComment[]
      */
     static $currentComments = [];
+
+    /**
+     * Fill a template with data
+     * @param string $template
+     * @param array  $data
+     * @return string
+     */
+    public function fillTemplate(string $template, array $data)
+    {
+        $mustache = new Mustache_Engine(array('entity_flags' => ENT_QUOTES));
+        $template = file_get_contents($template);
+        return $mustache->render($template, $data);
+    }
     
     /**
      * Process the written text

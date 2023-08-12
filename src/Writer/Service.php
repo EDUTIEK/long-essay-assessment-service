@@ -5,6 +5,8 @@ use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPage;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
 
 /**
  * API of the LongEssayAssessmentService for an LMS related to the writing of essays
@@ -70,8 +72,10 @@ class Service extends Base\BaseService
         $task = $this->context->getWritingTask();
         $essay = $this->context->getWrittenEssay();
 
-        return $this->dependencies->pdfGeneration()->generatePdfFromHtml(
-            $this->dependencies->html()->processWrittenText($essay->getWrittenText()),
+        $page = new PdfPage();
+        $page->addElement(new PdfHtml($this->dependencies->html()->processWrittenText($essay->getWrittenText())));
+        return $this->dependencies->pdfGeneration()->generatePdf(
+            [$page],
             $this->context->getSystemName(),
             $task->getWriterName(),
             $task->getTitle(),

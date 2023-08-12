@@ -86,7 +86,6 @@ class ImageProcessing
     public function getImageSrcAsDataForTCPDF(PageImage $page_image)
     {
         $content = stream_get_contents($page_image->getImage());
-        $mime = $page_image->getMime();
         $base64 = base64_encode($content);
         return "@{$base64}";
     }

@@ -3,6 +3,8 @@
 namespace Edutiek\LongEssayAssessmentService\Internal;
 
 
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPage;
+
 class PdfGeneration
 {
     /**
@@ -92,9 +94,8 @@ class PdfGeneration
      * Generate a pdf from an HTML text
      * Compliance with PDF/A-2B shall be achieved
      * @see https://de.wikipedia.org/wiki/PDF/A
-     * @see
      *
-     * @param string $html          HTML code of the content
+     * @param PdfPage[] $pages      Pages of the PDF
      * @param string $creator       Name of the creator app, e.h. name of the LMS
      * @param string $author
      * @param string $title
@@ -102,7 +103,7 @@ class PdfGeneration
      * @param string $keywords
      * @return string
      */
-    public function generatePdfFromHtml(string $html, $creator = "", $author = "", $title = "", $subject = "", $keywords = "") : string
+    public function generatePdf(array $pages, $creator = "", $author = "", $title = "", $subject = "", $keywords = "") : string
     {
         // create new PDF document
         // note the last parameter for compliance with PDF/A-2B
@@ -144,15 +145,38 @@ class PdfGeneration
         $pdf->SetFont($this->main_font, '', $this->main_font_size, '', true);
 
 
+        foreach ($pages as $page) 
+        {
+            $pdf->AddPage();
+            $pdf->LastPage();
+            
+            foreach ($page->getElements() as $element) 
+            {
+                if ($element instanceof Data\PdfHtml) {
+                    $pdf->writeHtmlCell(
+                        (float) $element->getWidth(),
+                        (float) $element->getHeight(),
+                        $element->getLeft(),
+                        $element->getTop(),
+                        $element->getHtml(), 
+                        false, 
+                        false
+                    );
+                }
+                elseif ($element instanceof Data\PdfImage) {
+                    $pdf->Image(
+                        $element->getPath(),
+                        $element->getLeft(),
+                        (float) $element->getWidth(),
+                        (float) $element->getHeight()
+                    );
+                }
+            }
+        }
         // Add a page
         // This method has several options, check the source code documentation for more information.
         $pdf->AddPage();
-
-
-
-        // Print text using writeHTMLCell()
-        //$pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
-        $pdf->writeHtml($html, false, true);
+        
 
         // Close and output PDF document
         // This method has several options, check the source code documentation for more information.
@@ -160,7 +184,7 @@ class PdfGeneration
     }
 
     /**
-     * Generate a plain pdf (without header/footer) that can be used fpr conversion to a correction omage
+     * Generate a plain pdf (without header/footer and margins) that can be used for conversion to a correction page
      * @param string $html
      * @return string
      */
