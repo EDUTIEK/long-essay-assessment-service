@@ -2,6 +2,9 @@
 
 namespace Edutiek\LongEssayAssessmentService\Data;
 
+/**
+ * Graphical mark drawn by a corrector on the image of a written page
+ */
 class CorrectionMark
 {
     const SHAPE_NONE = '';
@@ -23,13 +26,14 @@ class CorrectionMark
     private array $polygon;
 
     /**
-     * @param string              $key
-     * @param string              $shape
-     * @param CorrectionMarkPoint $pos
-     * @param CorrectionMarkPoint $end
-     * @param int                 $height
-     * @param int                 $width
-     * @param CorrectionMarkPoint[] $polygon
+     * Constructor
+     * @param string              $key  - unique key of the mark
+     * @param string              $shape - type of shape (see constants)
+     * @param CorrectionMarkPoint $pos - start position on the image
+     * @param CorrectionMarkPoint $end - end position on the image
+     * @param int                 $height - height of the mark
+     * @param int                 $width - with of the mark
+     * @param CorrectionMarkPoint[] $polygon -list of points from a polygon 
      */
     public function __construct(
         string $key,
@@ -49,7 +53,11 @@ class CorrectionMark
         $this->polygon = $polygon;
     }
 
-    
+    /**
+     * Get an object from an assoc array of mark data
+     * @param array $data
+     * @return static
+     */
     public static function fromArray(array $data = [])  : self
     {
         $key = '';
@@ -118,7 +126,10 @@ class CorrectionMark
         return $data;
     }
 
-
+    /**
+     * Get an assoc array of mark data from the objects properties
+     * @return array
+     */
     public function toArray() : array
     {
         $polygon = [];
@@ -139,7 +150,7 @@ class CorrectionMark
     
 
     /**
-     * @return string
+     * Get the unique key of the mark
      */
     public function getKey(): string
     {
@@ -147,7 +158,7 @@ class CorrectionMark
     }
 
     /**
-     * @return string
+     * Get the type of shape (see constants)
      */
     public function getShape(): string
     {
@@ -155,7 +166,8 @@ class CorrectionMark
     }
 
     /**
-     * @return CorrectionMarkPoint
+     * Get the start position on the image
+     * This is used by all shapes
      */
     public function getPos(): CorrectionMarkPoint
     {
@@ -163,7 +175,9 @@ class CorrectionMark
     }
 
     /**
-     * @return CorrectionMarkPoint
+     * Get the end position of the shape
+     * This is used by line and wave shapes
+     * Other shapes have a dummy point (0,0) as end position
      */
     public function getEnd(): CorrectionMarkPoint
     {
@@ -171,7 +185,8 @@ class CorrectionMark
     }
 
     /**
-     * @return int
+     * Get the height of the mark
+     * This is only used for rectangles and 0 otherwise
      */
     public function getHeight(): int
     {
@@ -179,7 +194,8 @@ class CorrectionMark
     }
 
     /**
-     * @return int
+     * Get the width of the mark
+     * This is only used for rectangles and 0 otherwise
      */
     public function getWidth(): int
     {
@@ -187,6 +203,7 @@ class CorrectionMark
     }
 
     /**
+     * Get a list of points from a polygon
      * @return CorrectionMarkPoint[]
      */
     public function getPolygon(): array

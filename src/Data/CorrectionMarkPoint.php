@@ -2,17 +2,30 @@
 
 namespace Edutiek\LongEssayAssessmentService\Data;
 
+/**
+ * Point specifying an x and y position on an image
+ * The position is measured from the top left corner of the image
+ * The unit are pixels related to the original images size
+ */
 class CorrectionMarkPoint
 {
     private int $x;
     private int $y;
 
+    /**
+     * Constructor
+     * @param int $x - x position
+     * @param int $y - y position
+     */
     public function __construct(int $x = 0, int $y = 0) 
     {
         $this->x = $x;
         $this->y = $y;
     }
-    
+
+    /**
+     * Get an object from an assoc array of data
+     */
     public static function fromArray($data): self
     {
         $x = 0;
@@ -25,7 +38,7 @@ class CorrectionMarkPoint
     }
 
     /**
-     * @return array
+     * Get an assoc array of data from the object
      */
     public function toArray() :array 
     {
@@ -37,7 +50,7 @@ class CorrectionMarkPoint
     
     
     /**
-     * @return int
+     * Get the X position
      */
     public function getX(): int
     {
@@ -45,7 +58,7 @@ class CorrectionMarkPoint
     }
 
     /**
-     * @return int
+     * Get the Y position
      */
     public function getY(): int
     {

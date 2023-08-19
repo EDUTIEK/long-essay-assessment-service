@@ -2,6 +2,10 @@
 
 namespace Edutiek\LongEssayAssessmentService\Data;
 
+/**
+ * Page in a PDF file converted to an image
+ * The image and its thumbnail are provided as file resources
+ */
 class PageImage
 {
     /**
@@ -23,6 +27,17 @@ class PageImage
     private ?int $thumb_width;
     private ?int $thumb_height;
 
+    /**
+     * Contructor
+     * @param resource    $image - file resource of the image (handler provided by the fopen function)
+     * @param string      $mime - mime type of the image
+     * @param int         $width - width of the image
+     * @param int         $height - height of the image
+     * @param             $thumbnail - file resource of a thumbnail (handler provided by the fopen function)
+     * @param string|null $thumb_mime - mime type of the thumbnail
+     * @param int|null    $thumb_width - width of the thumbnail
+     * @param int|null    $thumb_height - height of the thumbnail
+     */
     public function __construct(
         $image,
         string $mime,
@@ -45,6 +60,7 @@ class PageImage
     }
     
     /**
+     * Get the file resource of the image (handler provided by the fopen function)
      * @return resource
      */
     public function getImage()
@@ -53,6 +69,7 @@ class PageImage
     }
 
     /**
+     * get the file resource of a thumbnail (handler provided by the fopen function)
      * @return resource|null
      */
     public function getThumbnail()
@@ -62,7 +79,7 @@ class PageImage
 
 
     /**
-     * @return string
+     * Get the mime type of the image
      */
     public function getMime(): string
     {
@@ -70,7 +87,7 @@ class PageImage
     }
 
     /**
-     * @return int
+     * Get the width of the image
      */
     public function getWidth(): int
     {
@@ -78,7 +95,7 @@ class PageImage
     }
 
     /**
-     * @return int
+     * Get the height of the image
      */
     public function getHeight(): int
     {
@@ -87,7 +104,7 @@ class PageImage
 
 
     /**
-     * @return string|null
+     * Get the mime type of the thumbnail
      */
     public function getThumbMime(): ?string
     {
@@ -96,7 +113,7 @@ class PageImage
 
 
     /**
-     * @return int|null
+     * Get the width of the thumbnail
      */
     public function getThumbWidth(): ?int
     {
@@ -104,7 +121,7 @@ class PageImage
     }
 
     /**
-     * @return int|null
+     * Get the height of the thumbnail
      */
     public function getThumbHeight(): ?int
     {

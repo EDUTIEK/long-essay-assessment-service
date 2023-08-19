@@ -2,6 +2,11 @@
 
 namespace Edutiek\LongEssayAssessmentService\Data;
 
+/**
+ * Comment created by a corrector
+ * The comment either refers to a marked part of the preprocessed text
+ * Or it has CorrectionMark objects for graphical marks on a page image
+ */
 class CorrectionComment
 {
     const RATING_CARDINAL = 'cardinal';
@@ -19,16 +24,17 @@ class CorrectionComment
     protected array $marks = [];
 
     /**
-     * @param string $key
-     * @param string $item_key
-     * @param string $corrector_key
-     * @param int    $start_position
-     * @param int    $end_position
-     * @param int    $parent_number
-     * @param string $comment
-     * @param string $rating
-     * @param int    $points
-     * @param CorrectionMark[]  $marks
+     * Constructor
+     * @param string $key - unique key of the comment
+     * @param string $item_key - key of the correction item 
+     * @param string $corrector_key - key of the corrector
+     * @param int    $start_position - number of the first word from the marked text or the lowest y position of the correction marks
+     * @param int    $end_position - number of the last word fom the marked text
+     * @param int $parent_number - number of the parent paragraph of the first marked word or the page number of the correction marks
+     * @param string $comment - textual comment
+     * @param string $rating - rating flag (see constants)
+     * @param int    $points - points directly assigned to this comment (not to a criterion)
+     * @param CorrectionMark[]  $marks - correction marks which are assigned to this comment
      */
     public function __construct(
         string $key,
@@ -83,6 +89,7 @@ class CorrectionComment
 
     /**
      * Get the number of the first word from the marked text to which the comment belongs
+     * or the lowest y position of the correction marks
      */
     public function getStartPosition(): int
     {
@@ -90,7 +97,8 @@ class CorrectionComment
     }
 
     /**
-     * Get the number of the last word fom the marked text to which the comment belongs
+     * Get the number of the last word from the marked text to which the comment belongs
+     * or the page number of the correction marks
      */
     public function getEndPosition(): int
     {

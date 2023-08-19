@@ -2,6 +2,12 @@
 
 namespace Edutiek\LongEssayAssessmentService\Data;
 
+/**
+ * Page of a PDF from scanned or processed written text used for correction
+ * This object only describes some page metadata
+ * The actual page content has to be provided as a PageImage object
+ * @see PageImage
+ */
 class CorrectionPage
 {
     private string $key;
@@ -15,7 +21,16 @@ class CorrectionPage
     private ?int $thumb_width;
     private ?int $thumb_height;
 
-
+    /**
+     * Constructor
+     * @param string   $key - unique key of the page
+     * @param string   $item_key - key of the correction item to which the page belongs
+     * @param int      $page_no - sequential number of the page in the item (starting with 1)
+     * @param int      $width - with of the full page image
+     * @param int      $height - height of the full page image
+     * @param int|null $thumb_width - with of a page thumbnail
+     * @param int|null $thumb_height - height of a page thumbnail
+     */
     public function __construct(
         string $key,
         string $item_key,
@@ -36,7 +51,7 @@ class CorrectionPage
     }
 
     /**
-     * @return string
+     * Get the unique key of the page
      */
     public function getKey(): string
     {
@@ -44,7 +59,7 @@ class CorrectionPage
     }
 
     /**
-     * @return string
+     * Get the key of the correction item to which the page belongs
      */
     public function getItemKey(): string
     {
@@ -52,7 +67,8 @@ class CorrectionPage
     }
 
     /**
-     * @return int
+     * Get the sequential number of the page in the item (starting with 1)
+     * Comments will refer to this number
      */
     public function getPageNo(): int
     {
@@ -60,7 +76,7 @@ class CorrectionPage
     }
     
     /**
-     * @return int
+     * Get the with of the full page image
      */
     public function getWidth(): int
     {
@@ -68,7 +84,7 @@ class CorrectionPage
     }
 
     /**
-     * @return int
+     * Get the height of the full page image
      */
     public function getHeight(): int
     {
@@ -76,7 +92,7 @@ class CorrectionPage
     }
 
     /**
-     * @return int|null
+     * Get the with of a page thumbnail
      */
     public function getThumbWidth(): ?int
     {
@@ -84,7 +100,7 @@ class CorrectionPage
     }
 
     /**
-     * @return int|null
+     * Get the height of a page thumbnail
      */
     public function getThumbHeight(): ?int
     {

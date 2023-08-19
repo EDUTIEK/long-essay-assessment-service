@@ -69,9 +69,9 @@ class ImageProcessing
 
 
     /**
-     * Get the data that can be used as src for an image
+     * Get the data that can be used as src for a general img tag
      */
-    public function getImageSrcAsData(PageImage $page_image) 
+    public function getImageSrcAsData(PageImage $page_image) : string
     {
         $content = stream_get_contents($page_image->getImage());
         $mime = $page_image->getMime();
@@ -80,10 +80,10 @@ class ImageProcessing
     }
 
     /**
-     * Get the data that can be used as src for an image
-     * This avoids working with file pathes but may cause out of memory with Mustache
+     * Get the data that can be used as src for an img tag processed by TCPDF
+     * This avoids working with file paths but may cause out of memory with Mustache
      */
-    public function getImageSrcAsDataForTCPDF(PageImage $page_image)
+    public function getImageSrcAsDataForTCPDF(PageImage $page_image) : string
     {
         $content = stream_get_contents($page_image->getImage());
         $base64 = base64_encode($content);
@@ -91,12 +91,13 @@ class ImageProcessing
     }
     
     /**
-     * Get a file path for the image
+     * Get a file path that can be used as src for an img tag processed by TCPDF
      * @param PageImage$image
      * @param string $create_dir - directory where the image is created
-     * @param string $src_path - path which is used in the src attribute o an img tag                   
+     * @param string $src_path - directory path which is used in the src attribute of an img tag
+     * @return string path of the image file for the src attribute
      */
-    public function getImageSrcAsPathForTCPDF(PageImage $image, string $create_dir, string $src_path)
+    public function getImageSrcAsPathForTCPDF(PageImage $image, string $create_dir, string $src_path) : string
     {
         $content = stream_get_contents($image->getImage());
         $file = tempnam($create_dir, 'LAS');
@@ -106,9 +107,12 @@ class ImageProcessing
 
     /**
      * Apply the marks of comments to a page image
+     * @param CorrectionPage    $page
+     * @param PageImage         $image
      * @param CorrectionComment[] $comments
+     * @return PageImage
      */
-    public function applyCommentsMarks(CorrectionPage $page, PageImage $image, array $comments) :PageImage
+    public function applyCommentsMarks(CorrectionPage $page, PageImage $image, array $comments) : PageImage
     {
         $sketch = new Sketch('PNG');
         
@@ -128,8 +132,10 @@ class ImageProcessing
             return $image;
         }
     }
-    
-    
+
+    /**
+     * Get the image sketcher shape from a correction mark
+     */
     protected function getShapeFromMark(CorrectionMark $mark, string $label, string $color) : Shape
     {
         $pos = new Point($mark->getPos()->getX(), $mark->getPos()->getY());
@@ -160,8 +166,13 @@ class ImageProcessing
                 return new Shape\Circle($pos, $label, $color);
         }
     }
-    
-    
+
+    /**
+     * Get the color for the image sketcher shape from a correction mark
+     * @param CorrectionMark    $mark
+     * @param CorrectionComment $comment
+     * @return string
+     */
     protected function getShapeColor(CorrectionMark $mark, CorrectionComment $comment) : string
     {
         $filled = in_array($mark->getShape(), CorrectionMark::FILLED_SHAPES);
