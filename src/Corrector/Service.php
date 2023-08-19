@@ -171,7 +171,7 @@ class Service extends Base\BaseService
     }
 
     /**
-     * Get the data of the original writer pages for pdf processing
+     * Get the data of the writer pages with comment marks for pdf processing
      * @param CorrectionPage[] $pages
      * @param CorrectionComment[] $comments
      * @return array
@@ -181,17 +181,18 @@ class Service extends Base\BaseService
         $data = [];
         foreach ($pages as $page) {
             $image = $this->context->getPageImage($page->getKey());
-            $commented = $this->dependencies->image()->applyCommentsMarks($page, $image, $comments);
-            
-            if (isset($commented)) {
-                $data[] = [
-                    'page_no' => $page->getPageNo(),
-                    'src' => $this->dependencies->image()->getImageSrcAsPathForTCPDF(
-                        $commented,
-                        $this->context->getAbsoluteTempPath(),
-                        $this->context->getRelativeTempPath()
-                    )
-                ];
+            if (isset($image)) {
+                $commented = $this->dependencies->image()->applyCommentsMarks($page, $image, $comments);
+                if (isset($commented)) {
+                    $data[] = [
+                        'page_no' => $page->getPageNo(),
+                        'src' => $this->dependencies->image()->getImageSrcAsPathForTCPDF(
+                            $commented,
+                            $this->context->getAbsoluteTempPath(),
+                            $this->context->getRelativeTempPath()
+                        )
+                    ];
+                }
             }
         }
         return $data;
