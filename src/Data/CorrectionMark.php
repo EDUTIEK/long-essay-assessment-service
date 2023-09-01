@@ -24,6 +24,7 @@ class CorrectionMark
     private int $height;
     private int $width;
     private array $polygon;
+    private string $symbol;
 
     /**
      * Constructor
@@ -42,7 +43,8 @@ class CorrectionMark
         CorrectionMarkPoint $end,
         int $height = 0,
         int $width = 0,
-        array $polygon = []
+        array $polygon = [],
+        string $symbol = ''
     ) {
         $this->key = $key;
         $this->shape = $shape;
@@ -51,6 +53,7 @@ class CorrectionMark
         $this->height = $height;
         $this->width = $width;
         $this->polygon = $polygon;
+        $this->symbol = $symbol;
     }
 
     /**
@@ -67,6 +70,7 @@ class CorrectionMark
         $width = 0;
         $height = 0;
         $polygon = [];
+        $symbol = '';
         
         
         if (isset($data['key'])) {
@@ -95,8 +99,11 @@ class CorrectionMark
                 $polygon[] = CorrectionMarkPoint::fromArray((array) $point);
             }
         }
+        if (isset($data['symbol'])) {
+            $symbol = (string) $data['symbol'];
+        }
 
-        return new self($key, $shape, $pos, $end, $width, $height, $polygon);
+        return new self($key, $shape, $pos, $end, $width, $height, $polygon, $symbol);
     }
 
 
@@ -144,7 +151,8 @@ class CorrectionMark
             'end' => $this->getEnd()->toArray(),
             'width' => $this->getWidth(),
             'height' => $this->getHeight(),
-            'polygon' => $polygon
+            'polygon' => $polygon,
+            'symbol' => $this->getSymbol()
         ];
     }
     
@@ -209,5 +217,13 @@ class CorrectionMark
     public function getPolygon(): array
     {
         return $this->polygon;
+    }
+
+    /**
+     * Get the symbol which is shown in a circle shape
+     */
+    public function getSymbol(): string
+    {
+        return $this->symbol;
     }
 }

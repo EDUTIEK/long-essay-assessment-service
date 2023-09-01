@@ -116,7 +116,7 @@ class ImageProcessing
     {
         $sketch = new Sketch([
             // Default font of Sketch is not available on Windows - keep default font of Imagick
-            'font' => ['name' => null, 'size' => 10]]);
+            'font' => ['name' => null, 'size' => 15]]);
         $shapes = [];
         foreach ($comments as $comment) {
             if ($comment->getParentNumber() == $page->getPageNo() && !empty($comment->getMarks())) {
@@ -164,7 +164,7 @@ class ImageProcessing
                 
             case CorrectionMark::SHAPE_CIRCLE:
             default:
-                return new Shape\Circle('', '#000000', 20, $pos, $label, $color);
+                return new Shape\Circle($this->getShapeSymbol($mark), '#000000', 20, $pos, $label, $color);
         }
     }
 
@@ -180,11 +180,24 @@ class ImageProcessing
         
         switch ($comment->getRating()) {
             case CorrectionComment::RAITNG_EXCELLENT:
-                return $filled ?  '#E3EFDDAA' : '#19e62e';
+                return $filled ?  '#19e62eaa' : '#19e62e';
             case CorrectionComment::RATING_CARDINAL:
-                return $filled ? '#FBDED1AA' : '#bc4710';
+                return $filled ? '##bc4710aa' : '#bc4710';
             default:
-                return $filled ? '#D8E5F4AA' : '#3365ff';
+                return $filled ? '#3365ffaa' : '#3365ff';
+        }
+    }
+    
+    
+    protected function getShapeSymbol(CorrectionMark $mark) 
+    {
+        switch ($mark->getSymbol()) {
+            case '✓':
+                return '√';
+            case '✗':
+                return 'X';
+            default: 
+                return $mark->getSymbol();
         }
     }
 }
