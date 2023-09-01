@@ -3,7 +3,7 @@
 namespace Edutiek\LongEssayAssessmentService\Internal;
 
 
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPage;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 
 class PdfGeneration
 {
@@ -70,32 +70,17 @@ class PdfGeneration
     protected $footer_margin = 10;
 
     /**
-     * Top margin.
-     */
-    protected $top_margin = 20;
-
-    /**
      * Bottom margin.
      */
     protected $bottom_margin = 10;
-
-    /**
-     * Left margin.
-     */
-    protected $left_margin = 15;
-
-    /**
-     * Right margin.
-     */
-    protected $right_margin = 15;
-
+    
 
     /**
      * Generate a pdf from an HTML text
      * Compliance with PDF/A-2B shall be achieved
      * @see https://de.wikipedia.org/wiki/PDF/A
      *
-     * @param PdfPage[] $pages      Pages of the PDF
+     * @param PdfPart[] $parts      Parts of the PDF
      * @param string $creator       Name of the creator app, e.h. name of the LMS
      * @param string $author
      * @param string $title
@@ -103,11 +88,11 @@ class PdfGeneration
      * @param string $keywords
      * @return string
      */
-    public function generatePdf(array $pages, $creator = "", $author = "", $title = "", $subject = "", $keywords = "") : string
+    public function generatePdf(array $parts, $creator = "", $author = "", $title = "", $subject = "", $keywords = "") : string
     {
         // create new PDF document
         // note the last parameter for compliance with PDF/A-2B
-        $pdf = new \TCPDF($this->page_orientation, $this->pdf_unit, $this->page_format, true, 'UTF-8', false, 2);
+        $pdf = new Tcpdf($this->page_orientation, $this->pdf_unit, $this->page_format, true, 'UTF-8', false, 2);
 
         $pdf->setAllowLocalFiles(true);
         
@@ -121,7 +106,7 @@ class PdfGeneration
         $pdf->SetAlpha(1);
 
         // set default header data
-        $pdf->SetHeaderData('', 0, $title, $subject);
+        $pdf->SetHeaderData('', 0, $title, $subject);   
 
         // set header and footer fonts
         $pdf->setHeaderFont(Array($this->header_font, '', $this->header_font_size));
@@ -130,52 +115,71 @@ class PdfGeneration
         // set default monospaced font
         $pdf->SetDefaultMonospacedFont($this->mono_font);
 
-        // set margins
-        $pdf->SetMargins($this->left_margin, $this->top_margin, $this->right_margin);
-        $pdf->SetHeaderMargin($this->header_margin);
-        $pdf->SetFooterMargin($this->footer_margin);
-
-        // set auto page breaks
-        $pdf->SetAutoPageBreak(true, $this->bottom_margin);
-
-        // set default font subsetting mode
-        $pdf->setFontSubsetting(true);
-
         // Set font
         $pdf->SetFont($this->main_font, '', $this->main_font_size, '', true);
 
 
-        foreach ($pages as $page) 
-        {
-            $pdf->AddPage();
-            $pdf->LastPage();
+        $pdf->setDisplayMode('fullpage', 'SinglePage', 'UseThumbs');
             
-            foreach ($page->getElements() as $element) 
+        foreach ($parts as $part) 
+        {
+            $pdf->SetMargins($part->getLeftMargin(), $part->getTopMargin(), $part->getRightMargin(), true);
+            $pdf->setPrintHeader($part->getPrintHeader());
+            $pdf->setHeaderMargin($part->getHeaderMargin());
+
+            $pdf->setPrintFooter($part->getPrintFooter());
+            $pdf->setFooterMargin($part->getFooterMargin());
+
+            $pdf->AddPage($part->getOrientation(), $part->getFormat(), true);
+            
+            foreach ($part->getElements() as $element) 
             {
                 if ($element instanceof Data\PdfHtml) {
+                    $pdf->SetAutoPageBreak(true, $this->bottom_margin);
                     $pdf->writeHtmlCell(
                         (float) $element->getWidth(),
                         (float) $element->getHeight(),
                         $element->getLeft(),
                         $element->getTop(),
                         $element->getHtml(), 
-                        false, 
-                        false
+                        0, 
+                        0,
+                        false,
+                        true,
+                        '',
+                        true
                     );
                 }
                 elseif ($element instanceof Data\PdfImage) {
+
+                    $pdf->SetAutoPageBreak(false);
                     $pdf->Image(
                         $element->getPath(),
-                        $element->getLeft(),
+                        (float) $element->getLeft(),
+                        (float) $element->getTop(),
                         (float) $element->getWidth(),
-                        (float) $element->getHeight()
+                        (float) $element->getHeight(),
+                        '', 
+                        '', 
+                        '', 
+                        true, 
+                        300, 
+                        '', 
+                        false, 
+                        false, 
+                        0, 
+                        false,       
+                        false, 
+                        false, 
+                        false,
+                        array()
                     );
                 }
             }
+            
+            // important to do this here to avoid an overlapping with next part if html content is longer than a page
+            $pdf->lastPage();
         }
-        // Add a page
-        // This method has several options, check the source code documentation for more information.
-        $pdf->AddPage();
         
 
         // Close and output PDF document
@@ -190,33 +194,17 @@ class PdfGeneration
      */
     public function generatePlainPdfFromHtml(string $html) 
     {
-        $pdf = new \TCPDF($this->page_orientation, $this->pdf_unit, $this->page_format, true, 'UTF-8', false, 2);
+        $pdf = new Tcpdf($this->page_orientation, $this->pdf_unit, $this->page_format, true, 'UTF-8', false, 2);
 
         $pdf->setAllowLocalFiles(true);
-
-        //$pdf->SetMargins(0, 0, 0);
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
-        
         $pdf->SetAutoPageBreak(true, $this->bottom_margin);
-
-        // set default font subsetting mode
-        $pdf->setFontSubsetting(true);
-
-        // Set font
         $pdf->SetFont($this->main_font, '', $this->main_font_size, '', true);
 
-        // Add a page
-        // This method has several options, check the source code documentation for more information.
         $pdf->AddPage();
-
-        
-        // Print text using writeHTMLCell()
-        //$pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
         $pdf->writeHtml($html, false, true);
 
-        // Close and output PDF document
-        // This method has several options, check the source code documentation for more information.
         return $pdf->Output('dummy.pdf', 'S');
     }
 }

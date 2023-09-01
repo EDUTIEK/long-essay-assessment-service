@@ -5,7 +5,7 @@ use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPage;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
 
 /**
@@ -66,16 +66,20 @@ class Service extends Base\BaseService
 
     /**
      * Get a pdf from the text that has been processed for the corrector
+     * This PDF is intended to document the writing. It has a header and footer
      */
     public function getProcessedTextAsPdf() : string
     {
         $task = $this->context->getWritingTask();
         $essay = $this->context->getWrittenEssay();
 
-        $page = new PdfPage();
-        $page->addElement(new PdfHtml($this->dependencies->html()->processWrittenText($essay->getWrittenText())));
+        $part = (new PdfPart(
+            PdfPart::FORMAT_A4,
+            PdfPart::ORIENTATION_PORTRAIT
+        ))->withElement(
+            new PdfHtml($this->dependencies->html()->processWrittenText($essay->getWrittenText())));
         return $this->dependencies->pdfGeneration()->generatePdf(
-            [$page],
+            [$part],
             $this->context->getSystemName(),
             $task->getWriterName(),
             $task->getTitle(),
@@ -85,6 +89,7 @@ class Service extends Base\BaseService
 
     /**
      * Get a plain pdf (without header/hooter) from the text that has been processed for the corrector
+     * This PDF can afterwards be converted to an image for graphical marking and commenting
      */
     public function getProcessedTextAsPlainPdf() : string
     {

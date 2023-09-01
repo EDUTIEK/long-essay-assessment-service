@@ -114,13 +114,14 @@ class ImageProcessing
      */
     public function applyCommentsMarks(CorrectionPage $page, PageImage $image, array $comments) : PageImage
     {
-        $sketch = new Sketch('PNG');
-        
+        $sketch = new Sketch([
+            // Default font of Sketch is not available on Windows - keep default font of Imagick
+            'font' => ['name' => null, 'size' => 10]]);
         $shapes = [];
         foreach ($comments as $comment) {
             if ($comment->getParentNumber() == $page->getPageNo() && !empty($comment->getMarks())) {
                 foreach ($comment->getMarks() as $mark) {
-                    $shapes[] = $this->getShapeFromMark($mark, '', $this->getShapeColor($mark, $comment));
+                    $shapes[] = $this->getShapeFromMark($mark, $comment->getLabel(), $this->getShapeColor($mark, $comment));
                 }
             }
         }
@@ -163,7 +164,7 @@ class ImageProcessing
                 
             case CorrectionMark::SHAPE_CIRCLE:
             default:
-                return new Shape\Circle($pos, $label, $color);
+                return new Shape\Circle('', '#000000', 20, $pos, $label, $color);
         }
     }
 

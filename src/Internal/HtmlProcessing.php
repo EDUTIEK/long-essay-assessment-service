@@ -88,6 +88,7 @@ class HtmlProcessing
     {
         self::$allComments = $comments;
         self::$currentComments = [];
+        self::$commentCounter = 0;
         
         $html = $html ?? '';
         
@@ -107,6 +108,9 @@ class HtmlProcessing
      */
     protected function processXslt(string $html, string $xslt_file) : string
     {
+        self::$paraCounter = 0;
+        self::$wordCounter = 0;
+        
         try {
             // get the xslt document
             // set the URI to allow document() within the XSL file

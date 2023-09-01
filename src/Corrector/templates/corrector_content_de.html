@@ -1,0 +1,13 @@
+{{#page}}
+<p><strong>Seite {{page_no}} von Korrektor {{corrector_name}}</strong></p>
+{{#comments}}
+    {{#label}}
+    <p><strong>{{.}}:</strong>{{#cardinal}} (Kardinalfehler){{/cardinal}}{{#excellent}} (Exzellent){{/excellent}} {{text}}</p>
+    {{/label}}
+{{/comments}}
+{{/page}}
+
+{{#text}}
+<br><b>Einzelkommentare:</b><br>
+{{{comments}}}
+{{/text}}

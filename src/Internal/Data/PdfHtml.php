@@ -4,17 +4,16 @@ namespace Edutiek\LongEssayAssessmentService\Internal\Data;
 
 class PdfHtml extends PdfElement
 {
-    private $html;
+    private string $html;
 
     /**
      * Constructor
      * @param $html - html code of the element
-     * @param ...$args - see parent class
      * @see PdfElement
      */
-    public function __construct($html, ...$args)
+    public function __construct(string $html, ?float $left = null, ?float $top = null, ?float $width = null, ?float $height = null)
     {
-        parent::__construct(...$args);
+        parent::__construct($left, $top, $width, $height);
 
         $this->html = $html;
     }
@@ -22,7 +21,7 @@ class PdfHtml extends PdfElement
     /**
      * Get the html code
      */
-    public function getHtml()
+    public function getHtml() : string
     {
         return $this->html;
     }

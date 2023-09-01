@@ -4,17 +4,16 @@ namespace Edutiek\LongEssayAssessmentService\Internal\Data;
 
 class PdfImage extends PdfElement
 {
-    private $path;
+    private string $path;
 
     /**
      * Constructor
      * @param $path - path of the image file (relative to the executing script)
-     * @param ...$args - see parent class
      * @see PdfElement
      */
-    public function __construct($path, ...$args) 
+    public function __construct(string $path, ?float $left = null, ?float $top = null, ?float $width = null, ?float $height = null) 
     {
-        parent::__construct(...$args);
+        parent::__construct($left, $top, $width, $height);
 
         $this->path = $path;
     }
@@ -22,7 +21,7 @@ class PdfImage extends PdfElement
     /**
      * Get the path of the image file, relative to the executing script
      */
-    public function getPath()
+    public function getPath() : string
     {
         return $this->path;
     }

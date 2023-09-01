@@ -1,6 +1,4 @@
-{{#correction}}
-<h1>Ergebnis</h1>
-{{/correction}}
+<h1>Übersicht</h1>
 
 {{#writing}}
 <b>Bearbeitung gestartet:</b> {{edit_started}}<br>
@@ -32,42 +30,3 @@
 {{/stitch_comment}}
 {{/correction_finalized}}
 {{/correction}}
-
-{{#pages}}
-<p pagebreak="true"><strong>Abgabe Seite {{page_no}}</strong></p>
-<img src="{{src}}" />
-{{/pages}}
-{{#text}}
-<h1>Abgegebener Text</h1>
-{{{.}}}
-{{/text}}
-
-{{#summaries}}
-<h1>Korrektur von {{corrector_name}}</h1>
-
-{{#is_authorized}}
-<b>Korrigiert:</b> {{last_change}}<br>
-<b>Vergebene Punkte:</b> {{points}}<br>
-<b>Bewertung:</b> {{grade_title}}<br>
-{{#text}}
-<b>Kommentar:</b> {{{.}}}
-{{/text}}
-{{^text}}
-<b>Kommentar:</b> ohne Kommentar
-{{/text}}
-{{/is_authorized}}
-{{^is_authorized}}
-<b>Korrektur:</b> noch nicht abgeschlossen<br>
-{{/is_authorized}}
-
-{{#pages}}
-<p pagebreak="true"><strong>Seite {{page_no}} von Korrektor {{corrector_name}}</strong></p>
-<img src="{{src}}" />
-{{/pages}}
-{{#text}}
-<br><b>Einzelkommentare:</b><br>
-{{{comments}}}
-{{{.}}}
-{{/text}}
-
-{{/summaries}}

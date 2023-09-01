@@ -22,6 +22,9 @@ class CorrectionComment
     protected string $rating = '';
     protected int $points = 0;
     protected array $marks = [];
+    
+    // not in constructor
+    protected string $label = '';
 
     /**
      * Constructor
@@ -145,5 +148,24 @@ class CorrectionComment
     public function getMarks(): array
     {
         return $this->marks;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param string $label
+     * @return CorrectionComment
+     */
+    public function withLabel(string $label): CorrectionComment
+    {
+        $clone = clone $this;
+        $clone->label = $label;
+        return $clone;
     }
 }

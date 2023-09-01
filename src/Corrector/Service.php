@@ -3,12 +3,12 @@
 namespace Edutiek\LongEssayAssessmentService\Corrector;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\DocuItem;
-use Mustache_Engine;
-use Edutiek\LongEssayAssessmentService\Data\CorrectionPage;
-use ILIAS\Plugin\LongEssayAssessment\Data\Essay\CorrectorComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPage;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfImage;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionSummary;
+use Edutiek\LongEssayAssessmentService\Data\PageImage;
 
 /**
  * API of the LongEssayAssessmentService for an LMS related to the correction of essays
@@ -77,69 +77,25 @@ class Service extends Base\BaseService
      */
     public function getCorrectionAsPdf(DocuItem $item, string $forCorrectorKey = null) : string
     {
+        $pdfParts = [];
+        
         $task = $item->getWritingTask();
         $essay = $item->getWrittenEssay();
-        $processedText = $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
-        $pages = $this->context->getPagesOfItem($item->getKey());
-        
-        $renderContext = [];
-
         
         if (!isset($forCorrectorKey)) {
-            $renderContext['writing'] = [
-                'edit_started' =>  $this->formatDates($essay->getEditStarted()),
-                'edit_ended' =>  $this->formatDates($essay->getEditEnded()),
-                'writing_excluded' => $this->formatDates($task->getWritingExcluded()),
-                'is_authorized' => $essay->isAuthorized(),
-                'writing_authorized' =>  $this->formatDates($essay->getWritingAuthorized()),
-                'writing_authorized_by' => $essay->getWritingAuthorizedBy(),
-            ];
-
-            $renderContext['correction'] =  [
-                'correction_finalized' => $this->formatDates($essay->getCorrectionFinalized()),
-                'correction_finalized_by' => $essay->getCorrectionFinalizedBy(),
-                'final_points' => $essay->getFinalPoints(),
-                'final_grade' => $essay->getFinalGrade(),
-                'stitch_comment' => $essay->getStitchComment()
-            ];
-            
-            if (!empty($pages)) {
-                $renderContext['pages'] = $this->getOriginalPageImageDataForPdf($pages);
-            }
-            else {
-                $renderContext['text'] = $this->dependencies->html()->processTextForPdf($processedText);
-            }
+            $pdfParts = array_merge($pdfParts, $this->getPdfOverview($item));
+            $pdfParts = array_merge($pdfParts, $this->getPdfWrittenContent($item));
         }
-
-        $renderContext['summaries'] = [];
+        
         foreach ($item->getCorrectionSummaries() as $summary) {
-            
             if (!isset($forCorrectorKey) || $summary->getCorrectorKey() == $forCorrectorKey) {
-                $comments = $item->getCommentsByCorrectorKey($summary->getCorrectorKey());
-                $renderSummary = [
-                    'corrector_name' =>  $summary->getCorrectorName(),
-                    'is_authorized' => $summary->isAuthorized(),
-                    'last_change' => $this->formatDates($summary->getLastChange()),
-                    'points' => $summary->getPoints(),
-                    'grade_title' => $summary->getGradeTitle(),
-                ];
-                if (!empty($pages)) {
-                    $renderSummary['pages'] = $this->getCommentedPageImageDataForPdf($pages, $comments);
-                }
-                else {
-                    $renderSummary['text'] = $this->dependencies->html()->processCommentsForPdf(
-                        $processedText, $comments);
-                }
-                $renderContext['summaries'][] = $renderSummary;
+                $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionSummary($item, $summary));
+                $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionContent($item, $summary));
             }
         }
         
-        $allHtml = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/correction_de.html', $renderContext);
-        
-        $page = new PdfPage();
-        $page->addElement(new PdfHtml($allHtml));
         return $this->dependencies->pdfGeneration()->generatePdf(
-            [$page],
+            $pdfParts,
             $this->context->getSystemName(),
             $task->getWriterName(),
             $task->getTitle(),
@@ -148,53 +104,210 @@ class Service extends Base\BaseService
     }
 
     /**
-     * Get the data of the original writer pages for pdf processing 
-     * @param CorrectionPage[] $pages
-     * @return array
+     * Get the pdf part with overview information of corrected essay
+     * @return PdfPart[]
      */
-    protected function getOriginalPageImageDataForPdf(array $pages) : array
+    protected function getPdfOverview(DocuItem $item) : array
     {
-        $data = [];
-        foreach ($pages as $page) {
-            $image = $this->context->getPageImage($page->getKey());
-            if (isset($image)) {
-                $data[] = [
-                    'page_no' => $page->getPageNo(),
-                    'src' => $this->dependencies->image()->getImageSrcAsPathForTCPDF(
-                        $image, 
-                        $this->context->getAbsoluteTempPath(),
-                        $this->context->getRelativeTempPath())
-                ];
-            }
-        }
-        return $data;
+        $task = $item->getWritingTask();
+        $essay = $item->getWrittenEssay();
+
+        $renderContext = [];
+        $renderContext['writing'] = [
+            'edit_started' =>  $this->formatDates($essay->getEditStarted()),
+            'edit_ended' =>  $this->formatDates($essay->getEditEnded()),
+            'writing_excluded' => $this->formatDates($task->getWritingExcluded()),
+            'is_authorized' => $essay->isAuthorized(),
+            'writing_authorized' =>  $this->formatDates($essay->getWritingAuthorized()),
+            'writing_authorized_by' => $essay->getWritingAuthorizedBy(),
+        ];
+        $renderContext['correction'] =  [
+            'correction_finalized' => $this->formatDates($essay->getCorrectionFinalized()),
+            'correction_finalized_by' => $essay->getCorrectionFinalizedBy(),
+            'final_points' => $essay->getFinalPoints(),
+            'final_grade' => $essay->getFinalGrade(),
+            'stitch_comment' => $essay->getStitchComment()
+        ];
+
+        $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/overview_de.html', $renderContext);
+        return [(new PdfPart())->withElement(new PdfHtml($html))];
     }
 
     /**
-     * Get the data of the writer pages with comment marks for pdf processing
-     * @param CorrectionPage[] $pages
-     * @param CorrectionComment[] $comments
-     * @return array
+     * Get the pdf part with a correctors summary and result
+     * @return PdfPart[]
      */
-    protected function getCommentedPageImageDataForPdf(array $pages, array $comments) : array
+    protected function getPdfCorrectionSummary(DocuItem $item, CorrectionSummary $summary) : array
     {
-        $data = [];
-        foreach ($pages as $page) {
-            $image = $this->context->getPageImage($page->getKey());
-            if (isset($image)) {
-                $commented = $this->dependencies->image()->applyCommentsMarks($page, $image, $comments);
-                if (isset($commented)) {
-                    $data[] = [
-                        'page_no' => $page->getPageNo(),
-                        'src' => $this->dependencies->image()->getImageSrcAsPathForTCPDF(
-                            $commented,
-                            $this->context->getAbsoluteTempPath(),
-                            $this->context->getRelativeTempPath()
-                        )
-                    ];
-                }
+        $renderContext = [
+            'corrector_name' =>  $summary->getCorrectorName(),
+            'is_authorized' => $summary->isAuthorized(),
+            'last_change' => $this->formatDates($summary->getLastChange()),
+            'points' => $summary->getPoints(),
+            'grade_title' => $summary->getGradeTitle(),
+            'text' => $summary->getText()
+        ];
+
+        $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_summary_de.html', $renderContext);
+        return [(new PdfPart())->withElement(new PdfHtml($html))];
+    }
+
+
+    /**
+     * Get the pdf part with the written text
+     * @return PdfPart[]
+     */
+    protected function getPdfWrittenContent(DocuItem $item) : array
+    {
+        $pdfParts = [];
+        if (!empty($itemPages = $this->context->getPagesOfItem($item->getKey()))) {
+            foreach ($itemPages as $itemPage) {
+                $pageImage = $this->context->getPageImage($itemPage->getKey());
+                $pdfParts[] = (new PdfPart(
+                    PdfPart::FORMAT_A4,
+                    PdfPart::ORIENTATION_PORTRAIT
+                ))->withPrintHeader(false)
+                  ->withPrintFooter(true)
+                  ->withHeaderMargin(0)
+                  ->withFooterMargin(0)
+                  ->withLeftMargin(0)
+                  ->withRightMargin(0)
+                  ->withElement(new PdfImage(
+                      $this->getPageImagePathForPdf($pageImage),
+                      0,0, 210,297       // A4
+                        
+                  ));
             }
         }
-        return $data;
+        else {
+            $essay = $item->getWrittenEssay();
+            $processedText = $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
+            $renderContext = [
+                'text' => [$this->dependencies->html()->processTextForPdf($processedText)
+            ]];
+            $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/writer_content_de.html', $renderContext);
+            $pdfParts[] = (new PdfPart())->withElement(new PdfHtml($html));
+        }
+        return $pdfParts;
+    }
+
+
+    /**
+     * Get the pdf part with a correctors comments and marks on the writer content
+     * @return PdfPart[]
+     */
+    protected function getPdfCorrectionContent(DocuItem $item, CorrectionSummary $summary): array
+    {
+        $pdfParts = [];
+        $comments = $item->getCommentsByCorrectorKey($summary->getCorrectorKey());
+        
+        if (!empty($itemPages = $this->context->getPagesOfItem($item->getKey()))) {
+            foreach ($itemPages as $itemPage) {
+                $pageComments = $this->getSortedCommentsOfParent($comments, $itemPage->getPageNo());
+                $commentsContext = [];
+                foreach ($pageComments as $comment) {
+                    $commentsContext[] = [
+                      'label' => $comment->getLabel(),
+                      'text' => $comment->getComment(),
+                      'cardinal' => $comment->getRating() == CorrectionComment::RATING_CARDINAL,
+                      'excellent' => $comment->getRating() == CorrectionComment::RAITNG_EXCELLENT
+                    ];
+                }
+                $renderContext= [
+                    'page' => [
+                        'corrector_name' => $summary->getCorrectorName(),
+                        'page_no' => $itemPage->getPageNo(),
+                        'comments' => $commentsContext
+                    ]];
+
+                $image = $this->context->getPageImage($itemPage->getKey());
+                $path = '';
+                if (isset($image)) {
+                    $commented = $this->dependencies->image()->applyCommentsMarks($itemPage, $image, $pageComments);
+                    $path = $this->getPageImagePathForPdf($commented);
+                }
+                $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
+
+                $pdfParts[] = (new PdfPart(
+                    PdfPart::FORMAT_A4,
+                    PdfPart::ORIENTATION_LANDSCASPE
+                ))->withPrintHeader(false)
+                  ->withPrintFooter(true)
+                  ->withElement(new PdfImage(
+                      $path,
+                        0,0, 148,210     // A5
+                    ))
+                  ->withElement(new PdfHtml(
+                      $html,
+                      150
+                  ));
+            }
+        }
+        else {
+            $essay = $item->getWrittenEssay();
+            $processedText = $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
+            $renderContext= [
+                'text' => [
+                'comments' => $this->dependencies->html()->processCommentsForPdf($processedText, $comments)
+            ]];
+            $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
+            $pdfParts[] = (new PdfPart(
+                PdfPart::FORMAT_A4,
+                PdfPart::ORIENTATION_PORTRAIT
+            ))->withElement(new PdfHtml(
+                $html
+            ));
+        }
+        
+        return $pdfParts;
+    }
+    
+    /**
+     * @param CorrectionComment[] $comments
+     * @param int   $parent_no
+     * @return CorrectionComment[]
+     */
+    protected function getSortedCommentsOfParent(array $comments, int $parent_no) : array
+    {
+        $sort = [];
+        foreach($comments as $comment) {
+            if ($comment->getParentNumber() == $parent_no) {
+                $key = sprintf('%06d', $comment->getStartPosition()) . $comment->getKey();
+                $sort[$key] = $comment;
+            }
+        }
+        ksort($sort);
+        
+        $result = [];
+        $number = 1;
+        foreach ($sort as $comment) {
+            // only comments with text or rating should get a label
+            // others are only marks
+            if (!empty($comment->getComment() || !empty($comment->getRating()))) {
+                $result[] = $comment->withLabel($parent_no . '.' . $number++);
+            }
+            else {
+                $result[] = $comment;
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Get the path of a writer page image for pdf processing
+     * @param PageImage|null $image
+     * @return string
+     */
+    protected function getPageImagePathForPdf(?PageImage $image) : string
+    {
+        if (isset($image)) {
+            return $this->dependencies->image()->getImageSrcAsPathForTCPDF(
+                $image,
+                $this->context->getAbsoluteTempPath(),
+                $this->context->getRelativeTempPath()
+            );
+        }
+        return '';
     }
 }

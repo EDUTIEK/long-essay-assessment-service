@@ -103,8 +103,7 @@ interface BaseContext
      * @param string $purpose   'data' or 'file'
      */
     public function setApiToken(ApiToken $api_token, string $purpose);
-
-
+    
     /**
      * Extend the session of an authenticated user
      * This is called when the web apps makes rest calls that indicate an activity (e.g. writing)
@@ -131,6 +130,7 @@ interface BaseContext
      */
     public function sendFileResource(string $key): void;
 
+    
     /**
      * Send a pdf page image resource to the browser
      * The 'Content-Disposition' HTTP response header must be inline
@@ -138,8 +138,10 @@ interface BaseContext
      */
     public function sendPageImage(string $key): void;
 
+    
     /**
-     * Get the page image with loaded resources by its key
+     * Get the image of a scanned page by its key
+     * Its image and thumbnail properties must be file handlers
      * @param string $key
      * @return PageImage|null
      */
