@@ -36,6 +36,7 @@ class Rest extends Base\BaseRest
         $this->get('/item/{key}', [$this,'getItem']);
         $this->get('/file/{key}', [$this,'getFile']);
         $this->get('/image/{item_key}/{key}', [$this,'getPageImage']);
+        $this->get('/thumb/{item_key}/{key}', [$this,'getPageThumb']);
         $this->put('/changes/{key}', [$this, 'putChanges']);
         $this->put('/summary/{key}', [$this, 'putSummary']);
         $this->put('/stitch/{key}', [$this, 'putStitchDecision']);
@@ -73,6 +74,11 @@ class Rest extends Base\BaseRest
         // common checks and initializations
         if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_DATA)) {
             return $this->response;
+        }
+
+        // corrector can be null in review and stitch decision
+        if (empty($this->context->getCurrentCorrector()) && !$this->context->isReview() && !$this->context->isStitchDecision()) {
+            return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'getting correction data is not allowed');
         }
 
         $task = $this->context->getCorrectionTask();
@@ -160,6 +166,9 @@ class Rest extends Base\BaseRest
 
         // corrector can be null in review and stitch decision
         $currentCorrector = $this->context->getCurrentCorrector();
+        if (empty($currentCorrector) && !$this->context->isReview() && !$this->context->isStitchDecision()) {
+            return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'getting correction item is not allowed');
+        }
         $currentCorrectorKey = isset($currentCorrector) ? $currentCorrector->getKey() : '';
 
         foreach ($this->context->getCorrectionItems() as $item) {
@@ -305,10 +314,12 @@ class Rest extends Base\BaseRest
         if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_DATA)) {
             return $this->response;
         }
-        $data = $this->request->getParsedBody();
+        if (empty($currentCorrector = $this->context->getCurrentCorrector())) {
+            return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'sending changes is not allowed');
+        }
+        $currentCorrectorKey = $currentCorrector->getKey();
 
-        $currentCorrector = $this->context->getCurrentCorrector();
-        $currentCorrectorKey = isset($currentCorrector) ? $currentCorrector->getKey() : '';
+        $data = $this->request->getParsedBody();
 
         $comment_matching = [];
         foreach ((array) $data['comments'] as $key => $cdata) {
@@ -379,10 +390,13 @@ class Rest extends Base\BaseRest
         if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_DATA)) {
             return $this->response;
         }
-        $data = $this->request->getParsedBody();
+        
+        if (empty($currentCorrector = $this->context->getCurrentCorrector())) {
+            return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'sending summary is not allowed');
+        }
+        $currentCorrectorKey = $currentCorrector->getKey();
 
-        $currentCorrector = $this->context->getCurrentCorrector();
-        $currentCorrectorKey = isset($currentCorrector) ? $currentCorrector->getKey() : '';
+        $data = $this->request->getParsedBody();
 
         foreach ($this->context->getCorrectionItems() as $item) {
             if ($item->getKey() == $args['key']) {
@@ -423,6 +437,10 @@ class Rest extends Base\BaseRest
         if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_DATA)) {
             return $this->response;
         }
+        if (!$this->context->isStitchDecision()) {
+            return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'stitch decision is not allowed');
+        }
+        
         $data = $this->request->getParsedBody();
 
         if ($this->context->saveStitchDecision(
@@ -439,11 +457,18 @@ class Rest extends Base\BaseRest
         return $this->setResponse(StatusCode::HTTP_BAD_REQUEST, 'not saved');
     }
 
+    /**
+     * Get a Page thumbnail
+     */
+    public function getPageThumb(Request $request, Response $response, array $args): Response
+    {
+        return $this->getPageImage($request, $response, $args, true);
+    }
 
     /**
      * GET a page image
      */
-    public function getPageImage(Request $request, Response $response, array $args): Response
+    public function getPageImage(Request $request, Response $response, array $args, bool $thumb = false): Response
     {
         
         // common checks and initializations
@@ -451,14 +476,22 @@ class Rest extends Base\BaseRest
             return $this->response;
         }
 
+        // corrector can be null in review and stitch decision
+        if (empty($this->context->getCurrentCorrector()) && !$this->context->isReview() && !$this->context->isStitchDecision()) {
+            return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'getting page image is not allowed');
+        }
+
         $key = (string) ($args['key'] ?? '');
         $item_key = (string) ($args['item_key'] ?? '');
-
-        // todo: check if allowed for corrector
-
+        
         foreach ($this->context->getPagesOfItem($item_key) as $page) {
             if ($page->getKey() == $key) {
-                $this->context->sendPageImage($page->getKey());
+                if ($thumb) {
+                    $this->context->sendPageThumb($page->getKey());
+                } else {
+                    $this->context->sendPageImage($page->getKey());
+                }
+                
                 return $response;
             }
         }

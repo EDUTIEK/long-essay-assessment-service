@@ -165,21 +165,24 @@ interface Context extends Base\BaseContext
 
 
     /**
-     * Set the review mode for the corrector
-     * This must be called after init()
+     * Set the review mode for the corrector frontend
+     * This must be called from the system after init() when the frontend is opened for review
+     * It is called by the services after init() when REST calls are processed
      * @throws ContextException if user is not allowed to review corrections
      */
     public function setReview(bool $is_review);
 
 
     /**
-     * Get if the corrector should be opened for review of all correctors
+     * Get if the corrector app is opened for review of all correctors
      */
     public function isReview() : bool;
 
 
     /**
      * Set the stitch decision mode for the corrector
+     * This must be called from the system after init() when the frontend is opened for review
+     * It is called by the services after init() when REST calls are processed
      * @throws ContextException if user is not allowed to draw stitch decisions
      */
     public function setStitchDecision(bool $is_stitch_decision);

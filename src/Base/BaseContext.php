@@ -138,7 +138,14 @@ interface BaseContext
      */
     public function sendPageImage(string $key): void;
 
-    
+    /**
+     * Send a thumbnail of a pdf page image resource to the browser
+     * The 'Content-Disposition' HTTP response header must be inline
+     * The 'Content-Type' HTTP response header must give the correct mime type
+     */
+    public function sendPageThumb(string $key): void;
+
+
     /**
      * Get the image of a scanned page by its key
      * Its image and thumbnail properties must be file handlers
