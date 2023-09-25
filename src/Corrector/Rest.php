@@ -288,7 +288,11 @@ class Rest extends Base\BaseRest
                         'points' => isset($summary) ? $summary->getPoints() : null,
                         'grade_key' => isset($summary) ? $summary->getGradeKey() : null,
                         'last_change' => isset($summary) ? $summary->getLastChange() : null,
-                        'is_authorized' => isset($summary) && $summary->isAuthorized()
+                        'is_authorized' => isset($summary) && $summary->isAuthorized(),
+                        'include_comments' => isset($summary) && $summary->getIncludeComments(),
+                        'include_comment_ratings' => isset($summary) && $summary->getIncludeCommentRatings(),
+                        'include_comment_points' => isset($summary) && $summary->getIncludeCommentPoints(),
+                        'include_criteria_points' => isset($summary) && $summary->getIncludeCriteriaPoints(),
                     ],
                 ];
 
@@ -409,7 +413,11 @@ class Rest extends Base\BaseRest
                             isset($data['points']) ? (float) $data['points'] : null,
                             isset($data['grade_key']) ? (string) $data['grade_key'] : null,
                             isset($data['last_change']) ? (int) $data['last_change'] : time(),
-                            isset($data['is_authorized']) ? (bool) $data['is_authorized'] : null,
+                            (bool) ($data['is_authorized'] ?? false),
+                            (bool) ($data['include_comments'] ?? false),
+                            (bool) ($data['include_comment_ratings'] ?? false),
+                            (bool) ($data['include_comment_points'] ?? false),
+                            (bool) ($data['include_criteria_points'] ?? false),
                         );
                         $this->context->setCorrectionSummary($item->getKey(), $currentCorrectorKey, $summary);
                         $this->refreshDataToken();

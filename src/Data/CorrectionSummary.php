@@ -10,7 +10,12 @@ class CorrectionSummary
     private ?float $points;
     private ?string $grade_key;
     private ?string $last_change;
-    private ?bool $is_authorized;
+    private bool $is_authorized;
+    private bool $include_comments;
+    private bool $include_comment_ratings;
+    private bool $include_comment_points;
+    private bool $include_criteria_points;
+
     private ?string $corrector_name;
     private ?string $grade_title;
 
@@ -21,7 +26,11 @@ class CorrectionSummary
         ?float $points,
         ?string $grade_key,
         ?int $last_change,
-        ?bool $is_authorized = false,
+        bool $is_authorized = false,
+        bool $include_comments = false,
+        bool $include_comment_ratings = false,
+        bool $include_comment_points = false,
+        bool $include_criteria_points = false,
 
         // for documentation
         ?string $corrector_name = '',
@@ -37,7 +46,11 @@ class CorrectionSummary
         $this->is_authorized = $is_authorized;
         $this->corrector_name = $corrector_name;
         $this->grade_title = $grade_title;
-   }
+        $this->include_comments = $include_comments;
+        $this->include_comment_ratings = $include_comment_ratings;
+        $this->include_comment_points = $include_comment_points;
+        $this->include_criteria_points = $include_criteria_points;
+    }
     
     /**
      * @return string
@@ -93,6 +106,38 @@ class CorrectionSummary
     public function isAuthorized(): bool
     {
         return $this->is_authorized;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIncludeComments(): bool
+    {
+        return $this->include_comments;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIncludeCommentRatings(): bool
+    {
+        return $this->include_comment_ratings;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIncludeCommentPoints(): bool
+    {
+        return $this->include_comment_points;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIncludeCriteriaPoints(): bool
+    {
+        return $this->include_criteria_points;
     }
 
     /**
