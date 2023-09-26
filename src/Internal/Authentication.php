@@ -17,7 +17,8 @@ class Authentication
 
             case self::PURPOSE_DATA:
             default:
-                return time() + 3600;       // one hour, will be extended with each polling request
+                return 0;                   // todo: temporary solution until re-authentication is possible
+                //return time() + 3600;       // one hour, will be extended with each polling request
         }
     }
 
