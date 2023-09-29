@@ -242,6 +242,11 @@ class Rest extends Base\BaseRest
                             'grade_key' => $summary->getGradeKey(),
                             'last_change' => $summary->getLastChange(),
                             'is_authorized' => $summary->isAuthorized(),
+                            'include_comments' => $summary->getIncludeComments(),
+                            'include_comment_ratings' => $summary->getIncludeCommentRatings(),
+                            'include_comment_points' => $summary->getIncludeCommentPoints(),
+                            'include_criteria_points' => $summary->getIncludeCriteriaPoints(),
+                            'include_writer_notes' => $summary->getIncludeWriterNotes()
                         ];
                     }
                     else {
@@ -289,10 +294,11 @@ class Rest extends Base\BaseRest
                         'grade_key' => isset($summary) ? $summary->getGradeKey() : null,
                         'last_change' => isset($summary) ? $summary->getLastChange() : null,
                         'is_authorized' => isset($summary) && $summary->isAuthorized(),
-                        'include_comments' => isset($summary) && $summary->getIncludeComments(),
-                        'include_comment_ratings' => isset($summary) && $summary->getIncludeCommentRatings(),
-                        'include_comment_points' => isset($summary) && $summary->getIncludeCommentPoints(),
-                        'include_criteria_points' => isset($summary) && $summary->getIncludeCriteriaPoints(),
+                        'include_comments' => isset($summary) ? $summary->getIncludeComments() : 0,
+                        'include_comment_ratings' => isset($summary) ? $summary->getIncludeCommentRatings() : 0,
+                        'include_comment_points' => isset($summary) ? $summary->getIncludeCommentPoints() : 0,
+                        'include_criteria_points' => isset($summary) ? $summary->getIncludeCriteriaPoints() : 0,
+                        'include_writer_notes' => isset($summary) ? $summary->getIncludeWriterNotes() : 0,
                     ],
                 ];
 
@@ -414,10 +420,11 @@ class Rest extends Base\BaseRest
                             isset($data['grade_key']) ? (string) $data['grade_key'] : null,
                             isset($data['last_change']) ? (int) $data['last_change'] : time(),
                             (bool) ($data['is_authorized'] ?? false),
-                            (bool) ($data['include_comments'] ?? false),
-                            (bool) ($data['include_comment_ratings'] ?? false),
-                            (bool) ($data['include_comment_points'] ?? false),
-                            (bool) ($data['include_criteria_points'] ?? false),
+                            (int) ($data['include_comments'] ?? 0),
+                            (int) ($data['include_comment_ratings'] ?? 0),
+                            (int) ($data['include_comment_points'] ?? 0),
+                            (int) ($data['include_criteria_points'] ?? 0),
+                            (int) ($data['include_writer_notes'] ?? 0)
                         );
                         $this->context->setCorrectionSummary($item->getKey(), $currentCorrectorKey, $summary);
                         $this->refreshDataToken();

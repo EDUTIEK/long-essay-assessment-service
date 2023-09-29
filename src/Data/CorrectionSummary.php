@@ -4,6 +4,19 @@ namespace Edutiek\LongEssayAssessmentService\Data;
 
 class CorrectionSummary
 {
+    const INCLUDE_NOT = 0;          // don't conclude to documentation
+    const INCLUDE_INFO = 1;         // include to documentation as info
+    const INCLUDE_RELEVANT = 2;     // include to documentation as relevant for the result
+
+    /**
+     * Levels of including details of a correction in the final documentation
+     */
+    const DOCU_INCLUDE_LEVELS = [
+        self::INCLUDE_NOT,
+        self::INCLUDE_INFO,
+        self::INCLUDE_RELEVANT
+    ];
+
     private string $item_key;
     private string $corrector_key;
     private ?string $text;
@@ -11,14 +24,16 @@ class CorrectionSummary
     private ?string $grade_key;
     private ?string $last_change;
     private bool $is_authorized;
-    private bool $include_comments;
-    private bool $include_comment_ratings;
-    private bool $include_comment_points;
-    private bool $include_criteria_points;
-
+    private int $include_comments;
+    private int $include_comment_ratings;
+    private int $include_comment_points;
+    private int $include_criteria_points;
+    private int $include_writer_notes;
+    
     private ?string $corrector_name;
     private ?string $grade_title;
 
+    
     public function __construct(
         string $item_key,
         string $corrector_key,
@@ -27,10 +42,11 @@ class CorrectionSummary
         ?string $grade_key,
         ?int $last_change,
         bool $is_authorized = false,
-        bool $include_comments = false,
-        bool $include_comment_ratings = false,
-        bool $include_comment_points = false,
-        bool $include_criteria_points = false,
+        int $include_comments = 0,
+        int $include_comment_ratings = 0,
+        int $include_comment_points = 0,
+        int $include_criteria_points = 0,
+        int $include_writer_notes = 0,
 
         // for documentation
         ?string $corrector_name = '',
@@ -44,12 +60,15 @@ class CorrectionSummary
         $this->grade_key = $grade_key;
         $this->last_change = $last_change;
         $this->is_authorized = $is_authorized;
-        $this->corrector_name = $corrector_name;
-        $this->grade_title = $grade_title;
         $this->include_comments = $include_comments;
         $this->include_comment_ratings = $include_comment_ratings;
         $this->include_comment_points = $include_comment_points;
         $this->include_criteria_points = $include_criteria_points;
+        $this->include_writer_notes = $include_writer_notes;
+        
+        $this->corrector_name = $corrector_name;
+        $this->grade_title = $grade_title;
+
     }
     
     /**
@@ -109,39 +128,47 @@ class CorrectionSummary
     }
 
     /**
-     * @return bool
+     * Get the level of including comments to the documentation
      */
-    public function getIncludeComments(): bool
+    public function getIncludeComments(): int
     {
         return $this->include_comments;
     }
 
     /**
-     * @return bool
+     * Get the level of including comment ratings to the documentation
      */
-    public function getIncludeCommentRatings(): bool
+    public function getIncludeCommentRatings(): int
     {
         return $this->include_comment_ratings;
     }
 
     /**
-     * @return bool
+     * Get the level of including comment points to the documentation
      */
-    public function getIncludeCommentPoints(): bool
+    public function getIncludeCommentPoints(): int
     {
         return $this->include_comment_points;
     }
 
     /**
-     * @return bool
+     * Get the level of including criteria points to the documentation
      */
-    public function getIncludeCriteriaPoints(): bool
+    public function getIncludeCriteriaPoints(): int
     {
         return $this->include_criteria_points;
     }
+    
+    /**
+     * Get the level of including writer notes to the documentation
+     */
+    public function getIncludeWriterNotes(): int
+    {
+        return $this->include_writer_notes;
+    }
 
     /**
-     * @return string|null
+     * Get the corrector name
      */
     public function getCorrectorName(): ?string
     {
@@ -149,7 +176,7 @@ class CorrectionSummary
     }
 
     /**
-     * @return string|null
+     * Get the title of the reached grade
      */
     public function getGradeTitle(): ?string
     {
