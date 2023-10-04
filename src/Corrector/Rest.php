@@ -14,6 +14,7 @@ use Slim\Http\StatusCode;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionMark;
+use Edutiek\LongEssayAssessmentService\Data\Corrector;
 
 /**
  * Handler of REST requests from the corrector app
@@ -23,7 +24,17 @@ class Rest extends Base\BaseRest
     /** @var Context  */
     protected $context;
 
+    /**
+     * @var Corrector
+     */
+    protected $currentCorrector = null;
 
+    /**
+     * Flags for items whether changes are allowed by the current corrector
+     * @var bool[] item_key => is assigned
+     */
+    protected $changesAllowedCache = [];
+    
     /**
      * Init server / add handlers
      * @param Context $context
@@ -38,7 +49,6 @@ class Rest extends Base\BaseRest
         $this->get('/image/{item_key}/{key}', [$this,'getPageImage']);
         $this->get('/thumb/{item_key}/{key}', [$this,'getPageThumb']);
         $this->put('/changes/{key}', [$this, 'putChanges']);
-        $this->put('/summary/{key}', [$this, 'putSummary']);
         $this->put('/stitch/{key}', [$this, 'putStitchDecision']);
     }
 
@@ -59,6 +69,9 @@ class Rest extends Base\BaseRest
                 return false;
             }
         }
+        
+        $this->currentCorrector = $this->context->getCurrentCorrector();
+        
         return false;
     }
 
@@ -171,6 +184,7 @@ class Rest extends Base\BaseRest
         }
         $currentCorrectorKey = isset($currentCorrector) ? $currentCorrector->getKey() : '';
 
+        // the items are already filtered for the corrector
         foreach ($this->context->getCorrectionItems() as $item) {
 
             if ($item->getKey() == $args['key']) {
@@ -334,6 +348,11 @@ class Rest extends Base\BaseRest
         $comment_matching = [];
         foreach ((array) $data['comments'] as $key => $cdata) {
             
+            if ((string) $cdata['corrector_key'] != $currentCorrectorKey  
+                || !$this->areChangesAllowed((string) $cdata['item_key'])) {
+                continue;
+            }
+
             if (isset($cdata)) {
                 $comment = new CorrectionComment(
                     (string) $cdata['key'],
@@ -359,6 +378,8 @@ class Rest extends Base\BaseRest
 
         $points_matching = [];
         foreach ((array) $data['points'] as $key => $pdata) {
+            // todo: check if points saving is allowed
+            
             if (isset($pdata)) {
                 $points = new CorrectionPoints(
                     (string) $pdata['key'],
@@ -375,6 +396,34 @@ class Rest extends Base\BaseRest
                 }
             }
         }
+
+        foreach ((array) $data['summaries'] as $sdata) {
+
+            if ((string) $cdata['corrector_key'] != $currentCorrectorKey
+                || !$this->areChangesAllowed((string) $sdata['item_key'])) {
+                continue;
+            }
+            
+            if (isset($sdata)) {
+                $summary = new CorrectionSummary(
+                    (string) $sdata['item_key'],
+                    (string) $sdata['corrector_key'],
+                    isset($sdata['text']) ? (string) $sdata['text'] : null,
+                    isset($sdata['points']) ? (float) $sdata['points'] : null,
+                    isset($sdata['grade_key']) ? (string) $sdata['grade_key'] : null,
+                    isset($sdata['last_change']) ? (int) $sdata['last_change'] : time(),
+                    (bool) ($sdata['is_authorized'] ?? false),
+                    (int) ($sdata['include_comments'] ?? 0),
+                    (int) ($sdata['include_comment_ratings'] ?? 0),
+                    (int) ($sdata['include_comment_points'] ?? 0),
+                    (int) ($sdata['include_criteria_points'] ?? 0),
+                    (int) ($sdata['include_writer_notes'] ?? 0)
+                );
+
+                $this->context->setCorrectionSummary($summary->getItemKey(), $summary->getCorrectorKey(), $summary);
+            }
+        }
+
         
         $json = [
           'comments' => $comment_matching,
@@ -387,60 +436,9 @@ class Rest extends Base\BaseRest
     }
 
     
-    /**
-     * PUT the summary of a correction item
-     * @param Request  $request
-     * @param Response $response
-     * @param array $args
-     * @return Response
-     */
-    public function putSummary(Request $request, Response $response, array $args): Response
-    {
-        // common checks and initializations
-        if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_DATA)) {
-            return $this->response;
-        }
-        
-        if (empty($currentCorrector = $this->context->getCurrentCorrector())) {
-            return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'sending summary is not allowed');
-        }
-        $currentCorrectorKey = $currentCorrector->getKey();
-
-        $data = $this->request->getParsedBody();
-
-        foreach ($this->context->getCorrectionItems() as $item) {
-            if ($item->getKey() == $args['key']) {
-                foreach ($this->context->getCorrectorsOfItem($item->getKey()) as $corrector) {
-                    if ($corrector->getKey() == $currentCorrectorKey) {
-                        $summary = new CorrectionSummary(
-                            (string) $item->getKey(),
-                            (string) $currentCorrectorKey,
-                            isset($data['text']) ? (string) $data['text'] : null,
-                            isset($data['points']) ? (float) $data['points'] : null,
-                            isset($data['grade_key']) ? (string) $data['grade_key'] : null,
-                            isset($data['last_change']) ? (int) $data['last_change'] : time(),
-                            (bool) ($data['is_authorized'] ?? false),
-                            (int) ($data['include_comments'] ?? 0),
-                            (int) ($data['include_comment_ratings'] ?? 0),
-                            (int) ($data['include_comment_points'] ?? 0),
-                            (int) ($data['include_criteria_points'] ?? 0),
-                            (int) ($data['include_writer_notes'] ?? 0)
-                        );
-                        $this->context->setCorrectionSummary($item->getKey(), $currentCorrectorKey, $summary);
-                        $this->refreshDataToken();
-                        $this->context->setAlive();
-                        return $this->setResponse(StatusCode::HTTP_OK);
-                    }
-                }
-                return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'current user is no corrector');
-            }
-        }
-        return $this->setResponse(StatusCode::HTTP_NOT_FOUND, 'item not found');
-    }
-
 
     /**
-     * PUT the summary of a correction item
+     * PUT the stitch decision of a correction item
      * @param Request  $request
      * @param Response $response
      * @param array $args
@@ -512,6 +510,33 @@ class Rest extends Base\BaseRest
         }
 
         return $this->setResponse(StatusCode::HTTP_NOT_FOUND, 'resource not found');
+    }
+
+    /**
+     * Check if changes are allowed for an item by the current corrector
+     * @param string $item_key
+     * @return bool
+     */
+    protected function areChangesAllowed(string $item_key) : bool
+    {
+        if (!isset($this->currentCorrector)) {
+            return false;
+        }   
+        
+        if (!isset($this->changesAllowedCache[$item_key])) {
+            $this->changesAllowedCache[$item_key] = false;
+            foreach ($this->context->getCorrectorsOfItem($item_key) as $corrector) {
+                if ($corrector->getKey() == $this->currentCorrector->getKey()) {
+                    $summary = $this->context->getCorrectionSummary($item_key, $this->currentCorrector->getKey());
+                    if (!isset($summary) || !$summary->isAuthorized()) {
+                        $this->changesAllowedCache[$item_key] = true;
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return $this->changesAllowedCache[$item_key];
     }
 
 }
