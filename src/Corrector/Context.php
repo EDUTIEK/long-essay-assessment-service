@@ -120,6 +120,7 @@ interface Context extends Base\BaseContext
 
     /**
      * Set the correction summary given by a corrector for a correction item
+     * todo: rename and add item key as condition
      */
     public function setCorrectionSummary(string $item_key, string $corrector_key, CorrectionSummary $summary) : void;
 
@@ -127,6 +128,7 @@ interface Context extends Base\BaseContext
      * Save a correction comment if it belongs to a corrector
      * Returns the id of the saved or deleted comment 
      * Returns null if the comment can't be saved
+     * todo: add item key as condition
      */
     public function saveCorrectionComment(CorrectionComment $comment, string $corrector_key): ?int;
 
@@ -136,6 +138,7 @@ interface Context extends Base\BaseContext
      * 
      * Returns true if the comment is deleted afterwards
      * Returns false if the comment can't be deleted
+     * todo: add item key as condition
      */
     public function deleteCorrectionComment(string $comment_key, string $corrector_key): bool;
 
@@ -144,6 +147,7 @@ interface Context extends Base\BaseContext
      * Save a correction points object if it belongs to a corrector
      * Returns the id of the saved or deleted points
      * Returns null if the points can't be saved
+     * todo: add item key as condition
      */
     public function saveCorrectionPoints(CorrectionPoints $points, string $corrector_key): ?int;
 
@@ -153,6 +157,7 @@ interface Context extends Base\BaseContext
      *
      * Returns true if the object is deleted afterwards
      * Returns false if the object can't be deleted
+     * todo: add item key as condition
      */
     public function deleteCorrectionPoints(string $points_key, string $corrector_key): bool;
 

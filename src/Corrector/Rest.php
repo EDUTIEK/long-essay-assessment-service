@@ -236,6 +236,7 @@ class Rest extends Base\BaseRest
                     foreach ($this->context->getCorrectionPoints($item->getKey(), $corrector->getKey()) as $point) {
                         $points[] = [
                             'key' => $point->getKey(),
+                            'item_key' => $point->getItemKey(),
                             'comment_key' => $point->getCommentKey(),
                             'criterion_key' => $point->getCriterionKey(),
                             'points' => $point->getPoints()
@@ -343,28 +344,31 @@ class Rest extends Base\BaseRest
         }
         $currentCorrectorKey = $currentCorrector->getKey();
 
-        $data = $this->request->getParsedBody();
+        $body = $this->request->getParsedBody();
 
         $comment_matching = [];
-        foreach ((array) $data['comments'] as $key => $cdata) {
-            
-            if ((string) $cdata['corrector_key'] != $currentCorrectorKey  
-                || !$this->areChangesAllowed((string) $cdata['item_key'])) {
+        foreach ((array) $body['comments'] as $key => $change) {
+            if (!$this->areChangesAllowed((string) $change['item_key'])) {
                 continue;
             }
 
-            if (isset($cdata)) {
+            $data = $change['payload'] ?? null;
+            if (isset($data)) {
+                if ($data['item_key'] != $change['item_key']) {
+                    continue;
+                }
+
                 $comment = new CorrectionComment(
-                    (string) $cdata['key'],
-                    (string) $cdata['item_key'],
-                    (string) $cdata['corrector_key'],
-                    (int) $cdata['start_position'],
-                    (int) $cdata['end_position'],
-                    (int) $cdata['parent_number'],
-                    (string) $cdata['comment'],
-                    (string) $cdata['rating'],
-                    (int) $cdata['points'],
-                    CorrectionMark::multiFromArray((array) ($cdata['marks'] ?? []))
+                    (string) $data['key'],
+                    (string) $data['item_key'],
+                    (string) $data['corrector_key'],
+                    (int) $data['start_position'],
+                    (int) $data['end_position'],
+                    (int) $data['parent_number'],
+                    (string) $data['comment'],
+                    (string) $data['rating'],
+                    (int) $data['points'],
+                    CorrectionMark::multiFromArray((array) ($data['marks'] ?? []))
                 );
 
                 if (!empty($id = $this->context->saveCorrectionComment($comment, $currentCorrectorKey))) {
@@ -377,47 +381,58 @@ class Rest extends Base\BaseRest
         }
 
         $points_matching = [];
-        foreach ((array) $data['points'] as $key => $pdata) {
-            // todo: check if points saving is allowed
-            
-            if (isset($pdata)) {
+        foreach ((array) $body['points'] as $key => $change) {
+            if (!$this->areChangesAllowed((string) $change['item_key'])) {
+                continue;
+            }
+
+            $data = $change['payload'] ?? null;
+            if (isset($data)) {
+                if ($data['item_key'] != $change['item_key']) {
+                    continue;
+                }
+
                 $points = new CorrectionPoints(
-                    (string) $pdata['key'],
-                    (string) ($comment_matching[$pdata['comment_key']] ?? $pdata['comment_key']),
-                    (string) $pdata['criterion_key'],
-                    (int) $pdata['points']
+                    (string) $data['key'],
+                    (string) $data['item_key'],
+                    (string) ($comment_matching[$data['comment_key']] ?? $data['comment_key']),
+                    (string) $data['criterion_key'],
+                    (int) $data['points']
                 );
                 
                 if (!empty($id = $this->context->saveCorrectionPoints($points, $currentCorrectorKey))) {
                     $points_matching[$key] = (string) $id;
                 }
-                elseif ($this->context->deleteCorrectionPoints($key, $currentCorrectorKey)) {
-                    $points_matching[$key] = null;
-                }
+            }
+            elseif ($this->context->deleteCorrectionPoints($key, $currentCorrectorKey)) {
+                $points_matching[$key] = null;
             }
         }
 
-        foreach ((array) $data['summaries'] as $sdata) {
-
-            if ((string) $cdata['corrector_key'] != $currentCorrectorKey
-                || !$this->areChangesAllowed((string) $sdata['item_key'])) {
+        foreach ((array) $body['summaries'] as $key => $change) {
+            if (!$this->areChangesAllowed((string) $change['item_key'])) {
                 continue;
             }
             
-            if (isset($sdata)) {
+            $data = $change['payload'] ?? null;
+            if (isset($data)) {
+                if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $currentCorrectorKey) {
+                    continue;
+                }
+
                 $summary = new CorrectionSummary(
-                    (string) $sdata['item_key'],
-                    (string) $sdata['corrector_key'],
-                    isset($sdata['text']) ? (string) $sdata['text'] : null,
-                    isset($sdata['points']) ? (float) $sdata['points'] : null,
-                    isset($sdata['grade_key']) ? (string) $sdata['grade_key'] : null,
-                    isset($sdata['last_change']) ? (int) $sdata['last_change'] : time(),
-                    (bool) ($sdata['is_authorized'] ?? false),
-                    (int) ($sdata['include_comments'] ?? 0),
-                    (int) ($sdata['include_comment_ratings'] ?? 0),
-                    (int) ($sdata['include_comment_points'] ?? 0),
-                    (int) ($sdata['include_criteria_points'] ?? 0),
-                    (int) ($sdata['include_writer_notes'] ?? 0)
+                    (string) $data['item_key'],
+                    (string) $data['corrector_key'],
+                    isset($data['text']) ? (string) $data['text'] : null,
+                    isset($data['points']) ? (float) $data['points'] : null,
+                    isset($data['grade_key']) ? (string) $data['grade_key'] : null,
+                    isset($data['last_change']) ? (int) $data['last_change'] : time(),
+                    (bool) ($data['is_authorized'] ?? false),
+                    (int) ($data['include_comments'] ?? 0),
+                    (int) ($data['include_comment_ratings'] ?? 0),
+                    (int) ($data['include_comment_points'] ?? 0),
+                    (int) ($data['include_criteria_points'] ?? 0),
+                    (int) ($data['include_writer_notes'] ?? 0)
                 );
 
                 $this->context->setCorrectionSummary($summary->getItemKey(), $summary->getCorrectorKey(), $summary);
