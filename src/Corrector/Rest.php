@@ -327,7 +327,17 @@ class Rest extends Base\BaseRest
 
 
     /**
-     * PUT the summary of a correction item
+     * PUT the unsent changes in the corrector app
+     * 
+     * This is prepared to handle changes in different correction items
+     * The changes are available from the parsed body as assoc arrays with properties:
+     * - key: existing or temporary key of the object to be saved
+     * - item_key: key of the correction item to which the object belongs
+     * - 
+     * 
+     * The added, changed or deleted data of single comments, points or summaries
+     * is wrapped as "payload" in a
+     * 
      * @param Request  $request
      * @param Response $response
      * @param array $args

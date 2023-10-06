@@ -126,9 +126,11 @@ interface Context extends Base\BaseContext
 
     /**
      * Save a correction comment if it belongs to a corrector
+     * Create a new comment if a comment with the given key (e.g. temporary key) is not found
+     * 
      * Returns the id of the saved or deleted comment 
      * Returns null if the comment can't be saved
-     * todo: add item key as condition
+     * todo: add item key as condition, return a string key
      */
     public function saveCorrectionComment(CorrectionComment $comment, string $corrector_key): ?int;
 
@@ -136,8 +138,8 @@ interface Context extends Base\BaseContext
     /**
      * Delete a correction comment if it belongs to a corrector
      * 
-     * Returns true if the comment is deleted afterwards
-     * Returns false if the comment can't be deleted
+     * Return true if the comment is deleted afterwards
+     * Return false if the comment can't be deleted
      * todo: add item key as condition
      */
     public function deleteCorrectionComment(string $comment_key, string $corrector_key): bool;
@@ -145,9 +147,11 @@ interface Context extends Base\BaseContext
 
     /**
      * Save a correction points object if it belongs to a corrector
-     * Returns the id of the saved or deleted points
-     * Returns null if the points can't be saved
-     * todo: add item key as condition
+     * Create a new points object if points with the given key (e.g. temporary key) are not found
+
+     * Return the id of the saved or deleted points
+     * Return null if the points can't be saved
+     * todo: add item key as condition, return a string key
      */
     public function saveCorrectionPoints(CorrectionPoints $points, string $corrector_key): ?int;
 
