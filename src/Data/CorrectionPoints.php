@@ -6,6 +6,7 @@ class CorrectionPoints
 {
     private string $key;
     private string $item_key;
+    private string $corrector_key;
     private string $comment_key;
     private string $criterion_key;
     private int $points;
@@ -13,12 +14,14 @@ class CorrectionPoints
     public function __construct(
         string $key,
         string $item_key,
+        string $corrector_key,
         string $comment_key,
         string $criterion_key,
         int $points
     ) {
         $this->key = $key;
         $this->item_key = $item_key;
+        $this->corrector_key = $corrector_key;
         $this->comment_key = $comment_key;
         $this->criterion_key = $criterion_key;
         $this->points = $points;
@@ -39,6 +42,15 @@ class CorrectionPoints
     public function getItemKey(): string
     {
         return $this->item_key;
+    }
+
+
+    /**
+     * Get the key of the corrector to which the points belong
+     */
+    public function getCorrectorKey(): string
+    {
+        return $this->corrector_key;
     }
 
     /**

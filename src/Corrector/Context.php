@@ -119,49 +119,47 @@ interface Context extends Base\BaseContext
 
 
     /**
-     * Set the correction summary given by a corrector for a correction item
-     * todo: rename and add item key as condition
+     * Save the correction summary given by a corrector for a correction item
+     * @return bool summary is saved
      */
-    public function setCorrectionSummary(string $item_key, string $corrector_key, CorrectionSummary $summary) : void;
+    public function saveCorrectionSummary(CorrectionSummary $summary) : bool;
 
     /**
-     * Save a correction comment if it belongs to a corrector
+     * Save a correction comment if it is valid
      * Create a new comment if a comment with the given key (e.g. temporary key) is not found
      * 
-     * Returns the id of the saved or deleted comment 
-     * Returns null if the comment can't be saved
-     * todo: add item key as condition, return a string key
+     * @param CorrectionComment $comment the comment object to be saved
+     * @return string key of the saved comment or null if the comment can't be saved
      */
-    public function saveCorrectionComment(CorrectionComment $comment, string $corrector_key): ?int;
+    public function saveCorrectionComment(CorrectionComment $comment): ?string;
 
 
     /**
      * Delete a correction comment if it belongs to a corrector
-     * 
-     * Return true if the comment is deleted afterwards
-     * Return false if the comment can't be deleted
-     * todo: add item key as condition
+     *
+     * @param string $comment_key key of the comment object to delete
+     * @param string $corrector_key key of the corrector for which the comment should be deleted
+     * @return bool true if the object is deleted afterwards, false if the object can't be deleted
      */
     public function deleteCorrectionComment(string $comment_key, string $corrector_key): bool;
 
 
     /**
-     * Save a correction points object if it belongs to a corrector
+     * Save a correction points object
      * Create a new points object if points with the given key (e.g. temporary key) are not found
-
-     * Return the id of the saved or deleted points
-     * Return null if the points can't be saved
-     * todo: add item key as condition, return a string key
+     *
+     * @param CorrectionPoints $points the points object to be saved
+     * @return string key of the saved points or null if the points can't be saved
      */
-    public function saveCorrectionPoints(CorrectionPoints $points, string $corrector_key): ?int;
+    public function saveCorrectionPoints(CorrectionPoints $points): ?string;
 
 
     /**
      * Delete a correction points object if it belongs to a corrector
      *
-     * Returns true if the object is deleted afterwards
-     * Returns false if the object can't be deleted
-     * todo: add item key as condition
+     * @param string $points_key key of the points object to delete
+     * @param string $corrector_key key of the corrector for which the points should be deleted 
+     * @return bool true if the object is deleted afterwards, false if the object can't be deleted
      */
     public function deleteCorrectionPoints(string $points_key, string $corrector_key): bool;
 
