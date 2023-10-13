@@ -62,6 +62,7 @@ class Rest extends Base\BaseRest
             try {
                 $this->context->setReview((bool) $this->params['LongEssayIsReview']);
                 $this->context->setStitchDecision((bool) $this->params['LongEssayIsStitchDecision']);
+                $this->currentCorrector = $this->context->getCurrentCorrector();
                 return true;
             }
             catch (ContextException $e) {
@@ -69,9 +70,6 @@ class Rest extends Base\BaseRest
                 return false;
             }
         }
-        
-        $this->currentCorrector = $this->context->getCurrentCorrector();
-        
         return false;
     }
 
@@ -189,6 +187,8 @@ class Rest extends Base\BaseRest
 
             if ($item->getKey() == $args['key']) {
 
+                $task = $this->context->getCorrectionTask();
+
                 $essay = $this->context->getEssayOfItem($item->getKey());
                 // update the processed text if needed
                 // after authorization the written text will not change
@@ -214,46 +214,25 @@ class Rest extends Base\BaseRest
                 }
                 
                 $correctors = [];
+                $summaries = [];
                 $comments = [];
                 $points = [];
+
                 foreach ($this->context->getCorrectorsOfItem($item->getKey()) as $corrector) {
 
-                    // PILOT style: comments and points are commonly transmitted for current and other correctors
-                    foreach ($this->context->getCorrectionComments($item->getKey(), $corrector->getKey()) as $comment) {
-                        $comments[] = [
-                            'key' => $comment->getKey(),
+                    $correctors[] = [
+                        'key' => $corrector->getKey(),
+                        'title' => $corrector->getTitle(),
+                    ];
+
+                    $summary = $this->context->getCorrectionSummary($item->getKey(), $corrector->getKey());
+                    if (isset($summary) && ($corrector->getKey() == $currentCorrectorKey || $summary->isAuthorized())) {
+                        // add the existing summary for the current corrector or an authorized summary for other correctors
+                        $summaries[] = [
                             'item_key' => $item->getKey(),
                             'corrector_key' => $corrector->getKey(),
-                            'start_position' => $comment->getStartPosition(),
-                            'end_position' => $comment->getEndPosition(),
-                            'parent_number' => $comment->getParentNumber(),
-                            'comment' => $comment->getComment(),
-                            'points' => $comment->getPoints(),
-                            'rating' => $comment->getRating(),
-                            'marks' => CorrectionMark::multiToArray($comment->getMarks())
-                        ];
-                    }
-                    foreach ($this->context->getCorrectionPoints($item->getKey(), $corrector->getKey()) as $point) {
-                        $points[] = [
-                            'key' => $point->getKey(),
-                            'item_key' => $point->getItemKey(),
-                            'comment_key' => $point->getCommentKey(),
-                            'criterion_key' => $point->getCriterionKey(),
-                            'points' => $point->getPoints()
-                        ];
-                    }
-
-                    // PRE-TEST style: summaries are provided separately for other correctors
-                    if ($corrector->getKey() == $currentCorrectorKey) {
-                        continue;
-                    }
-                    $summary = $this->context->getCorrectionSummary($item->getKey(), $corrector->getKey());
-                    if (isset($summary) && $summary->isAuthorized()) {
-                        $correctors[] = [
-                            'key' => $corrector->getKey(),
-                            'title' => $corrector->getTitle(),
                             'text' => $summary->getText(),
-                            'points' => $summary->getPoints(),
+                            'points'  => $summary->getPoints(),
                             'grade_key' => $summary->getGradeKey(),
                             'last_change' => $summary->getLastChange(),
                             'is_authorized' => $summary->isAuthorized(),
@@ -261,27 +240,54 @@ class Rest extends Base\BaseRest
                             'include_comment_ratings' => $summary->getIncludeCommentRatings(),
                             'include_comment_points' => $summary->getIncludeCommentPoints(),
                             'include_criteria_points' => $summary->getIncludeCriteriaPoints(),
-                            'include_writer_notes' => $summary->getIncludeWriterNotes()
+                            'include_writer_notes' => $summary->getIncludeWriterNotes(),
                         ];
                     }
                     else {
-                        // don't provide date of other corrector if not yet authorized
-                        // but provide corrector to see the authorized status
-                        $correctors[] = [
-                            'key' => $corrector->getKey(),
-                            'title' => $corrector->getTitle(),
+                        // provide a dummy summary if not existing or nor authorized for other correctors
+                        $summaries[] = [
+                            'item_key' => $item->getKey(),
+                            'corrector_key' => $corrector->getKey(),
                             'text' => null,
                             'points' => null,
                             'grade_key' => null,
                             'last_change' => null,
-                            'is_authorized' => false
+                            'is_authorized' => false,
+                            'include_comments' => 0,
+                            'include_comment_ratings' => 0,
+                            'include_comment_points' => 0,
+                            'include_criteria_points' => 0,
+                            'include_writer_notes' => 0,
                         ];
                     }
-                }
-                $task = $this->context->getCorrectionTask();
-                
-                if (!empty($currentCorrectorKey)) {
-                    $summary = $this->context->getCorrectionSummary($item->getKey(), $currentCorrectorKey);
+                    
+                    // provide comments or points for current corrector or if the corrector's summary is authorized
+                    if ($corrector->getKey() == $currentCorrectorKey || (isset($summary) && $summary->isAuthorized())) {
+                        
+                        foreach ($this->context->getCorrectionComments($item->getKey(), $corrector->getKey()) as $comment) {
+                            $comments[] = [
+                                'key' => $comment->getKey(),
+                                'item_key' => $item->getKey(),
+                                'corrector_key' => $corrector->getKey(),
+                                'start_position' => $comment->getStartPosition(),
+                                'end_position' => $comment->getEndPosition(),
+                                'parent_number' => $comment->getParentNumber(),
+                                'comment' => $comment->getComment(),
+                                'points' => $comment->getPoints(),
+                                'rating' => $comment->getRating(),
+                                'marks' => CorrectionMark::multiToArray($comment->getMarks())
+                            ];
+                        }
+                        foreach ($this->context->getCorrectionPoints($item->getKey(), $corrector->getKey()) as $point) {
+                            $points[] = [
+                                'key' => $point->getKey(),
+                                'item_key' => $point->getItemKey(),
+                                'comment_key' => $point->getCommentKey(),
+                                'criterion_key' => $point->getCriterionKey(),
+                                'points' => $point->getPoints()
+                            ];
+                        }
+                    }
                 }
 
                 $json = [
@@ -301,20 +307,9 @@ class Rest extends Base\BaseRest
                     ],
                     'pages' => $pages,
                     'correctors' => $correctors,
+                    'summaries' => $summaries,
                     'comments' => $comments,
                     'points' => $points,
-                    'summary' => [
-                        'text' => isset($summary) ? $summary->getText() : null,
-                        'points' => isset($summary) ? $summary->getPoints() : null,
-                        'grade_key' => isset($summary) ? $summary->getGradeKey() : null,
-                        'last_change' => isset($summary) ? $summary->getLastChange() : null,
-                        'is_authorized' => isset($summary) && $summary->isAuthorized(),
-                        'include_comments' => isset($summary) ? $summary->getIncludeComments() : 0,
-                        'include_comment_ratings' => isset($summary) ? $summary->getIncludeCommentRatings() : 0,
-                        'include_comment_points' => isset($summary) ? $summary->getIncludeCommentPoints() : 0,
-                        'include_criteria_points' => isset($summary) ? $summary->getIncludeCriteriaPoints() : 0,
-                        'include_writer_notes' => isset($summary) ? $summary->getIncludeWriterNotes() : 0,
-                    ],
                 ];
 
                 $this->refreshDataToken();
@@ -349,10 +344,9 @@ class Rest extends Base\BaseRest
         if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_DATA)) {
             return $this->response;
         }
-        if (empty($currentCorrector = $this->context->getCurrentCorrector())) {
+        if (empty($this->currentCorrector)) {
             return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'sending changes is not allowed');
         }
-        $currentCorrectorKey = $currentCorrector->getKey();
 
         $body = $this->request->getParsedBody();
         
@@ -370,7 +364,7 @@ class Rest extends Base\BaseRest
             switch ($change['action']) {
                 case 'save':
                     if (!empty(($data = $change['payload'] ?? null))) {
-                        if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $currentCorrectorKey) {
+                        if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $this->currentCorrector->getKey()) {
                             continue 2;
                         }
 
@@ -394,7 +388,7 @@ class Rest extends Base\BaseRest
                     break;
 
                 case 'delete': 
-                    if ($this->context->deleteCorrectionComment((string) $change['key'], $currentCorrectorKey)) {
+                    if ($this->context->deleteCorrectionComment((string) $change['key'], $this->currentCorrector->getKey())) {
                         $comments_done[$change['key']] = null;
                     }
                     break;
@@ -417,7 +411,7 @@ class Rest extends Base\BaseRest
                         $points = new CorrectionPoints(
                             (string) $data['key'],
                             (string) $data['item_key'],
-                            $currentCorrectorKey,
+                            $this->currentCorrector->getKey(),
                             (string) ($comment_matching[$data['comment_key']] ?? $data['comment_key']),
                             (string) $data['criterion_key'],
                             (int) $data['points']
@@ -430,7 +424,7 @@ class Rest extends Base\BaseRest
                     break;
                 
                 case 'delete':
-                    if ($this->context->deleteCorrectionPoints($change['key'], $currentCorrectorKey)) {
+                    if ($this->context->deleteCorrectionPoints($change['key'], $this->currentCorrector->getKey())) {
                         $points_done[$change['key']] = null;
                     }
                     break;
@@ -447,10 +441,10 @@ class Rest extends Base\BaseRest
             switch ($change['action']) {
                 case 'save':
                     if (!empty($data = $change['payload'] ?? null)) {
-                        if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $currentCorrectorKey) {
+                        if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $this->currentCorrector->getKey()) {
                             continue 2;
                         }
-
+                        
                         $summary = new CorrectionSummary(
                             (string) $data['item_key'],
                             (string) $data['corrector_key'],
@@ -579,7 +573,7 @@ class Rest extends Base\BaseRest
             $this->changesAllowedCache[$item_key] = false;
             foreach ($this->context->getCorrectorsOfItem($item_key) as $corrector) {
                 if ($corrector->getKey() == $this->currentCorrector->getKey()) {
-                    $summary = $this->context->getCorrectionSummary($item_key, $this->currentCorrector->getKey());
+                    $summary = $this->context->getCorrectionSummary($item_key, $corrector->getKey());
                     if (!isset($summary) || !$summary->isAuthorized()) {
                         $this->changesAllowedCache[$item_key] = true;
                     }
