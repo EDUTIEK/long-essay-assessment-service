@@ -14,7 +14,6 @@ use Slim\Http\StatusCode;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionMark;
-use Edutiek\LongEssayAssessmentService\Data\Corrector;
 
 /**
  * Handler of REST requests from the corrector app
@@ -25,9 +24,10 @@ class Rest extends Base\BaseRest
     protected $context;
 
     /**
-     * @var Corrector
+     * Key of the current corrector (if not review or stitch decision mode)
+     * @var ?string
      */
-    protected $currentCorrector = null;
+    protected $currentCorrectorKey = null;
 
     /**
      * Flags for items whether changes are allowed by the current corrector
@@ -62,7 +62,7 @@ class Rest extends Base\BaseRest
             try {
                 $this->context->setReview((bool) $this->params['LongEssayIsReview']);
                 $this->context->setStitchDecision((bool) $this->params['LongEssayIsStitchDecision']);
-                $this->currentCorrector = $this->context->getCurrentCorrector();
+                $this->currentCorrectorKey = $this->context->getCurrentCorrectorKey();
                 return true;
             }
             catch (ContextException $e) {
@@ -88,7 +88,7 @@ class Rest extends Base\BaseRest
         }
 
         // corrector can be null in review and stitch decision
-        if (empty($this->context->getCurrentCorrector()) && !$this->context->isReview() && !$this->context->isStitchDecision()) {
+        if (empty($this->currentCorrectorKey) && !$this->context->isReview() && !$this->context->isStitchDecision()) {
             return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'getting correction data is not allowed');
         }
 
@@ -176,11 +176,9 @@ class Rest extends Base\BaseRest
         }
 
         // corrector can be null in review and stitch decision
-        $currentCorrector = $this->context->getCurrentCorrector();
-        if (empty($currentCorrector) && !$this->context->isReview() && !$this->context->isStitchDecision()) {
+        if (empty($this->currentCorrectorKey) && !$this->context->isReview() && !$this->context->isStitchDecision()) {
             return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'getting correction item is not allowed');
         }
-        $currentCorrectorKey = isset($currentCorrector) ? $currentCorrector->getKey() : '';
 
         // the items are already filtered for the corrector
         foreach ($this->context->getCorrectionItems() as $item) {
@@ -220,17 +218,21 @@ class Rest extends Base\BaseRest
 
                 foreach ($this->context->getCorrectorsOfItem($item->getKey()) as $corrector) {
 
+                    // a corrector may be added multiple for several items
                     $correctors[] = [
-                        'key' => $corrector->getKey(),
+                        'item_key' => $corrector->getItemKey(),
+                        'corrector_key' => $corrector->getCorrectorKey(),
                         'title' => $corrector->getTitle(),
+                        'initials' => $corrector->getInitials(),
+                        'position' => $corrector->getPosition()
                     ];
 
-                    $summary = $this->context->getCorrectionSummary($item->getKey(), $corrector->getKey());
-                    if (isset($summary) && ($corrector->getKey() == $currentCorrectorKey || $summary->isAuthorized())) {
+                    $summary = $this->context->getCorrectionSummary($item->getKey(), $corrector->getCorrectorKey());
+                    if (isset($summary) && ($corrector->getCorrectorKey() == $this->currentCorrectorKey || $summary->isAuthorized())) {
                         // add the existing summary for the current corrector or an authorized summary for other correctors
                         $summaries[] = [
-                            'item_key' => $item->getKey(),
-                            'corrector_key' => $corrector->getKey(),
+                            'item_key' => $summary->getItemKey(),
+                            'corrector_key' => $summary->getCorrectorKey(),
                             'text' => $summary->getText(),
                             'points'  => $summary->getPoints(),
                             'grade_key' => $summary->getGradeKey(),
@@ -247,7 +249,7 @@ class Rest extends Base\BaseRest
                         // provide a dummy summary if not existing or nor authorized for other correctors
                         $summaries[] = [
                             'item_key' => $item->getKey(),
-                            'corrector_key' => $corrector->getKey(),
+                            'corrector_key' => $corrector->getCorrectorKey(),
                             'text' => null,
                             'points' => null,
                             'grade_key' => null,
@@ -262,13 +264,13 @@ class Rest extends Base\BaseRest
                     }
                     
                     // provide comments or points for current corrector or if the corrector's summary is authorized
-                    if ($corrector->getKey() == $currentCorrectorKey || (isset($summary) && $summary->isAuthorized())) {
+                    if ($corrector->getCorrectorKey() == $this->currentCorrectorKey || (isset($summary) && $summary->isAuthorized())) {
                         
-                        foreach ($this->context->getCorrectionComments($item->getKey(), $corrector->getKey()) as $comment) {
+                        foreach ($this->context->getCorrectionComments($item->getKey(), $corrector->getCorrectorKey()) as $comment) {
                             $comments[] = [
                                 'key' => $comment->getKey(),
-                                'item_key' => $item->getKey(),
-                                'corrector_key' => $corrector->getKey(),
+                                'item_key' => $comment->getItemKey(),
+                                'corrector_key' => $comment->getCorrectorKey(),
                                 'start_position' => $comment->getStartPosition(),
                                 'end_position' => $comment->getEndPosition(),
                                 'parent_number' => $comment->getParentNumber(),
@@ -278,7 +280,7 @@ class Rest extends Base\BaseRest
                                 'marks' => CorrectionMark::multiToArray($comment->getMarks())
                             ];
                         }
-                        foreach ($this->context->getCorrectionPoints($item->getKey(), $corrector->getKey()) as $point) {
+                        foreach ($this->context->getCorrectionPoints($item->getKey(), $corrector->getCorrectorKey()) as $point) {
                             $points[] = [
                                 'key' => $point->getKey(),
                                 'item_key' => $point->getItemKey(),
@@ -344,7 +346,7 @@ class Rest extends Base\BaseRest
         if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_DATA)) {
             return $this->response;
         }
-        if (empty($this->currentCorrector)) {
+        if (empty($this->currentCorrectorKey)) {
             return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'sending changes is not allowed');
         }
 
@@ -364,7 +366,7 @@ class Rest extends Base\BaseRest
             switch ($change['action']) {
                 case 'save':
                     if (!empty(($data = $change['payload'] ?? null))) {
-                        if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $this->currentCorrector->getKey()) {
+                        if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $this->currentCorrectorKey) {
                             continue 2;
                         }
 
@@ -388,7 +390,7 @@ class Rest extends Base\BaseRest
                     break;
 
                 case 'delete': 
-                    if ($this->context->deleteCorrectionComment((string) $change['key'], $this->currentCorrector->getKey())) {
+                    if ($this->context->deleteCorrectionComment((string) $change['key'], $this->currentCorrectorKey)) {
                         $comments_done[$change['key']] = null;
                     }
                     break;
@@ -411,7 +413,7 @@ class Rest extends Base\BaseRest
                         $points = new CorrectionPoints(
                             (string) $data['key'],
                             (string) $data['item_key'],
-                            $this->currentCorrector->getKey(),
+                            $this->currentCorrectorKey,
                             (string) ($comment_matching[$data['comment_key']] ?? $data['comment_key']),
                             (string) $data['criterion_key'],
                             (int) $data['points']
@@ -424,7 +426,7 @@ class Rest extends Base\BaseRest
                     break;
                 
                 case 'delete':
-                    if ($this->context->deleteCorrectionPoints($change['key'], $this->currentCorrector->getKey())) {
+                    if ($this->context->deleteCorrectionPoints($change['key'], $this->currentCorrectorKey)) {
                         $points_done[$change['key']] = null;
                     }
                     break;
@@ -441,7 +443,7 @@ class Rest extends Base\BaseRest
             switch ($change['action']) {
                 case 'save':
                     if (!empty($data = $change['payload'] ?? null)) {
-                        if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $this->currentCorrector->getKey()) {
+                        if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $this->currentCorrectorKey) {
                             continue 2;
                         }
                         
@@ -536,7 +538,7 @@ class Rest extends Base\BaseRest
         }
 
         // corrector can be null in review and stitch decision
-        if (empty($this->context->getCurrentCorrector()) && !$this->context->isReview() && !$this->context->isStitchDecision()) {
+        if (empty($this->currentCorrectorKey) && !$this->context->isReview() && !$this->context->isStitchDecision()) {
             return $this->setResponse(StatusCode::HTTP_FORBIDDEN, 'getting page image is not allowed');
         }
 
@@ -565,19 +567,16 @@ class Rest extends Base\BaseRest
      */
     protected function areChangesAllowed(string $item_key) : bool
     {
-        if (!isset($this->currentCorrector)) {
+        if (empty($this->currentCorrectorKey)) {
             return false;
         }   
         
         if (!isset($this->changesAllowedCache[$item_key])) {
             $this->changesAllowedCache[$item_key] = false;
-            foreach ($this->context->getCorrectorsOfItem($item_key) as $corrector) {
-                if ($corrector->getKey() == $this->currentCorrector->getKey()) {
-                    $summary = $this->context->getCorrectionSummary($item_key, $corrector->getKey());
-                    if (!isset($summary) || !$summary->isAuthorized()) {
-                        $this->changesAllowedCache[$item_key] = true;
-                    }
-                    break;
+            if ($this->context->isCorrectorOfItem($item_key, $this->currentCorrectorKey)) {
+                $summary = $this->context->getCorrectionSummary($item_key, $this->currentCorrectorKey);
+                if (!isset($summary) || !$summary->isAuthorized()) {
+                    $this->changesAllowedCache[$item_key] = true;
                 }
             }
         }

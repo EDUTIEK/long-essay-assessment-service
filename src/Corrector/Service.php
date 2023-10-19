@@ -41,8 +41,8 @@ class Service extends Base\BaseService
      */
     protected function setSpecificFrontendParams()
     {
-        if (!empty($corrector = $this->context->getCurrentCorrector())) {
-            $this->setFrontendParam('Corrector', $corrector->getKey());
+        if (!empty($corrector_key = $this->context->getCurrentCorrectorKey())) {
+            $this->setFrontendParam('Corrector', $corrector_key);
         }
         if (!empty($item = $this->context->getCurrentItem())) {
             $this->setFrontendParam('Item', $item->getKey());

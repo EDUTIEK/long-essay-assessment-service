@@ -61,12 +61,12 @@ interface Context extends Base\BaseContext
 
 
     /**
-     * Get the current corrector
+     * Get the key of the current corrector
      * This corrector represents the current user
      * If the current user is no corrector (e.g. for review decision or stitch decision), return null
      */
-    public function getCurrentCorrector(): ?Corrector;
-
+    public function getCurrentCorrectorKey(): ?string;
+    
 
     /**
      * Get the current correction item
@@ -93,7 +93,11 @@ interface Context extends Base\BaseContext
      */
     public function getCorrectorsOfItem(string $item_key): array;
 
-
+    /**
+     * Get if a corrector is assigned to an item
+     */
+    public function isCorrectorOfItem(string $item_key, string $corrector_key) : bool;
+    
     /**
      * Get the correction summary given by a corrector for a correction item
      */
