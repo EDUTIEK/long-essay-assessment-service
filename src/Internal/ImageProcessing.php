@@ -5,7 +5,6 @@ namespace Edutiek\LongEssayAssessmentService\Internal;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPage;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
 use LongEssayPDFConverter\ImageMagick\PDFImage;
-use Imagick;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use LongEssayImageSketch\ImageMagick\Sketch;
 use LongEssayImageSketch\Shape;
@@ -22,45 +21,23 @@ class ImageProcessing
     public function createImagesFromPdf($pdf) : array
     {
         $PDFImage = new PDFImage();
-        $magic = new Imagick();
 
         $images = [];
-        $resources = $PDFImage->asOnePerPage($pdf, PDFImage::NORMAL);
-        $thumbnails = $PDFImage->asOnePerPage($pdf, PDFImage::THUMBNAIL);
+        $page_descriptors = $PDFImage->asOnePerPage($pdf, PDFImage::NORMAL);
+        $thumbnail_descriptors = $PDFImage->asOnePerPage($pdf, PDFImage::THUMBNAIL);
 
-        foreach ($resources as $index => $resource) {
-            $magic->readImageFile($resource);
-            $magic->resetIterator();
-            $mime = $magic->getImageMimeType();
-            $width = $magic->getImageWidth();
-            $height = $magic->getImageHeight();
-            $magic->removeImage();
+        foreach ($page_descriptors as $index => $page_desc) {
+            $thumb_desc = $thumbnail_descriptors[$index] ?? null;
             
-            $thumbnail = null;
-            $thumb_mime = null;
-            $thumb_width = null;
-            $thumb_height = null;
-            
-            if (isset($thumbnails[$index])) {
-                $thumbnail = $thumbnails[$index];
-                $magic->clear();
-                $magic->readImageFile($thumbnail);
-                $magic->resetIterator();
-                $thumb_mime = $magic->getImageMimeType();
-                $thumb_width = $magic->getImageWidth();
-                $thumb_height = $magic->getImageHeight();
-                $magic->removeImage();
-            }
-  
             $images[] = new PageImage(
-                $resource,
-                $mime,
-                $width,
-                $height,
-                $thumbnail,
-                $thumb_mime,
-                $thumb_width,
-                $thumb_height
+                $page_desc->stream(),
+                $page_desc->type(),
+                $page_desc->width(),
+                $page_desc->height(),
+                $thumb_desc ? $thumb_desc->stream() : null,
+                $thumb_desc ? $thumb_desc->type() : null,
+                $thumb_desc ? $thumb_desc->width() : null,
+                $thumb_desc ? $thumb_desc->height() : null
             );
         }
 
