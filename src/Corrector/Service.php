@@ -72,6 +72,34 @@ class Service extends Base\BaseService
     }
 
     /**
+     * Get a pdf from a written essay
+     * @see \Edutiek\LongEssayAssessmentService\Writer\Service::getProcessedTextAsPdf
+     * 
+     * @param DocuItem    $item
+     * @param string|null $forCorrectorKey
+     * @return string
+     */
+    public function getWritingAsPdf(DocuItem $item, string $forCorrectorKey = null) : string
+    {
+        $task = $item->getWritingTask();
+        $essay = $item->getWrittenEssay();
+        
+        $part = (new PdfPart(
+            PdfPart::FORMAT_A4,
+            PdfPart::ORIENTATION_PORTRAIT
+        ))->withElement(
+            new PdfHtml($this->dependencies->html()->processWrittenText($essay->getWrittenText())));
+
+        return $this->dependencies->pdfGeneration()->generatePdf(
+            [$part],
+            $this->context->getSystemName(),
+            $task->getWriterName(),
+            $task->getTitle(),
+            $task->getWriterName() . ' ' . $this->formatDates($essay->getEditStarted(), $essay->getEditEnded())
+        );
+    }
+
+    /**
      * Get a pdf from a corrected essay
      * If a corrector key is given then only the correction of this corrector is exported
      */
@@ -84,13 +112,15 @@ class Service extends Base\BaseService
         
         if (!isset($forCorrectorKey)) {
             $pdfParts = array_merge($pdfParts, $this->getPdfOverview($item));
-            $pdfParts = array_merge($pdfParts, $this->getPdfWrittenContent($item));
         }
         
         foreach ($item->getCorrectionSummaries() as $summary) {
             if (!isset($forCorrectorKey) || $summary->getCorrectorKey() == $forCorrectorKey) {
-                $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionSummary($item, $summary));
-                $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionContent($item, $summary));
+                $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionResult($item, $summary));
+                if ($summary->getIncludeComments()) {
+                    $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionContent($item, $summary));
+                }
+                $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionText($item, $summary));
             }
         }
         
@@ -137,7 +167,7 @@ class Service extends Base\BaseService
      * Get the pdf part with a correctors summary and result
      * @return PdfPart[]
      */
-    protected function getPdfCorrectionSummary(DocuItem $item, CorrectionSummary $summary) : array
+    protected function getPdfCorrectionResult(DocuItem $item, CorrectionSummary $summary) : array
     {
         $renderContext = [
             'corrector_name' =>  $summary->getCorrectorName(),
@@ -145,50 +175,36 @@ class Service extends Base\BaseService
             'last_change' => $this->formatDates($summary->getLastChange()),
             'points' => $summary->getPoints(),
             'grade_title' => $summary->getGradeTitle(),
-            'text' => $summary->getText()
+            'include_comments' => $summary->getIncludeComments() > CorrectionSummary::INCLUDE_NOT,
+            'include_comments_info' => $summary->getIncludeComments() == CorrectionSummary::INCLUDE_INFO,
+            'include_comments_relevant' => $summary->getIncludeComments() == CorrectionSummary::INCLUDE_RELEVANT,
+            'include_comment_ratings_info' => $summary->getIncludeCommentRatings() == CorrectionSummary::INCLUDE_INFO,
+            'include_comment_ratings_relevant' => $summary->getIncludeCommentRatings() == CorrectionSummary::INCLUDE_RELEVANT,
+            'include_comment_points_info' => $summary->getIncludeCommentPoints() == CorrectionSummary::INCLUDE_INFO,
+            'include_comment_points_relevant' => $summary->getIncludeCommentPoints() == CorrectionSummary::INCLUDE_RELEVANT,
+            'include_criteria_points_info' => $summary->getIncludeCriteriaPoints() == CorrectionSummary::INCLUDE_INFO,
+            'include_criteria_points_relevant' => $summary->getIncludeCriteriaPoints() == CorrectionSummary::INCLUDE_RELEVANT,
+            'include_writer_notes_info' => $summary->getIncludeWriterNotes() == CorrectionSummary::INCLUDE_INFO,
+            'include_writer_notes_relevant' => $summary->getIncludeWriterNotes() == CorrectionSummary::INCLUDE_RELEVANT
         ];
 
-        $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_summary_de.html', $renderContext);
+        $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_result_de.html', $renderContext);
         return [(new PdfPart())->withElement(new PdfHtml($html))];
     }
 
-
     /**
-     * Get the pdf part with the written text
+     * Get the pdf part with a correctors summary and result
      * @return PdfPart[]
      */
-    protected function getPdfWrittenContent(DocuItem $item) : array
+    protected function getPdfCorrectionText(DocuItem $item, CorrectionSummary $summary) : array
     {
-        $pdfParts = [];
-        if (!empty($itemPages = $this->context->getPagesOfItem($item->getKey()))) {
-            foreach ($itemPages as $itemPage) {
-                $pageImage = $this->context->getPageImage($itemPage->getKey());
-                $pdfParts[] = (new PdfPart(
-                    PdfPart::FORMAT_A4,
-                    PdfPart::ORIENTATION_PORTRAIT
-                ))->withPrintHeader(false)
-                  ->withPrintFooter(true)
-                  ->withHeaderMargin(0)
-                  ->withFooterMargin(0)
-                  ->withLeftMargin(0)
-                  ->withRightMargin(0)
-                  ->withElement(new PdfImage(
-                      $this->getPageImagePathForPdf($pageImage),
-                      0,0, 210,297       // A4
-                        
-                  ));
-            }
-        }
-        else {
-            $essay = $item->getWrittenEssay();
-            $processedText = $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
-            $renderContext = [
-                'text' => [$this->dependencies->html()->processTextForPdf($processedText)
-            ]];
-            $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/writer_content_de.html', $renderContext);
-            $pdfParts[] = (new PdfPart())->withElement(new PdfHtml($html));
-        }
-        return $pdfParts;
+        $renderContext = [
+            'corrector_name' =>  $summary->getCorrectorName(),
+            'text' => $summary->getText()
+        ];
+
+        $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_text_de.html', $renderContext);
+        return [(new PdfPart())->withElement(new PdfHtml($html))];
     }
 
 
@@ -199,19 +215,41 @@ class Service extends Base\BaseService
     protected function getPdfCorrectionContent(DocuItem $item, CorrectionSummary $summary): array
     {
         $pdfParts = [];
-        $comments = $item->getCommentsByCorrectorKey($summary->getCorrectorKey());
+        $comments = [];
+
+        $hasCriteria = !empty($this->context->getRatingCriteria($summary->getCorrectorKey()));
+        foreach ($item->getCommentsByCorrectorKey($summary->getCorrectorKey()) as $comment) {
+           
+            // put criteria related points into comment
+            if ($hasCriteria) {
+                $points = 0;
+                foreach($this->context->getCorrectionPoints($comment->getItemKey(), $comment->getCorrectorKey(), $comment->getKey()) as $pointsObject) {
+                    $points += $pointsObject->getPoints();
+                }
+                $comment = $comment->withPoints($points);
+            }
+            $comments[] = $comment
+                ->withShowRating($summary->getIncludeCommentRatings() > CorrectionSummary::INCLUDE_NOT)
+                ->withShowPoints($summary->getIncludeCommentPoints() > CorrectionSummary::INCLUDE_NOT);
+        }
+
         
         if (!empty($itemPages = $this->context->getPagesOfItem($item->getKey()))) {
             foreach ($itemPages as $itemPage) {
                 $pageComments = $this->getSortedCommentsOfParent($comments, $itemPage->getPageNo());
                 $commentsContext = [];
                 foreach ($pageComments as $comment) {
-                    $commentsContext[] = [
-                      'label' => $comment->getLabel(),
-                      'text' => $comment->getComment(),
-                      'cardinal' => $comment->getRating() == CorrectionComment::RATING_CARDINAL,
-                      'excellent' => $comment->getRating() == CorrectionComment::RAITNG_EXCELLENT
-                    ];
+                    
+                    if ($comment->hasDetailsToShow()) {
+                        $commentsContext[] = [
+                            'label' => $comment->getLabel(),
+                            'text' => $comment->getComment(),
+                            'cardinal' => $comment->showRating() && $comment->getRating() == CorrectionComment::RATING_CARDINAL,
+                            'excellent' => $comment->showRating() && $comment->getRating() == CorrectionComment::RAITNG_EXCELLENT,
+                            'one_point' => $comment->showPoints() && $comment->getPoints() == 1,
+                            'points' => $comment->showPoints() ? $comment->getPoints() : 0
+                        ];
+                    }
                 }
                 $renderContext= [
                     'page' => [
@@ -281,9 +319,9 @@ class Service extends Base\BaseService
         $result = [];
         $number = 1;
         foreach ($sort as $comment) {
-            // only comments with text or rating should get a label
-            // others are only marks
-            if (!empty($comment->getComment() || !empty($comment->getRating()))) {
+            // only comments with details to show should get a label
+            // others are only marks in the text
+            if ($comment->hasDetailsToShow()) {
                 $result[] = $comment->withLabel($parent_no . '.' . $number++);
             }
             else {

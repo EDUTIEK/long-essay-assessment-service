@@ -67,6 +67,7 @@ class Service extends Base\BaseService
     /**
      * Get a pdf from the text that has been processed for the corrector
      * This PDF is intended to document the writing. It has a header and footer
+     * @see \Edutiek\LongEssayAssessmentService\Corrector\Service::getWritingAsPdf
      */
     public function getProcessedTextAsPdf() : string
     {
@@ -78,6 +79,7 @@ class Service extends Base\BaseService
             PdfPart::ORIENTATION_PORTRAIT
         ))->withElement(
             new PdfHtml($this->dependencies->html()->processWrittenText($essay->getWrittenText())));
+
         return $this->dependencies->pdfGeneration()->generatePdf(
             [$part],
             $this->context->getSystemName(),

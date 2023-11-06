@@ -25,6 +25,8 @@ class CorrectionComment
     
     // not in constructor
     protected string $label = '';
+    protected bool $show_rating = true;
+    protected bool $show_points = true;
 
     /**
      * Constructor
@@ -159,6 +161,17 @@ class CorrectionComment
     }
 
     /**
+     * @param int $points
+     * @return CorrectionComment
+     */
+    public function withPoints(int $points): CorrectionComment
+    {
+        $clone = clone $this;
+        $clone->points = $points;
+        return $clone;
+    }
+
+    /**
      * @param string $label
      * @return CorrectionComment
      */
@@ -168,4 +181,50 @@ class CorrectionComment
         $clone->label = $label;
         return $clone;
     }
+
+    /**
+     * @return bool
+     */
+    public function showRating(): bool
+    {
+        return $this->show_rating;
+    }
+
+    /**
+     * @param bool $show_rating
+     * @return CorrectionComment
+     */
+    public function withShowRating(bool $show_rating): CorrectionComment
+    {
+        $clone = clone $this;
+        $clone->show_rating = $show_rating;
+        return $clone;
+    }
+
+    /**
+     * @return bool
+     */
+    public function showPoints(): bool
+    {
+        return $this->show_points;
+    }
+
+    /**
+     * @param bool $show_points
+     * @return CorrectionComment
+     */
+    public function withShowPoints(bool $show_points): CorrectionComment
+    {
+        $clone = clone $this;
+        $clone->show_points = $show_points;
+        return $clone;
+    }
+
+    public function hasDetailsToShow() : bool 
+    {
+        return !empty($this->getComment())
+            || (!empty($this->getRating()) && $this->showPoints())
+            || (!empty($this->getPoints()) && $this->showPoints());
+    }
+
 }

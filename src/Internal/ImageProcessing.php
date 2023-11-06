@@ -159,7 +159,7 @@ class ImageProcessing
             case CorrectionComment::RAITNG_EXCELLENT:
                 return $filled ?  '#19e62eaa' : '#19e62e';
             case CorrectionComment::RATING_CARDINAL:
-                return $filled ? '##bc4710aa' : '#bc4710';
+                return $filled ? '#bc4710aa' : '#bc4710';
             default:
                 return $filled ? '#3365ffaa' : '#3365ff';
         }

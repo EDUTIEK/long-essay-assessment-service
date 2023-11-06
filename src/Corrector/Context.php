@@ -44,11 +44,11 @@ interface Context extends Base\BaseContext
     /**
      * Get the rating criteria defined in the environment
      * these can be either fixed or individual criteria of the correctors
+     *
      * @see CorrectionRatingCriterion::getCorrectorKey()
-     *                                                  
      * @return CorrectionRatingCriterion[]
      */
-    public function getRatingCriteria(): array;
+    public function getRatingCriteria(?string $corrector_key = null): array;
 
 
     /**
@@ -111,10 +111,11 @@ interface Context extends Base\BaseContext
     public function getCorrectionComments(string $item_key, string $corrector_key): array;
 
     /**
-     * Get the correction points given by a corrector for a correction item
+     * Get the correction points given by a corrector for a correction item and his rating criteria
+     * Optionally restrict these to the points related to a correction comment
      * @return CorrectionPoints[]
      */
-    public function getCorrectionPoints(string $item_key, string $corrector_key): array;
+    public function getCorrectionPoints(string $item_key, string $corrector_key, ?string $comment_key = null): array;
 
     /**
      * Set the text of the written essay that is processed for display in the corrector (e.g. line numbers added)

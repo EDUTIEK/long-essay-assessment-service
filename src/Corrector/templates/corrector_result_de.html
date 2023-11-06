@@ -1,0 +1,50 @@
+<h1>Korrektur von {{corrector_name}}</h1>
+
+{{#is_authorized}}
+<b>Korrigiert:</b> {{last_change}}<br>
+<b>Vergebene Punkte:</b> {{points}}<br>
+<b>Bewertung:</b> {{grade_title}}<br>
+{{/is_authorized}}
+{{^is_authorized}}
+<b>Korrektur:</b> noch nicht abgeschlossen<br>
+{{/is_authorized}}
+
+{{#include_comments_info}}
+<p>Einzelkommentare sind informativ enthalten, aber nicht Gegenstand der Korrektur.</p>
+{{/include_comments_info}}
+{{#include_comments_relevant}}
+<p>Einzelkommentare sind als Gegenstand der Korrektur enthalten.</p>
+{{/include_comments_relevant}}
+
+{{#include_comments}}
+
+{{#include_comment_ratings_info}}
+<p>Markierungen exzellenter Passagen oder Kardinalfehler sind informativ enthalten, aber nicht Gegenstand der Korrektur.</p>
+{{/include_comment_ratings_info}}
+{{#include_comment_ratings_relevant}}
+<p>Markierungen exzellenter Passagen oder Kardinalfehler sind als Gegenstand der Korrektur enthalten.</p>
+{{/include_comment_ratings_relevant}}
+
+{{#include_comment_points_info}}
+<p>Teilpunkte zu Einzelkommentaren sind informativ enthalten, aber nicht Gegenstand der Korrektur.</p>
+{{/include_comment_points_info}}
+{{#include_comment_points_relevant}}
+<p>Teilpunkte zu Einzelkommentaren sind als Gegenstand der Korrektur enthalten.</p>
+{{/include_comment_points_relevant}}
+
+{{/include_comments}}
+
+{{#include_criteria_points_info}}
+<p>Teilpunkte zu Bewertungskriterien sind informativ enthalten, aber nicht Gegenstand der Korrektur.</p>
+{{/include_criteria_points_info}}
+{{#include_criteria_points_relevant}}
+<p>Teilpunkte zu Bewertungskriterien sind als Gegenstand der Korrektur enthalten.</p>
+{{/include_criteria_points_relevant}}
+
+
+{{#include_writer_notes_info}}
+<p>Abgegebene Notizen sind informativ enthalten, aber nicht Gegenstand der Korrektur.</p>
+{{/include_writer_notes_info}}
+{{#include_writer_notes_relevant}}
+<p>Abgegebene Notizen sind als Gegenstand der Korrektur enthalten.</p>
+{{/include_writer_notes_relevant}}
