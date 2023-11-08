@@ -79,19 +79,38 @@ class Service extends Base\BaseService
      * @param string|null $forCorrectorKey
      * @return string
      */
-    public function getWritingAsPdf(DocuItem $item, string $forCorrectorKey = null) : string
+    public function getWritingAsPdf(DocuItem $item) : string
     {
         $task = $item->getWritingTask();
         $essay = $item->getWrittenEssay();
-        
-        $part = (new PdfPart(
-            PdfPart::FORMAT_A4,
-            PdfPart::ORIENTATION_PORTRAIT
-        ))->withElement(
-            new PdfHtml($this->dependencies->html()->processWrittenText($essay->getWrittenText())));
 
+        $pdfParts = [];
+
+        if (!empty($itemPages = $this->context->getPagesOfItem($item->getKey()))) {
+            foreach ($itemPages as $itemPage) {
+                $image = $this->context->getPageImage($itemPage->getKey());
+                $path = $this->getPageImagePathForPdf($image);
+                $pdfParts[] = (new PdfPart(
+                    PdfPart::FORMAT_A4,
+                    PdfPart::ORIENTATION_PORTRAIT
+                ))->withPrintHeader(true)
+                  ->withPrintFooter(true)
+                  ->withElement(new PdfImage(
+                      $path,
+                      0,0, 210,297     // A5
+                  ));
+            }
+        }
+        else {
+            $pdfParts[] = (new PdfPart(
+                PdfPart::FORMAT_A4,
+                PdfPart::ORIENTATION_PORTRAIT
+            ))->withElement(
+                new PdfHtml($this->dependencies->html()->processWrittenText($essay->getWrittenText())));
+        }
+        
         return $this->dependencies->pdfGeneration()->generatePdf(
-            [$part],
+            $pdfParts,
             $this->context->getSystemName(),
             $task->getWriterName(),
             $task->getTitle(),
