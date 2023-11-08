@@ -1,13 +1,9 @@
 {{#page}}
 <p><strong>Seite {{page_no}} von Korrektor {{corrector_name}}</strong></p>
-{{#comments}}
-    <p><strong>{{label}}{{#cardinal}} Kardinalfehler{{/cardinal}}{{#excellent}} Exzellent{{/excellent}}</strong>{{#text}} {{.}}{{/text}}
-        {{#points}}{{#one_point}}(1 Punkt){{/one_point}}{{^one_point}}({{.}} Punkte){{/one_point}}{{/points}}
-    </p>
-{{/comments}}
+{{{comments}}}
 {{/page}}
 
 {{#text}}
-<br><b>Einzelkommentare:</b><br>
+<p><strong>Einzelkommentare:</strong></p>
 {{{comments}}}
 {{/text}}

@@ -91,6 +91,8 @@ class ImageProcessing
      */
     public function applyCommentsMarks(CorrectionPage $page, PageImage $image, array $comments) : PageImage
     {
+        $commentHandler = Dependencies::getInstance()->commentHandling();
+        
         $sketch = new Sketch([
             // Default font of Sketch is not available on Windows - keep default font of Imagick
             'font' => ['name' => null, 'size' => 15]]);
@@ -98,7 +100,12 @@ class ImageProcessing
         foreach ($comments as $comment) {
             if ($comment->getParentNumber() == $page->getPageNo() && !empty($comment->getMarks())) {
                 foreach ($comment->getMarks() as $mark) {
-                    $shapes[] = $this->getShapeFromMark($mark, $comment->getLabel(), $this->getShapeColor($mark, $comment));
+                    $filled = in_array($mark->getShape(), CorrectionMark::FILLED_SHAPES);
+                    if ($filled) {
+                        $shapes[] = $this->getShapeFromMark($mark, $comment->getLabel(), $commentHandler->getMarkFillColor($comment));
+                    } else {
+                        $shapes[] = $this->getShapeFromMark($mark, $comment->getLabel(), $commentHandler->getMarkBorderColor($comment));
+                    }
                 }
             }
         }
@@ -146,27 +153,9 @@ class ImageProcessing
     }
 
     /**
-     * Get the color for the image sketcher shape from a correction mark
-     * @param CorrectionMark    $mark
-     * @param CorrectionComment $comment
-     * @return string
+     * Get a mark symbol that is known to the image sketching font
      */
-    protected function getShapeColor(CorrectionMark $mark, CorrectionComment $comment) : string
-    {
-        $filled = in_array($mark->getShape(), CorrectionMark::FILLED_SHAPES);
-        
-        switch ($comment->getRating()) {
-            case CorrectionComment::RAITNG_EXCELLENT:
-                return $filled ?  '#19e62eaa' : '#19e62e';
-            case CorrectionComment::RATING_CARDINAL:
-                return $filled ? '#bc4710aa' : '#bc4710';
-            default:
-                return $filled ? '#3365ffaa' : '#3365ff';
-        }
-    }
-    
-    
-    protected function getShapeSymbol(CorrectionMark $mark) 
+    protected function getShapeSymbol(CorrectionMark $mark) : string
     {
         switch ($mark->getSymbol()) {
             case '✓':

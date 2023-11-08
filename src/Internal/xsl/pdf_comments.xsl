@@ -19,7 +19,7 @@
     
     <!-- add the comments column -->
     <xsl:template match="tr">
-        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::initCurrentComments')" />
+        <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::initCurrentComments', string(td[1]/node()))" />
         <xsl:copy>
             <xsl:copy-of select="@*" />
             <td style="width: 5%;">
@@ -45,7 +45,7 @@
     <xsl:template match="span">
         <xsl:choose>
             <xsl:when test="@data-w">
-                <xsl:variable name="label" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::commentLabel',string(@data-w),string(@data-p))" />
+                <xsl:variable name="label" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::commentLabel',string(@data-w))" />
                 <xsl:variable name="color" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::commentColor',string(@data-w))" />
                 <xsl:choose>
                     <xsl:when test="$color">

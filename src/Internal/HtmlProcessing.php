@@ -17,27 +17,22 @@ class HtmlProcessing
     const COLOR_CARDINAL = '#FBDED1';
 
 
-    /** @var int */
-    static $paraCounter = 0;
-
-    /** @var int */
-    static $wordCounter = 0;
-
-    /** @var int */
-    static $commentCounter = 0;
-
+    static int $paraCounter = 0;
+    static int $wordCounter = 0;
+    
     /**
      * All Comments that should be merged
      * @var CorrectionComment[]
      */
-    static $allComments = [];
+    static array $allComments = [];
 
     /**
      * Comments for the current paragraph
      * @var CorrectionComment[]
      */
-    static $currentComments = [];
+    static array $currentComments = [];
 
+    
     /**
      * Fill a template with data
      * @param string $template
@@ -52,10 +47,17 @@ class HtmlProcessing
     }
     
     /**
-     * Process the written text
+     * Process the written text for usage in the correction
+     * This will add the paragraph numbers and split up all text to single word embedded in <w-p> elements.
+     *      the 'w' attribute is the word number
+     *      the 'p' attribute is the paragraph number
      */
     public function processWrittenText(?string $html) : string
     {
+        self::$paraCounter = 0;
+        self::$wordCounter = 0;
+        
+        
         $html = $html ?? '';
         $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl');
         $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl');
@@ -64,7 +66,7 @@ class HtmlProcessing
     }
 
     /**
-     * Process the text for inclusion in a pdf
+     * Process the text for inclusion in a pdf without comments
      */
     public function processTextForPdf(?string $html) : string
     {
@@ -78,7 +80,7 @@ class HtmlProcessing
 
 
     /**
-     * Add comments to a text for inclusion in a pdf
+     * Process the text for inclusion in a pdf with comments at hte side comments
      * The text must have been processed with processedWrittenText()
      * @param string|null $html
      * @param CorrectionComment[]  $comments
@@ -88,7 +90,6 @@ class HtmlProcessing
     {
         self::$allComments = $comments;
         self::$currentComments = [];
-        self::$commentCounter = 0;
         
         $html = $html ?? '';
         
@@ -108,9 +109,6 @@ class HtmlProcessing
      */
     protected function processXslt(string $html, string $xslt_file) : string
     {
-        self::$paraCounter = 0;
-        self::$wordCounter = 0;
-        
         try {
             // get the xslt document
             // set the URI to allow document() within the XSL file
@@ -213,27 +211,21 @@ class HtmlProcessing
     /**
      * Initialize the collection of comments for the current paragraph
      */
-    static function initCurrentComments() 
+    static function initCurrentComments(string $paraNumber) 
     {
-        self::$currentComments = [];
-        self::$commentCounter = 0;
+        $commentHandling = Dependencies::getInstance()->commentHandling();
+        self::$currentComments = $commentHandling->getSortedCommentsOfParent(self::$allComments, (int) $paraNumber);
     }
 
     /**
      * Get a label if a comment starts at the given word
-     * @param $wordNumber
-     * @param $paraNumber
-     * @return string
      */
-    static function commentLabel(string $wordNumber, string $paraNumber) : string
+    static function commentLabel(string $wordNumber) : string
     {
         $labels = [];
-        foreach(self::$allComments as $comment) {
-            if ($wordNumber == (int) $comment->getStartPosition()) {
-                self::$commentCounter++;
-                $label = $paraNumber . '.' .  self::$commentCounter;
-                self::$currentComments[$label] = $comment;
-                $labels[] = $label;
+        foreach(self::$currentComments as $comment) {
+            if ((int) $wordNumber == $comment->getStartPosition() && !empty($comment->getLabel())) {
+                $labels[] = $comment->getLabel();
             }
         }
         return(implode(',', $labels));
@@ -241,26 +233,18 @@ class HtmlProcessing
 
     /**
      * Get the background color for the word
-     * @param $wordNumber
-     * @return string
      */
-    static function commentColor($wordNumber) : string
+    static function commentColor(string $wordNumber) : string
     {
-        $color= '';
-        foreach(self::$allComments as $comment) {
-            if ($wordNumber >= (int) $comment->getStartPosition() && $wordNumber <= $comment->getEndPosition()) {
-                if ($comment->getRating() == CorrectorComment::RATING_CARDINAL) {
-                    $color = self::COLOR_CARDINAL;
-                }
-                elseif ($comment->getRating() == CorrectorComment::RAITNG_EXCELLENT) {
-                    $color = self::COLOR_EXCELLENT;
-                }
-                elseif ($color == '') {
-                    $color = self::COLOR_NORMAL;
-                }
+        $commentHandling = Dependencies::getInstance()->commentHandling();
+        
+        $comments = [];
+        foreach(self::$currentComments as $comment) {
+            if ((int) $wordNumber >= $comment->getStartPosition() && (int) $wordNumber <= $comment->getEndPosition()) {
+                $comments[] = $comment;
             }
         }
-        return $color;
+        return $commentHandling->getTextBackgroundColor($comments);
     }
 
     /**
@@ -270,29 +254,11 @@ class HtmlProcessing
      */
     static function getCurrentComments(): \DOMElement 
     {
-        $doc = new DOMDocument;
-        $root = $doc->createElement("root");
-        
-        foreach (self::$currentComments as $label => $comment) {
-            
-            if ($comment->getRating() == CorrectorComment::RAITNG_EXCELLENT) {
-                $color = self::COLOR_EXCELLENT;
-                $label1 = $label . ' (exzellent): ';
-            }
-            elseif ($comment->getRating() == CorrectorComment::RATING_CARDINAL) {
-                $color = self::COLOR_CARDINAL;
-                $label1 = $label . ' (Kardinalfehler): ';
-            }
-            else {
-                $color = self::COLOR_NORMAL;
-                $label1 = $label . ': ';
-            }
-            
-            $span = $doc->createElement('span', $label1 .  $comment->getComment());
-            $span->setAttribute('style', "background-color:$color;");
-            $root->appendChild($span);
-        }
+        $commentHandling = Dependencies::getInstance()->commentHandling();
+        $html = $commentHandling->getCommentsHtml(self::$currentComments);
 
-        return $root;
+        $doc = new DOMDocument;
+        $doc->loadXML('<root xml:id="root">' . $html . '</root>');
+        return $doc->getElementById('root');
     }
 }

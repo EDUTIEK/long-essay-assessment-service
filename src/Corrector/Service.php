@@ -261,7 +261,7 @@ class Service extends Base\BaseService
         
         if (!empty($itemPages = $this->context->getPagesOfItem($item->getKey()))) {
             foreach ($itemPages as $itemPage) {
-                $pageComments = $this->getSortedCommentsOfParent($comments, $itemPage->getPageNo());
+                $pageComments = $this->dependencies->commentHandling()->getSortedCommentsOfParent($comments, $itemPage->getPageNo());
                 $commentsContext = [];
                 foreach ($pageComments as $comment) {
                     
@@ -280,7 +280,7 @@ class Service extends Base\BaseService
                     'page' => [
                         'corrector_name' => $summary->getCorrectorName(),
                         'page_no' => $itemPage->getPageNo(),
-                        'comments' => $commentsContext
+                        'comments' => $this->dependencies->commentHandling()->getCommentsHtml($pageComments)
                     ]];
 
                 $image = $this->context->getPageImage($itemPage->getKey());
@@ -325,38 +325,6 @@ class Service extends Base\BaseService
         return $pdfParts;
     }
     
-    /**
-     * @param CorrectionComment[] $comments
-     * @param int   $parent_no
-     * @return CorrectionComment[]
-     */
-    protected function getSortedCommentsOfParent(array $comments, int $parent_no) : array
-    {
-        $sort = [];
-        foreach($comments as $comment) {
-            if ($comment->getParentNumber() == $parent_no) {
-                $key = sprintf('%06d', $comment->getStartPosition()) . $comment->getKey();
-                $sort[$key] = $comment;
-            }
-        }
-        ksort($sort);
-        
-        $result = [];
-        $number = 1;
-        foreach ($sort as $comment) {
-            // only comments with details to show should get a label
-            // others are only marks in the text
-            if ($comment->hasDetailsToShow()) {
-                $result[] = $comment->withLabel($parent_no . '.' . $number++);
-            }
-            else {
-                $result[] = $comment;
-            }
-        }
-        
-        return $result;
-    }
-
     /**
      * Get the path of a writer page image for pdf processing
      * @param PageImage|null $image

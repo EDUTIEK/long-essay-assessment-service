@@ -4,6 +4,9 @@ namespace Edutiek\LongEssayAssessmentService\Internal;
 
 class Dependencies
 {
+    private static self $instance;
+    
+    
     /** @var Authentication */
     protected $authentication;
 
@@ -15,8 +18,21 @@ class Dependencies
     
     /** @var PdfGeneration */
     protected $pdfGeneration;
+    
+    /** @var CommentHandling */
+    protected $commentHandling;
 
-
+    /**
+     * Get the instance
+     */
+    public static function getInstance() :self
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
+        }   
+        return self::$instance;
+    }
+    
     /**
      * Get the object for authentication
      */
@@ -28,8 +44,20 @@ class Dependencies
         return $this->authentication;
     }
 
+
     /**
-     * Get the object for HMTL processing
+     * Get the object for comment handling
+     */
+    public function commentHandling() : CommentHandling
+    {
+        if (!isset($this->commentHandling)) {
+            $this->commentHandling = new CommentHandling();
+        }
+        return $this->commentHandling;
+    }
+
+    /**
+     * Get the object for HTML processing
      */
     public function html() : HtmlProcessing
     {
