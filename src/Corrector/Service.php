@@ -189,6 +189,31 @@ class Service extends Base\BaseService
         ];
 
         $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_result_de.html', $renderContext);
+
+        if ($summary->getIncludeCriteriaPoints()) {
+            $criteria = $this->context->getRatingCriteria($summary->getCorrectorKey());
+            if (!empty($criteria)) {
+                $points = [];
+                foreach ( $this->context->getCorrectionPoints($item->getKey(), $summary->getCorrectorKey()) as $pointsObj) {
+                    $points[$pointsObj->getCriterionKey()] = ($points[$pointsObj->getCriterionKey()] ?? 0) + $pointsObj->getPoints();
+                }
+
+                $renderContext = [
+                    'criteria' => []
+                ];
+                foreach ($criteria as $criterion) {
+                    $renderContext['criteria'][] = [
+                        'title' => $criterion->getTitle(),
+                        'description' => $criterion->getDescription(),
+                        'points' => $points[$criterion->getKey()] ?? 0
+                    ];
+                }
+
+                $html .= $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_criteria_de.html', $renderContext);
+            }
+
+        }
+        
         return [(new PdfPart())->withElement(new PdfHtml($html))];
     }
 
