@@ -305,7 +305,10 @@ class Rest extends Base\BaseRest
                         'text'=> isset($essay) ? $essay->getProcessedText() : null,
                         'started' => isset($essay) ? $essay->getEditStarted() : null,
                         'ended' => isset($essay) ? $essay->getEditEnded() : null,
-                        'authorized' => isset($essay) ? $essay->isAuthorized() : null
+                        'authorized' => isset($essay) ? $essay->isAuthorized() : null,
+                        'correction_finalized' => isset($essay) ? $essay->getCorrectionFinalized() : null,
+                        'final_points' => isset($essay) ? $essay->getFinalPoints() : null,
+                        'stitch_comment' => isset($essay) ? $essay->getStitchComment() : null,
                     ],
                     'pages' => $pages,
                     'correctors' => $correctors,
