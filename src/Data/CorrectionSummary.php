@@ -22,7 +22,7 @@ class CorrectionSummary
     private ?string $text;
     private ?float $points;
     private ?string $grade_key;
-    private ?string $last_change;
+    private ?int $last_change;
     private bool $is_authorized;
     private int $include_comments;
     private int $include_comment_ratings;
@@ -37,10 +37,10 @@ class CorrectionSummary
     public function __construct(
         string $item_key,
         string $corrector_key,
-        ?string $text,
-        ?float $points,
-        ?string $grade_key,
-        ?int $last_change,
+        ?string $text = null,
+        ?float $points = null,
+        ?string $grade_key = null,
+        ?int $last_change = null,
         bool $is_authorized = false,
         int $include_comments = 0,
         int $include_comment_ratings = 0,
@@ -181,5 +181,17 @@ class CorrectionSummary
     public function getGradeTitle(): ?string
     {
         return $this->grade_title;
+    }
+
+    /**
+     * 
+     * @param int $last_change
+     * @return CorrectionSummary
+     */
+    public function withLastChange(int $last_change): CorrectionSummary
+    {
+        $clone = clone $this;
+        $clone->last_change = $last_change;
+        return $clone;
     }
 }

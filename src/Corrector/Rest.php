@@ -355,6 +355,7 @@ class Rest extends Base\BaseRest
 
         $body = $this->request->getParsedBody();
         
+        $times = [];
         $comments_done = [];
         $points_done = [];
         $summaries_done = [];
@@ -388,6 +389,7 @@ class Rest extends Base\BaseRest
 
                         if (!empty($key = $this->context->saveCorrectionComment($comment))) {
                             $comments_done[$change['key']] = $key;
+                            $times[$change['item_key']] = max($times[$change['item_key']] ?? 0, (int) $change['server_time']);
                         }
                     }
                     break;
@@ -395,6 +397,7 @@ class Rest extends Base\BaseRest
                 case 'delete': 
                     if ($this->context->deleteCorrectionComment((string) $change['key'], $this->currentCorrectorKey)) {
                         $comments_done[$change['key']] = null;
+                        $times[$change['item_key']] = max($times[$change['item_key']] ?? 0, (int) $change['server_time']);
                     }
                     break;
             }
@@ -424,6 +427,7 @@ class Rest extends Base\BaseRest
 
                         if (!empty($key = $this->context->saveCorrectionPoints($points))) {
                             $points_done[$change['key']] = $key;
+                            $times[$change['item_key']] = max($times[$change['item_key']] ?? 0, (int) $change['server_time']);
                         }
                     }
                     break;
@@ -431,6 +435,7 @@ class Rest extends Base\BaseRest
                 case 'delete':
                     if ($this->context->deleteCorrectionPoints($change['key'], $this->currentCorrectorKey)) {
                         $points_done[$change['key']] = null;
+                        $times[$change['item_key']] = max($times[$change['item_key']] ?? 0, (int) $change['server_time']);
                     }
                     break;
             }
@@ -456,7 +461,7 @@ class Rest extends Base\BaseRest
                             isset($data['text']) ? (string) $data['text'] : null,
                             isset($data['points']) ? (float) $data['points'] : null,
                             isset($data['grade_key']) ? (string) $data['grade_key'] : null,
-                            isset($data['last_change']) ? (int) $data['last_change'] : time(),
+                            max($times[$change['item_key']] ?? 0, (int) $change['server_time']),
                             (bool) ($data['is_authorized'] ?? false),
                             (int) ($data['include_comments'] ?? 0),
                             (int) ($data['include_comment_ratings'] ?? 0),
@@ -467,13 +472,25 @@ class Rest extends Base\BaseRest
 
                         if ($this->context->saveCorrectionSummary($summary)) {
                             $summaries_done[$change['key']] = $change['key'];
+                            // last change time is already set
+                            unset($times[$change['item_key']]);
                         }
                     }
                     break;
             }
-
         }
 
+        
+        // Touch the summaries for changed comments or points 
+        // This sets the last change and ensures that a summary exists
+        foreach ($times as $item_key => $time) {
+            $summary = $this->context->getCorrectionSummary((string) $item_key, (string) $this->currentCorrectorKey);
+            if (empty($summary)) {
+                $summary = new CorrectionSummary((string) $item_key, (string) $this->currentCorrectorKey);
+            }
+            $this->context->saveCorrectionSummary($summary->withLastChange($time));
+        }
+        
         
         $json = [
           'comments' => $comments_done,
