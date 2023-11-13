@@ -10,9 +10,9 @@ class CommentHandling
     const BACKGROUND_EXCELLENT = '#E3EFDD';
     const BACKGROUND_CARDINAL = '#FBDED1';
     
-    const FILL_NORMAL = '#3365ffaa';
-    const FILL_EXCELLENT = '#19e62eaa';
-    const FILL_CARDINAL = '#bc4710aa';
+    const FILL_NORMAL = '#3365ff40';
+    const FILL_EXCELLENT = '#19e62e40';
+    const FILL_CARDINAL = '#bc471040';
     
     const BORDER_NORMAL = '#3365ff';
     const BORDER_EXCELLENT = '#19e62e';
