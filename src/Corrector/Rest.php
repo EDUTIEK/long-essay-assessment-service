@@ -255,11 +255,11 @@ class Rest extends Base\BaseRest
                             'grade_key' => null,
                             'last_change' => null,
                             'is_authorized' => false,
-                            'include_comments' => 0,
-                            'include_comment_ratings' => 0,
-                            'include_comment_points' => 0,
-                            'include_criteria_points' => 0,
-                            'include_writer_notes' => 0,
+                            'include_comments' => null,
+                            'include_comment_ratings' => null,
+                            'include_comment_points' => null,
+                            'include_criteria_points' => null,
+                            'include_writer_notes' => null,
                         ];
                     }
                     
@@ -463,11 +463,11 @@ class Rest extends Base\BaseRest
                             isset($data['grade_key']) ? (string) $data['grade_key'] : null,
                             max($times[$change['item_key']] ?? 0, (int) $change['server_time']),
                             (bool) ($data['is_authorized'] ?? false),
-                            (int) ($data['include_comments'] ?? 0),
-                            (int) ($data['include_comment_ratings'] ?? 0),
-                            (int) ($data['include_comment_points'] ?? 0),
-                            (int) ($data['include_criteria_points'] ?? 0),
-                            (int) ($data['include_writer_notes'] ?? 0)
+                            isset($data['include_comments']) ? (int) $data['include_comments'] : null,
+                            isset($data['include_comment_ratings']) ? (int) $data['include_comment_ratings'] : null,
+                            isset($data['include_comment_points']) ? (int) $data['include_comment_points'] : null,
+                            isset($data['include_criteria_points']) ? (int) $data['include_criteria_points'] : null,
+                            isset($data['include_writer_notes']) ? (int) $data['include_writer_notes'] : null
                         );
 
                         if ($this->context->saveCorrectionSummary($summary)) {

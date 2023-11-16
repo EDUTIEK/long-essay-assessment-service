@@ -24,11 +24,11 @@ class CorrectionSummary
     private ?string $grade_key;
     private ?int $last_change;
     private bool $is_authorized;
-    private int $include_comments;
-    private int $include_comment_ratings;
-    private int $include_comment_points;
-    private int $include_criteria_points;
-    private int $include_writer_notes;
+    private ?int $include_comments;
+    private ?int $include_comment_ratings;
+    private ?int $include_comment_points;
+    private ?int $include_criteria_points;
+    private ?int $include_writer_notes;
     
     private ?string $corrector_name;
     private ?string $grade_title;
@@ -42,11 +42,11 @@ class CorrectionSummary
         ?string $grade_key = null,
         ?int $last_change = null,
         bool $is_authorized = false,
-        int $include_comments = 0,
-        int $include_comment_ratings = 0,
-        int $include_comment_points = 0,
-        int $include_criteria_points = 0,
-        int $include_writer_notes = 0,
+        ?int $include_comments = null,
+        ?int $include_comment_ratings = null,
+        ?int $include_comment_points = null,
+        ?int $include_criteria_points = null,
+        ?int $include_writer_notes = null,
 
         // for documentation
         ?string $corrector_name = '',
@@ -130,7 +130,7 @@ class CorrectionSummary
     /**
      * Get the level of including comments to the documentation
      */
-    public function getIncludeComments(): int
+    public function getIncludeComments(): ?int
     {
         return $this->include_comments;
     }
@@ -138,7 +138,7 @@ class CorrectionSummary
     /**
      * Get the level of including comment ratings to the documentation
      */
-    public function getIncludeCommentRatings(): int
+    public function getIncludeCommentRatings(): ?int
     {
         return $this->include_comment_ratings;
     }
@@ -146,7 +146,7 @@ class CorrectionSummary
     /**
      * Get the level of including comment points to the documentation
      */
-    public function getIncludeCommentPoints(): int
+    public function getIncludeCommentPoints(): ?int
     {
         return $this->include_comment_points;
     }
@@ -154,7 +154,7 @@ class CorrectionSummary
     /**
      * Get the level of including criteria points to the documentation
      */
-    public function getIncludeCriteriaPoints(): int
+    public function getIncludeCriteriaPoints(): ?int
     {
         return $this->include_criteria_points;
     }
@@ -162,7 +162,7 @@ class CorrectionSummary
     /**
      * Get the level of including writer notes to the documentation
      */
-    public function getIncludeWriterNotes(): int
+    public function getIncludeWriterNotes(): ?int
     {
         return $this->include_writer_notes;
     }
