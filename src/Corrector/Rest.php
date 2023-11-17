@@ -14,6 +14,8 @@ use Slim\Http\StatusCode;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionMark;
+use ILIAS\Plugin\LongEssayAssessment\Data\Corrector\CorrectorPreferences;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionPreferences;
 
 /**
  * Handler of REST requests from the corrector app
@@ -94,6 +96,7 @@ class Rest extends Base\BaseRest
 
         $task = $this->context->getCorrectionTask();
         $settings = $this->context->getCorrectionSettings();
+        $preferences = $this->context->getCorrectionPreferences($this->currentCorrectorKey);
 
         $resources = [];
         foreach ($this->context->getResources() as $resource) {
@@ -148,6 +151,16 @@ class Rest extends Base\BaseRest
                 'max_auto_distance' => $settings->getMaxAutoDistance(),
                 'stitch_when_distance' => $settings->getStitchWhenDistance(),
                 'stitch_when_decimals' => $settings->getStitchWhenDecimals()
+            ],
+            'preferences' => [
+                'essay_page_zoom' => $preferences->getEssayPageZoom(),
+                'essay_text_zoom' => $preferences->getEssayTextZoom(),
+                'sumary_text_zoom' => $preferences->getSummaryTextZoom(),
+                'include_comments' => $preferences->getIncludeComments(),
+                'include_comment_ratings' => $preferences->getIncludeCommentRatings(),
+                'include_comment_points' => $preferences->getIncludeCommentPoints(),
+                'include_criteria_points' => $preferences->getIncludeCriteriaPoints(),
+                'include_writer_notes' => $preferences->getIncludeWriterNotes()
             ],
             'resources' => $resources,
             'levels' => $levels,
@@ -354,11 +367,16 @@ class Rest extends Base\BaseRest
         }
 
         $body = $this->request->getParsedBody();
-        
+
+        /**
+         * Last change times item_key => unix time
+         */
         $times = [];
+        
         $comments_done = [];
         $points_done = [];
         $summaries_done = [];
+        $preferences_done = [];
 
         // Save comments
         
@@ -367,7 +385,7 @@ class Rest extends Base\BaseRest
                 continue;
             }
 
-            switch ($change['action']) {
+            switch ($change['action'] ?? '') {
                 case 'save':
                     if (!empty(($data = $change['payload'] ?? null))) {
                         if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $this->currentCorrectorKey) {
@@ -410,7 +428,7 @@ class Rest extends Base\BaseRest
                 continue;
             }
 
-            switch ($change['action']) {
+            switch ($change['action'] ?? '') {
                 case 'save':
                     if (!empty($data = $change['payload'] ?? null)) {
                         if ($data['item_key'] != $change['item_key']) {
@@ -448,7 +466,7 @@ class Rest extends Base\BaseRest
                 continue;
             }
             
-            switch ($change['action']) {
+            switch ($change['action'] ?? '') {
                 case 'save':
                     if (!empty($data = $change['payload'] ?? null)) {
                         if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $this->currentCorrectorKey) {
@@ -480,7 +498,27 @@ class Rest extends Base\BaseRest
             }
         }
 
-        
+        // save preferences (only one with fixed key 
+        foreach ((array) $body['preferences'] as $change) {
+            if (!empty($data = $change['payload'] ?? null)) {
+                $preferences = new CorrectionPreferences(
+                    (string) $this->currentCorrectorKey,
+                    (float) $data['essay_page_zoom'],
+                    (float) $data['essay_text_zoom'],
+                    (float) $data['summary_text_zoom'],
+                    (int) $data['include_comments'],
+                    (int) $data['include_comment_ratings'],
+                    (int) $data['include_comment_points'],
+                    (int) $data['include_criteria_points'],
+                    (int) $data['include_writer_notes']
+                );
+                if ($this->context->saveCorrectionPreferences($preferences)) {
+                    $preferences_done[$change['key']] = $change['key'];
+                    break;
+                }
+            }
+        }
+
         // Touch the summaries for changed comments or points 
         // This sets the last change and ensures that a summary exists
         foreach ($times as $item_key => $time) {
@@ -495,7 +533,8 @@ class Rest extends Base\BaseRest
         $json = [
           'comments' => $comments_done,
           'points' => $points_done,
-          'summaries' => $summaries_done
+          'summaries' => $summaries_done,
+          'preferences' => $preferences_done,
         ];
 
         $this->refreshDataToken();

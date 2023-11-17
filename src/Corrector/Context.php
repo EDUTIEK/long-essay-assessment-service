@@ -14,6 +14,7 @@ use Edutiek\LongEssayAssessmentService\Data\CorrectionRatingCriterion;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPage;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionPreferences;
 
 /**
  * Required interface of a context application (e.g. an LMS) calling the corrector service
@@ -31,9 +32,15 @@ interface Context extends Base\BaseContext
     public function getCorrectionTask(): CorrectionTask;
 
     /**
-     * Get the correction settings for the app
+     * Get the fixed correction settings for the app
      */
     public function getCorrectionSettings() : CorrectionSettings;
+
+    /**
+     * Get the correction preferences which can be set in the app
+     */
+    public function getCorrectionPreferences(string $corrector_key) : CorrectionPreferences;
+
 
     /**
      * Get the grade levels defined in the environment
@@ -122,6 +129,12 @@ interface Context extends Base\BaseContext
      */
     public function setProcessedText(string $item_key, ?string $text) : void;
 
+
+    /**
+     * Save the correction preferences given by a corrector
+     * @return bool preferences are saved
+     */
+    public function saveCorrectionPreferences(CorrectionPreferences $preferences) : bool;
 
     /**
      * Save the correction summary given by a corrector for a correction item
