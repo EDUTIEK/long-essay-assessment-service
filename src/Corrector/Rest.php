@@ -155,7 +155,7 @@ class Rest extends Base\BaseRest
             'preferences' => [
                 'essay_page_zoom' => $preferences->getEssayPageZoom(),
                 'essay_text_zoom' => $preferences->getEssayTextZoom(),
-                'sumary_text_zoom' => $preferences->getSummaryTextZoom(),
+                'summary_text_zoom' => $preferences->getSummaryTextZoom(),
                 'include_comments' => $preferences->getIncludeComments(),
                 'include_comment_ratings' => $preferences->getIncludeCommentRatings(),
                 'include_comment_points' => $preferences->getIncludeCommentPoints(),
