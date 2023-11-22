@@ -38,8 +38,9 @@ interface Context extends Base\BaseContext
 
     /**
      * Get the correction preferences which can be set in the app
+     * Corrector key may be null in review mode
      */
-    public function getCorrectionPreferences(string $corrector_key) : CorrectionPreferences;
+    public function getCorrectionPreferences(?string $corrector_key) : CorrectionPreferences;
 
 
     /**
