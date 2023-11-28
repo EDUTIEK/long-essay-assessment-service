@@ -7,6 +7,7 @@ use Edutiek\LongEssayAssessmentService\Data\WritingSettings;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\WritingTask;
 use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
+use Edutiek\LongEssayAssessmentService\Data\WrittenNote;
 
 /**
  * Required interface of a context application (e.g. an LMS) calling the writer service
@@ -44,9 +45,22 @@ interface Context extends Base\BaseContext
 
     /**
      * Set the Essay that is written by the student
-     * This is set every time when changes are sent from the editor
+     * This is set when changes are sent from the editor
      */
-    public function setWrittenEssay(WrittenEssay$essay): void;
+    public function setWrittenEssay(WrittenEssay $essay): void;
+
+    /**
+     * Get the Notes written by the student
+     * The data represents the last saving status
+     * @return WrittenNote[]
+     */
+    public function getWrittenNotes(): array;
+
+    /**
+     * Set a note written by the student
+     * This is set time when changes are sent from the editor
+     */
+    public function setWrittenNote(WrittenNote $note): void;
 
     /**
      * Get the writing steps that lead to the written text

@@ -12,6 +12,7 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Http\StatusCode;
 use DiffMatchPatch\DiffMatchPatch;
+use Edutiek\LongEssayAssessmentService\Data\WrittenNote;
 
 /**
  * Handler of REST requests from the writer app
@@ -33,6 +34,7 @@ class Rest extends Base\BaseRest
         $this->get('/file/{key}', [$this,'getFile']);
         $this->put('/start', [$this,'putStart']);
         $this->put('/steps', [$this,'putSteps']);
+        $this->put('/changes', [$this, 'putChanges']);
         $this->put('/final', [$this,'putFinal']);
     }
 
@@ -50,6 +52,15 @@ class Rest extends Base\BaseRest
         $task = $this->context->getWritingTask();
         $essay = $this->context->getWrittenEssay();
 
+        $notes = [];
+        foreach ($this->context->getWrittenNotes() as $note) {
+            $notes[] = [
+                'note_no' => $note->getNoteNo(),
+                'note_text' => $note->getNoteText(),
+                'last_change' => $note->getLastChange()
+            ];
+        }
+
         $resources = [];
         foreach ($this->context->getResources() as $resource) {
             $resources[] = [
@@ -61,7 +72,7 @@ class Rest extends Base\BaseRest
                 'size' => $resource->getSize()
             ];
         }
-
+        
         $steps = [];
         // send all steps if undo should be based on them
         // then each step would need a revert diff
@@ -75,7 +86,9 @@ class Rest extends Base\BaseRest
 //              'hash_after' => $step->getHashAfter()
 //            ];
 //        }
-
+        
+        
+        
         $json = [
             'settings' => [
                 'headline_scheme' => $settings->getHeadlineScheme(),
@@ -98,6 +111,7 @@ class Rest extends Base\BaseRest
                 'authorized' => $essay->isAuthorized(),
                 'steps' => $steps,
             ],
+            'notes' => $notes,
             'resources' => $resources,
         ];
 
@@ -195,6 +209,102 @@ class Rest extends Base\BaseRest
         $this->refreshDataToken();
         $this->context->setAlive();
         return $this->setResponse(StatusCode::HTTP_OK);
+    }
+
+    /**
+     * PUT the unsent changes in the corrector app
+     *
+     * This is prepared to handle changes in different correction items
+     * The changes are available from the parsed body as assoc arrays with properties:
+     * - key: existing or temporary key of the object to be saved
+     * - item_key: key of the correction item to which the object belongs
+     * -
+     *
+     * The added, changed or deleted data of single comments, points or summaries
+     * is wrapped as "payload" in a
+     *
+     * @param Request  $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
+    public function putChanges(Request $request, Response $response, array $args): Response
+    {
+        // common checks and initializations
+        if (!$this->prepare($request, $response, $args, Authentication::PURPOSE_DATA)) {
+            return $this->response;
+        }
+
+        $body = $this->request->getParsedBody();
+        $essay = $this->context->getWrittenEssay();
+
+        $max_time = null;
+        $notes_done = [];
+        $preferences_done = [];
+
+        // Save notes
+
+        foreach ((array) $body['notes'] as $note) {
+            if (!$this->areChangesAllowed()) {
+                continue;
+            }
+
+            switch ($change['action'] ?? '') {
+                case 'save':
+                    if (!empty(($data = $change['payload'] ?? null))) {
+                        if (!$this->isChangeTimeAllowed((int) $change['server_time'])) {
+                            continue 2;
+                        }
+                        
+                        $note = new WrittenNote(
+                            (int) $data['note_no'],
+                            isset($data['note_text']) ? ((string) $data['note_text']) : null,
+                            (int) $change['server_time']
+                        );
+                        $this->context->setWrittenNote($note);
+
+                        $max_time = max($max_time ?? 0, (int) $change['server_time']);
+                    }
+                    break;
+            }
+        }
+
+        
+        // save preferences (only one with fixed key 
+//        foreach ((array) $body['preferences'] as $change) {
+//            if (!empty($data = $change['payload'] ?? null)) {
+//                $preferences = new CorrectionPreferences(
+//                    (string) $this->currentCorrectorKey,
+//                    (float) $data['essay_page_zoom'],
+//                    (float) $data['essay_text_zoom'],
+//                    (float) $data['summary_text_zoom'],
+//                    (int) $data['include_comments'],
+//                    (int) $data['include_comment_ratings'],
+//                    (int) $data['include_comment_points'],
+//                    (int) $data['include_criteria_points'],
+//                    (int) $data['include_writer_notes']
+//                );
+//                if ($this->context->saveCorrectionPreferences($preferences)) {
+//                    $preferences_done[$change['key']] = $change['key'];
+//                    break;
+//                }
+//            }
+//        }
+
+        // Touch the summaries for changed comments or points 
+        // This sets the last change and ensures that a summary exists
+        if (isset($max_time) && $max_time > $essay->getEditEnded() ?? 0) {
+            $this->context->setWrittenEssay($essay->withEditEnded($max_time));
+        }
+        
+        $json = [
+            'notes' => $notes_done,
+            'preferences' => $preferences_done,
+        ];
+
+        $this->refreshDataToken();
+        $this->context->setAlive();
+        return $this->setResponse(StatusCode::HTTP_OK, $json);
     }
 
 
@@ -301,4 +411,26 @@ class Rest extends Base\BaseRest
             ->withProcessedText(null) // processing may cause html parsing errors, do not at saving
         );
     }
+
+    /**
+     * Check if changes are generally allowed
+     */
+    protected function areChangesAllowed() : bool
+    {
+        $essay = $this->context->getWrittenEssay();
+        if ($essay->isAuthorized()) {
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * Check if a chane time is allowed
+     * @todo: check with writing time
+     */
+    protected function isChangeTimeAllowed(int $timestamp) : bool
+    {
+       return true;
+    }
+
 }
