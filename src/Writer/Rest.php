@@ -13,6 +13,8 @@ use Slim\Http\Response;
 use Slim\Http\StatusCode;
 use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Data\WrittenNote;
+use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
+use Edutiek\LongEssayAssessmentService\Data\WritingTask;
 
 /**
  * Handler of REST requests from the writer app
@@ -22,6 +24,8 @@ class Rest extends Base\BaseRest
     /** @var Context  */
     protected $context;
 
+    /** @var WritingTask */
+    protected $task;
 
     /**
      * Init server / add handlers
@@ -36,6 +40,25 @@ class Rest extends Base\BaseRest
         $this->put('/steps', [$this,'putSteps']);
         $this->put('/changes', [$this, 'putChanges']);
         $this->put('/final', [$this,'putFinal']);
+    }
+
+    /**
+     * @inheritDoc
+     * here: set mode for review or stitch decision
+     */
+    protected function prepare(Request $request, Response $response, array $args, string $purpose): bool
+    {
+        if (parent::prepare($request, $response, $args, $purpose)) {
+            try {
+                $this->task = $this->context->getWritingTask();
+                return true;
+            }
+            catch (ContextException $e) {
+                $this->setResponseForContextException($e);
+                return false;
+            }
+        }
+        return false;
     }
 
     /**
@@ -244,7 +267,7 @@ class Rest extends Base\BaseRest
 
         // Save notes
 
-        foreach ((array) $body['notes'] as $note) {
+        foreach ((array) $body['notes'] as $change) {
             if (!$this->areChangesAllowed()) {
                 continue;
             }
@@ -262,6 +285,7 @@ class Rest extends Base\BaseRest
                             (int) $change['server_time']
                         );
                         $this->context->setWrittenNote($note);
+                        $notes_done[$change['key']] = $change['key'];
 
                         $max_time = max($max_time ?? 0, (int) $change['server_time']);
                     }
@@ -293,7 +317,7 @@ class Rest extends Base\BaseRest
 
         // Touch the summaries for changed comments or points 
         // This sets the last change and ensures that a summary exists
-        if (isset($max_time) && $max_time > $essay->getEditEnded() ?? 0) {
+        if (isset($max_time) && $max_time > ($essay->getEditEnded() ?? 0)) {
             $this->context->setWrittenEssay($essay->withEditEnded($max_time));
         }
         
@@ -410,6 +434,7 @@ class Rest extends Base\BaseRest
             ->withEditEnded(isset($step) ? $step->getTimestamp() : null)
             ->withProcessedText(null) // processing may cause html parsing errors, do not at saving
         );
+        $this->context->deleteWrittenNotes();
     }
 
     /**
@@ -421,16 +446,18 @@ class Rest extends Base\BaseRest
         if ($essay->isAuthorized()) {
             return false;
         }
-        return false;
+        return true;
     }
 
     /**
      * Check if a chane time is allowed
-     * @todo: check with writing time
      */
     protected function isChangeTimeAllowed(int $timestamp) : bool
     {
-       return true;
+        if (!empty($this->task->getWritingEnd()) && $this->task->getWritingEnd() < $timestamp) {
+            return false;
+        }
+        return true;
     }
 
 }

@@ -63,6 +63,12 @@ interface Context extends Base\BaseContext
     public function setWrittenNote(WrittenNote $note): void;
 
     /**
+     * Delete the written notes
+     * This is done when the written essay is authorized
+     */
+    public function deleteWrittenNotes() : void;
+
+    /**
      * Get the writing steps that lead to the written text
      * This may return an empty array if the context does not provide a writing history
      *
