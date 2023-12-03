@@ -8,6 +8,7 @@ use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\WritingTask;
 use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
 use Edutiek\LongEssayAssessmentService\Data\WrittenNote;
+use Edutiek\LongEssayAssessmentService\Data\WritingPreferences;
 
 /**
  * Required interface of a context application (e.g. an LMS) calling the writer service
@@ -31,7 +32,7 @@ interface Context extends Base\BaseContext
     public function getWritingTask(): WritingTask;
 
     /**
-     * Get Teh alerts to be shown to the writer
+     * Get the alerts to be shown to the writer
      * @return Alert[]
      */
     public function getAlerts(): array;
@@ -67,6 +68,19 @@ interface Context extends Base\BaseContext
      * This is done when the written essay is authorized
      */
     public function deleteWrittenNotes() : void;
+
+    
+    /**
+     * Get the preferences set by the writing user
+     * @return WritingPreferences
+     */
+    public function getWritingPreferences(): WritingPreferences;
+
+    /**
+     * Set the preferences of the writing user
+     */
+    public function setWritingPreferences(WritingPreferences $preferences): void;
+
 
     /**
      * Get the writing steps that lead to the written text

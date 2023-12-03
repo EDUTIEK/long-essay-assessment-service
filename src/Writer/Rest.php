@@ -15,6 +15,7 @@ use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Data\WrittenNote;
 use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 use Edutiek\LongEssayAssessmentService\Data\WritingTask;
+use Edutiek\LongEssayAssessmentService\Data\WritingPreferences;
 
 /**
  * Handler of REST requests from the writer app
@@ -72,8 +73,10 @@ class Rest extends Base\BaseRest
         }
 
         $settings = $this->context->getWritingSettings();
+        $preferences = $this->context->getWritingPreferences();
         $task = $this->context->getWritingTask();
         $essay = $this->context->getWrittenEssay();
+
 
         $notes = [];
         foreach ($this->context->getWrittenNotes() as $note) {
@@ -120,6 +123,10 @@ class Rest extends Base\BaseRest
                 'copy_allowed' => $settings->isCopyAllowed(),
                 'primary_color' => $settings->getPrimaryColor(),
                 'primary_text_color' => $settings->getPrimaryTextColor()
+            ],
+            'preferences' => [
+                'instructions_zoom' => $preferences->getInstructionsZoom(),
+                'editor_zoom' => $preferences->getEditorZoom()
             ],
             'task' => [
                 'title' => $task->getTitle(),
@@ -292,28 +299,18 @@ class Rest extends Base\BaseRest
                     break;
             }
         }
-
         
         // save preferences (only one with fixed key 
-//        foreach ((array) $body['preferences'] as $change) {
-//            if (!empty($data = $change['payload'] ?? null)) {
-//                $preferences = new CorrectionPreferences(
-//                    (string) $this->currentCorrectorKey,
-//                    (float) $data['essay_page_zoom'],
-//                    (float) $data['essay_text_zoom'],
-//                    (float) $data['summary_text_zoom'],
-//                    (int) $data['include_comments'],
-//                    (int) $data['include_comment_ratings'],
-//                    (int) $data['include_comment_points'],
-//                    (int) $data['include_criteria_points'],
-//                    (int) $data['include_writer_notes']
-//                );
-//                if ($this->context->saveCorrectionPreferences($preferences)) {
-//                    $preferences_done[$change['key']] = $change['key'];
-//                    break;
-//                }
-//            }
-//        }
+        foreach ((array) $body['preferences'] as $change) {
+            if (!empty($data = $change['payload'] ?? null)) {
+                $preferences = new WritingPreferences(
+                    (float) $data['instructions_zoom'],
+                    (float) $data['editor_zoom'],
+                );
+                $this->context->setWritingPreferences($preferences);
+                $preferences_done[$change['key']] = $change['key'];
+            }
+        }
 
         // Touch the summaries for changed comments or points 
         // This sets the last change and ensures that a summary exists
