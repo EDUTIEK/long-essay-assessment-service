@@ -161,6 +161,7 @@ class Rest extends Base\BaseRest
         }
 
         $task = $this->context->getWritingTask();
+        $settings = $this->context->getWritingSettings();
 
         $alerts = [];
         foreach ($this->context->getAlerts() as $alert) {
@@ -178,6 +179,14 @@ class Rest extends Base\BaseRest
                 'writer_name' => $task->getWriterName(),
                 'writing_end' => $task->getWritingEnd(),
                 'writing_excluded' => $task->getWritingExcluded()
+            ],
+            'settings' => [
+                'headline_scheme' => $settings->getHeadlineScheme(),
+                'formatting_options' => $settings->getFormattingOptions(),
+                'notice_boards' => $settings->getNoticeBoards(),
+                'copy_allowed' => $settings->isCopyAllowed(),
+                'primary_color' => $settings->getPrimaryColor(),
+                'primary_text_color' => $settings->getPrimaryTextColor()
             ],
             'alerts' => $alerts
         ];
