@@ -25,7 +25,7 @@
             <xsl:copy-of select="@*" />
             <td style="width: 5%;">
                 <!-- paragraph number -->
-                <xsl:copy-of select="td[1]/node()" />
+                <xsl:apply-templates select="td[1]/node()" />
             </td>
             <td style="width: 60%;">
                 <!-- text -->

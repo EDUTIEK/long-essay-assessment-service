@@ -40,7 +40,7 @@ class Dependencies
      */
     public function serviceVersion() : int
     {
-        return 20231208;
+        return 20231218;
     }
     
     /**
