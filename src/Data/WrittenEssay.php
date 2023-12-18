@@ -5,12 +5,12 @@ namespace Edutiek\LongEssayAssessmentService\Data;
 class WrittenEssay
 {
 
-    protected $written_text;
-    protected $written_hash;
-    protected $processed_text;
-    protected $edit_started;
-    protected $edit_ended;
-    protected $is_authorized;
+    protected ?string $written_text;
+    protected ?string $written_hash;
+    protected int $service_version;
+    protected ?int $edit_started;
+    protected ?int $edit_ended;
+    protected bool $is_authorized;
 
     private ?int $writing_authorized;
     private ?string $writing_authorized_by;
@@ -27,7 +27,7 @@ class WrittenEssay
     public function __construct(
         ?string $written_text,
         ?string $written_hash,
-        ?string $processed_text,
+        int $service_version,
         ?int $edit_started,
         ?int $edit_ended,
         bool $is_authorized,
@@ -43,7 +43,7 @@ class WrittenEssay
     ) {
         $this->written_text = $written_text;
         $this->written_hash = $written_hash;
-        $this->processed_text = $processed_text;
+        $this->service_version = $service_version;
         $this->edit_started = $edit_started;
         $this->edit_ended = $edit_ended;
         $this->is_authorized = $is_authorized;
@@ -92,20 +92,22 @@ class WrittenEssay
         return $this;
     }
 
+
     /**
-     * Get the written text that has been processed for correction and review
+     * Get the services version of the last text saving
      */
-    public function getProcessedText(): ?string
+    public function getServiceVersion(): int
     {
-        return $this->processed_text;
+        return $this->service_version;
     }
 
     /**
-     * Apply the written text that has been processed for correction and review
+     * Apply the service version of the last text saving
+     * This must be applied each time an essay is saved with a new text
      */
-    public function withProcessedText(?string $processed_text): self
+    public function withServiceVersion(int $service_version): WrittenEssay
     {
-        $this->processed_text = $processed_text;
+        $this->service_version = $service_version;
         return $this;
     }
 

@@ -251,16 +251,13 @@ class Rest extends Base\BaseRest
     }
 
     /**
-     * PUT the unsent changes in the corrector app
+     * PUT the unsent changes in the writer app
+     * Currently only the notes are sent as changes
      *
-     * This is prepared to handle changes in different correction items
      * The changes are available from the parsed body as assoc arrays with properties:
      * - key: existing or temporary key of the object to be saved
-     * - item_key: key of the correction item to which the object belongs
-     * -
      *
-     * The added, changed or deleted data of single comments, points or summaries
-     * is wrapped as "payload" in a
+     * The added or changed data is wrapped as 'payload' in the change
      *
      * @param Request  $request
      * @param Response $response
@@ -321,7 +318,7 @@ class Rest extends Base\BaseRest
             }
         }
 
-        // Touch the summaries for changed comments or points 
+        // Touch the essay
         // This sets the last change and ensures that a summary exists
         if (isset($max_time) && $max_time > ($essay->getEditEnded() ?? 0)) {
             $this->context->setWrittenEssay($essay->withEditEnded($max_time));
@@ -371,7 +368,7 @@ class Rest extends Base\BaseRest
             $this->context->setWrittenEssay($essay
                 ->withWrittenText((string) $data['content'])
                 ->withWrittenHash((string) $data['hash'])
-                ->withProcessedText(null) // processing may cause html parsing errors, do not at saving
+                ->withServiceVersion($this->dependencies->serviceVersion())
                 ->withIsAuthorized((bool) $data['authorized'])
             );
         }
@@ -437,8 +434,8 @@ class Rest extends Base\BaseRest
         $this->context->setWrittenEssay($essay
             ->withWrittenText($currentText)
             ->withWrittenHash($currentHash)
-            ->withEditEnded(isset($step) ? $step->getTimestamp() : null)
-            ->withProcessedText(null) // processing may cause html parsing errors, do not at saving
+            ->withServiceVersion($this->dependencies->serviceVersion())
+            ->withEditEnded(isset($step) ? $step->getTimestamp() : $essay->getEditEnded())
         );
         $this->context->deleteWrittenNotes();
     }

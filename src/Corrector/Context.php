@@ -125,11 +125,6 @@ interface Context extends Base\BaseContext
      */
     public function getCorrectionPoints(string $item_key, string $corrector_key, ?string $comment_key = null): array;
 
-    /**
-     * Set the text of the written essay that is processed for display in the corrector (e.g. line numbers added)
-     */
-    public function setProcessedText(string $item_key, ?string $text) : void;
-
 
     /**
      * Save the correction preferences given by a corrector

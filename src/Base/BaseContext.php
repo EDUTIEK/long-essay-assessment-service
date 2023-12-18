@@ -5,6 +5,7 @@ use Edutiek\LongEssayAssessmentService\Data\EnvResource;
 use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 use Edutiek\LongEssayAssessmentService\Data\ApiToken;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
+use Edutiek\LongEssayAssessmentService\Data\WritingSettings;
 
 /**
  * Common interface for Writer and Corrector contexts
@@ -114,6 +115,13 @@ interface BaseContext
      * But if a user returns from the web app to the system, the session may otherwise be expired
      */
     public function setAlive() : void;
+
+    
+    /**
+     * Get the settings to be used for the editor
+     * e.g. the headline scheme or formatting options
+     */
+    public function getWritingSettings(): WritingSettings;
 
 
     /**

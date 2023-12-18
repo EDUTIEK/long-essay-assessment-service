@@ -199,17 +199,8 @@ class Rest extends Base\BaseRest
             if ($item->getKey() == $args['key']) {
 
                 $task = $this->context->getCorrectionTask();
-
                 $essay = $this->context->getEssayOfItem($item->getKey());
-                // update the processed text if needed
-                // after authorization the written text will not change
-                if (!empty($essay)) {
-                    $processed = $this->dependencies->html()->processWrittenText($essay->getWrittenText());
-                    if ($processed != $essay->getProcessedText()) {
-                        $this->context->setProcessedText($item->getKey(), $processed);
-                        $essay = $essay->withProcessedText($processed);
-                    }
-                }
+
 
                 $pages = [];
                 foreach ($this->context->getPagesOfItem($item->getKey()) as $page) {
@@ -315,7 +306,7 @@ class Rest extends Base\BaseRest
                         'authorization_allowed' => $item->isAuthorizationAllowed()
                     ],
                     'essay' => [
-                        'text'=> isset($essay) ? $essay->getProcessedText() : null,
+                        'text'=> isset($essay) ? $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings()) : null,
                         'started' => isset($essay) ? $essay->getEditStarted() : null,
                         'ended' => isset($essay) ? $essay->getEditEnded() : null,
                         'authorized' => isset($essay) ? $essay->isAuthorized() : null,

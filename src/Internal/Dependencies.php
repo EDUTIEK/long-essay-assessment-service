@@ -32,6 +32,16 @@ class Dependencies
         }   
         return self::$instance;
     }
+
+    /**
+     * Get the current service version
+     * This is saved for written essays and relevant for their correction comments
+     * By convention the version number is a coded date of the last relevant service change
+     */
+    public function serviceVersion() : int
+    {
+        return 20231208;
+    }
     
     /**
      * Get the object for authentication

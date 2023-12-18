@@ -78,7 +78,7 @@ class Service extends Base\BaseService
             PdfPart::FORMAT_A4,
             PdfPart::ORIENTATION_PORTRAIT
         ))->withElement(
-            new PdfHtml($this->dependencies->html()->processWrittenText($essay->getWrittenText())));
+            new PdfHtml($this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings())));
 
         return $this->dependencies->pdfGeneration()->generatePdf(
             [$part],
@@ -97,7 +97,7 @@ class Service extends Base\BaseService
     {
         $essay = $this->context->getWrittenEssay();
         return $this->dependencies->pdfGeneration()->generatePlainPdfFromHtml(
-            $this->dependencies->html()->processWrittenText($essay->getWrittenText())
+            $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings())
         );
     }
 
@@ -107,7 +107,7 @@ class Service extends Base\BaseService
     public function getProcessedTextAsHtml() : string
     {
         $essay = $this->context->getWrittenEssay();
-        return  $this->dependencies->html()->processWrittenText($essay->getWrittenText());
+        return  $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings());
     }
 
 

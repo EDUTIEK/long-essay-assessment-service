@@ -19,12 +19,6 @@ use Edutiek\LongEssayAssessmentService\Data\WritingPreferences;
 interface Context extends Base\BaseContext
 {
     /**
-     * Get the settings to be used for the editor
-     * e.g. the headline scheme or formatting options
-     */
-    public function getWritingSettings(): WritingSettings;
-
-    /**
      * Get the Task that should be done in the editor
      * The instructions of this task will be shown to the student when the writer is opened
      * The writing end will limit the time for writing

@@ -4,8 +4,9 @@ namespace Edutiek\LongEssayAssessmentService\Internal;
 
 use DOMDocument;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
-use ILIAS\Plugin\LongEssayAssessment\Data\Essay\CorrectorComment;
 use Mustache_Engine;
+use Edutiek\LongEssayAssessmentService\Data\WritingSettings;
+use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
 
 /**
  * Tool for processing HTML code coming from the rich text editor
@@ -19,6 +20,15 @@ class HtmlProcessing
 
     static int $paraCounter = 0;
     static int $wordCounter = 0;
+    static int $h1Counter = 0;
+    static int $h2Counter = 0;
+    static int $h3Counter = 0;
+    static int $h4Counter = 0;
+    static int $h5Counter = 0;
+    static int $h6Counter = 0;
+    
+    /** @var ?WritingSettings */
+    static $writingSettings = null;
     
     /**
      * All Comments that should be merged
@@ -46,56 +56,46 @@ class HtmlProcessing
         return $mustache->render($template, $data);
     }
     
+    
     /**
      * Process the written text for usage in the correction
-     * This will add the paragraph numbers and split up all text to single word embedded in <w-p> elements.
+     * This will add the paragraph numbers and headline prefixes
+     * and split up all text to single word embedded in <w-p> elements.
      *      the 'w' attribute is the word number
      *      the 'p' attribute is the paragraph number
      */
-    public function processWrittenText(?string $html) : string
+    public function processWrittenText(?WrittenEssay $essay, WritingSettings $settings) : string
     {
-        self::$paraCounter = 0;
-        self::$wordCounter = 0;
+        self::$writingSettings = $settings;
         
+        self::initParaCounter();
+        self::initWordCounter();
+        self::initHeadlineCounters();
         
-        $html = $html ?? '';
-        $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl');
-        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl');
+        $html = $essay ? ($essay->getWrittenText() ?? '') : '';
+        
+        $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl', $essay ? $essay->getServiceVersion() : 0);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl', $essay ? $essay->getServiceVersion() : 0);
 
         return $html;
     }
+    
 
     /**
-     * Process the text for inclusion in a pdf without comments
-     */
-    public function processTextForPdf(?string $html) : string
-    {
-        $html = $html ?? '';
-        $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','', $html);
-        $html = str_replace('</w-p>','', $html);
-
-        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_text.xsl');
-        return $html;
-    }
-
-
-    /**
-     * Process the text for inclusion in a pdf with comments at hte side comments
+     * Process the written text for inclusion in a pdf with comments at the side comments
      * The text must have been processed with processedWrittenText()
-     * @param string|null $html
      * @param CorrectionComment[]  $comments
-     * @return string
      */
-    public function processCommentsForPdf(?string $html, array $comments) : string
+    public function processCommentsForPdf(?WrittenEssay $essay, WritingSettings $settings, array $comments) : string
     {
         self::$allComments = $comments;
         self::$currentComments = [];
         
-        $html = $html ?? '';
+        $html = $this->processWrittenText($essay, $settings);
         
         $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','<span data-w="$1" data-p="$2">', $html);
         $html = str_replace('</w-p>','</span>', $html);
-        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl');
+        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl', $essay ? $essay->getServiceVersion() : 0);
 
         return $html;
     }
@@ -103,11 +103,10 @@ class HtmlProcessing
 
     /**
      * Get the XSLt Processor for an XSL file
-     * @param string $html
-     * @param string $xslt_file
-     * @return string
+     * The process_version is a number which can be increased with a new version of the processing
+     * This number is provided as a parameter to the XSLT processing
      */
-    protected function processXslt(string $html, string $xslt_file) : string
+    protected function processXslt(string $html, string $xslt_file, int $service_version) : string
     {
         try {
             // get the xslt document
@@ -120,6 +119,7 @@ class HtmlProcessing
             $xslt = new \XSLTProcessor();
             $xslt->registerPhpFunctions();
             $xslt->importStyleSheet($xslt_doc);
+            $xslt->setParameter('', 'service_version', $service_version);
 
             // get the html document
             $dom_doc = new \DOMDocument('1.0', 'UTF-8');
@@ -171,6 +171,155 @@ class HtmlProcessing
         self::$wordCounter++;
         return self::$wordCounter;
     }
+    
+    static function initHeadlineCounters(): void
+    {
+        self::$h1Counter = 0;
+        self::$h2Counter = 0;
+        self::$h3Counter = 0;
+        self::$h4Counter = 0;
+        self::$h5Counter = 0;
+        self::$h6Counter = 0;
+    }
+    
+    static function nextHeadlinePrefix($tag): string
+    {
+        switch ($tag) {
+            case 'h1':
+                self::$h1Counter += 1;
+                self::$h2Counter = 0;
+                self::$h3Counter = 0;
+                self::$h4Counter = 0;
+                self::$h5Counter = 0;
+                self::$h6Counter = 0;
+                break;
+                
+            case 'h2':
+                self::$h2Counter += 1;
+                self::$h3Counter = 0;
+                self::$h4Counter = 0;
+                self::$h5Counter = 0;
+                self::$h6Counter = 0;
+                break;
+
+            case 'h3':
+                self::$h3Counter += 1;
+                self::$h4Counter = 0;
+                self::$h5Counter = 0;
+                self::$h6Counter = 0;
+                break;
+
+            case 'h4':
+                self::$h4Counter += 1;
+                self::$h5Counter = 0;
+                self::$h6Counter = 0;
+                break;
+                
+            case 'h5':
+                self::$h5Counter += 1;
+                self::$h6Counter = 0;
+                break;
+
+            case 'h6':
+                self::$h6Counter += 1;
+                break;
+        }
+        
+        switch (self::$writingSettings->getHeadlineScheme()) {
+            
+            case WritingSettings::HEADLINE_SCHEME_NUMERIC:
+                switch ($tag) {
+                    case 'h1':
+                        return self::$h1Counter . ' ';
+                    case 'h2':
+                        return self::$h1Counter . '.' . self::$h2Counter  . ' ';
+                    case 'h3':
+                        return self::$h1Counter . '.' . self::$h2Counter . '.' . self::$h3Counter  . ' ';
+                    case 'h4':
+                        return self::$h1Counter . '.' . self::$h2Counter . '.' . self::$h3Counter  . '.' . self::$h4Counter  . ' ';
+                    case 'h5':
+                        return self::$h1Counter . '.' . self::$h2Counter . '.' . self::$h3Counter  . '.' . self::$h4Counter . '.' . self::$h5Counter  . ' ';
+                    case 'h6':
+                        return self::$h1Counter . '.' . self::$h2Counter . '.' . self::$h3Counter  . '.' . self::$h4Counter . '.' . self::$h5Counter  . '.' . self::$h6Counter  . ' ';
+                }
+
+            case WritingSettings::HEADLINE_SCHEME_EDUTIEK:
+                switch ($tag) {
+                    case 'h1':
+                        return self::toLatin(self::$h1Counter, true) . '. ';
+                    case 'h2':
+                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ';
+                    case 'h3':
+                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ' . self::$h3Counter  . ' ';
+                    case 'h4':
+                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ' . self::$h3Counter  . ' ' . self::toLatin(self::$h4Counter) . '. ';
+                    case 'h5':
+                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ' . self::$h3Counter  . ' ' . self::toLatin(self::$h4Counter) . '. ' . self::toLatin(self::$h5Counter) . self::toLatin(self::$h5Counter) . '. ';
+                    case 'h6':
+                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ' . self::$h3Counter  . ' ' . self::toLatin(self::$h4Counter) . '. ' . self::toLatin(self::$h5Counter) . self::toLatin(self::$h5Counter)  . '. (' . self::$h6Counter  . ') ';
+                }
+        }
+        
+        
+        return '';
+    }
+
+    /**
+     * Get a latin character representation of a number
+     */
+    static function toLatin(int $num, $upper = false) : string
+    {
+        if ($num == 0) {
+            return '0';
+        }
+        $num = $num - 1;
+        $text= '';
+        
+        do {
+            $char = substr('abcdefghijklmnopqrstuvwxyz', $num % 26, 1);
+            $text = ($upper ? ucfirst($char) : $char) . $text;
+            $num = intdiv($num, 26);
+        }
+        while ($num > 0);
+        
+        return $text;
+    }
+
+    /**
+     * Get a roman letter representation of a number
+     */
+    static function  toRoman(int $num) : string
+    {
+        if ($num == 0) {
+            return '0';
+        }
+        $text = '';
+        
+        $steps = [
+            'M'  => 1000,
+            'CM' => 900,
+            'D'  => 500,
+            'CD' => 400,
+            'C'  => 100,
+            'XC' => 90,
+            'L'  => 50,
+            'XL' => 40,
+            'X'  => 10,
+            'IX' => 9,
+            'V'  => 5,
+            'IV' => 4,
+            'I'  => 1
+        ];
+
+        foreach ($steps as $sign => $step) {
+            $repeat = intdiv($num, $step);
+            $text .= str_repeat($sign, $repeat);
+            $num = $num % $step;
+        }
+        
+        return $text;
+    }
+
 
     /**
      * Split a text into single words

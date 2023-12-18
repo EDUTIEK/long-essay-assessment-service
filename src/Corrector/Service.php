@@ -106,7 +106,7 @@ class Service extends Base\BaseService
                 PdfPart::FORMAT_A4,
                 PdfPart::ORIENTATION_PORTRAIT
             ))->withElement(
-                new PdfHtml($this->dependencies->html()->processWrittenText($essay->getWrittenText())));
+                new PdfHtml($this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings())));
         }
         
         return $this->dependencies->pdfGeneration()->generatePdf(
@@ -327,10 +327,9 @@ class Service extends Base\BaseService
         }
         else {
             $essay = $item->getWrittenEssay();
-            $processedText = $this->dependencies->html()->processWrittenText((string) $essay->getWrittenText());
             $renderContext= [
                 'text' => [
-                'comments' => $this->dependencies->html()->processCommentsForPdf($processedText, $comments)
+                'comments' => $this->dependencies->html()->processCommentsForPdf($essay, $this->context->getWritingSettings(), $comments)
             ]];
             $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
             $pdfParts[] = (new PdfPart(
