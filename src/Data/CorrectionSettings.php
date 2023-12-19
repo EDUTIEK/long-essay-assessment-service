@@ -10,6 +10,9 @@ class CorrectionSettings
     private float $max_auto_distance;
     private bool $stitch_when_distance;
     private bool $stitch_when_decimals;
+    private string $positive_rating;
+    private string $negative_rating;
+
 
     /**
      * Constructor (see getters)
@@ -20,7 +23,9 @@ class CorrectionSettings
         int $max_points,
         float $max_auto_distance,
         bool $stitch_when_distance,
-        bool $stitch_when_decimals
+        bool $stitch_when_decimals,
+        string $positive_rating,
+        string $negative_rating
     )
     {
         $this->mutual_visibility = $mutual_visibility;
@@ -29,6 +34,8 @@ class CorrectionSettings
         $this->max_auto_distance = $max_auto_distance;
         $this->stitch_when_distance = $stitch_when_distance;
         $this->stitch_when_decimals = $stitch_when_decimals;
+        $this->positive_rating = $positive_rating;
+        $this->negative_rating = $negative_rating;
     }
 
     /**
@@ -77,5 +84,21 @@ class CorrectionSettings
     public function getStitchWhenDecimals(): bool
     {
         return $this->stitch_when_decimals;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPositiveRating(): string
+    {
+        return $this->positive_rating;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNegativeRating(): string
+    {
+        return $this->negative_rating;
     }
 }

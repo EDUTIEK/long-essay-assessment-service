@@ -204,7 +204,9 @@ class Service extends Base\BaseService
             'include_criteria_points_info' => $summary->getIncludeCriteriaPoints() == CorrectionSummary::INCLUDE_INFO,
             'include_criteria_points_relevant' => $summary->getIncludeCriteriaPoints() == CorrectionSummary::INCLUDE_RELEVANT,
             'include_writer_notes_info' => $summary->getIncludeWriterNotes() == CorrectionSummary::INCLUDE_INFO,
-            'include_writer_notes_relevant' => $summary->getIncludeWriterNotes() == CorrectionSummary::INCLUDE_RELEVANT
+            'include_writer_notes_relevant' => $summary->getIncludeWriterNotes() == CorrectionSummary::INCLUDE_RELEVANT,
+            'positive_rating' => $this->context->getCorrectionSettings()->getPositiveRating(),
+            'negative_rating' => $this->context->getCorrectionSettings()->getNegativeRating()
         ];
 
         $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_result_de.html', $renderContext);
@@ -299,7 +301,7 @@ class Service extends Base\BaseService
                     'page' => [
                         'corrector_name' => $summary->getCorrectorName(),
                         'page_no' => $itemPage->getPageNo(),
-                        'comments' => $this->dependencies->commentHandling()->getCommentsHtml($pageComments)
+                        'comments' => $this->dependencies->commentHandling()->getCommentsHtml($pageComments, $this->context->getCorrectionSettings())
                     ]];
 
                 $image = $this->context->getPageImage($itemPage->getKey());
@@ -329,7 +331,7 @@ class Service extends Base\BaseService
             $essay = $item->getWrittenEssay();
             $renderContext= [
                 'text' => [
-                'comments' => $this->dependencies->html()->processCommentsForPdf($essay, $this->context->getWritingSettings(), $comments)
+                'comments' => $this->dependencies->html()->processCommentsForPdf($essay, $this->context->getWritingSettings(), $this->context->getCorrectionSettings(), $comments)
             ]];
             $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
             $pdfParts[] = (new PdfPart(

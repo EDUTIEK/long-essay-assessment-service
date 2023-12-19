@@ -3,6 +3,7 @@
 namespace Edutiek\LongEssayAssessmentService\Internal;
 
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionSettings;
 
 class CommentHandling
 {
@@ -54,7 +55,7 @@ class CommentHandling
      * Get html formatted comments for side display in the pdf
      * @param CorrectionComment[] $comments
      */
-    public function getCommentsHtml(array $comments) : string
+    public function getCommentsHtml(array $comments, CorrectionSettings $settings) : string
     {
         $html = '';
         foreach ($comments as $comment) {
@@ -64,10 +65,10 @@ class CommentHandling
                 
                 $content = $comment->getLabel();
                 if ($comment->showRating() && $comment->getRating() == CorrectionComment::RATING_CARDINAL) {
-                    $content .= ' Kardinalfehler';
+                    $content .= ' ' . $settings->getNegativeRating();
                 }
                 if ($comment->showRating() && $comment->getRating() == CorrectionComment::RAITNG_EXCELLENT) {
-                    $content .= ' Exzellent';
+                    $content .= ' ' . $settings->getPositiveRating();
                 }
 
                 $color = $this->getTextBackgroundColor([$comment]);

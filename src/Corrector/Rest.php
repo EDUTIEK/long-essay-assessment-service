@@ -150,7 +150,9 @@ class Rest extends Base\BaseRest
                 'max_points' => $settings->getMaxPoints(),
                 'max_auto_distance' => $settings->getMaxAutoDistance(),
                 'stitch_when_distance' => $settings->getStitchWhenDistance(),
-                'stitch_when_decimals' => $settings->getStitchWhenDecimals()
+                'stitch_when_decimals' => $settings->getStitchWhenDecimals(),
+                'positive_rating' => $settings->getPositiveRating(),
+                'negative_rating' => $settings->getNegativeRating()
             ],
             'preferences' => [
                 'essay_page_zoom' => $preferences->getEssayPageZoom(),

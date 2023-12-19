@@ -7,6 +7,7 @@ use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Mustache_Engine;
 use Edutiek\LongEssayAssessmentService\Data\WritingSettings;
 use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionSettings;
 
 /**
  * Tool for processing HTML code coming from the rich text editor
@@ -29,6 +30,9 @@ class HtmlProcessing
     
     /** @var ?WritingSettings */
     static $writingSettings = null;
+
+    /** @var ?CorrectionSettings */
+    static $correctionSettings = null;
     
     /**
      * All Comments that should be merged
@@ -86,12 +90,13 @@ class HtmlProcessing
      * The text must have been processed with processedWrittenText()
      * @param CorrectionComment[]  $comments
      */
-    public function processCommentsForPdf(?WrittenEssay $essay, WritingSettings $settings, array $comments) : string
+    public function processCommentsForPdf(?WrittenEssay $essay, WritingSettings $writingSettings, CorrectionSettings $correctionSettings, array $comments) : string
     {
+        self::$correctionSettings = $correctionSettings;
         self::$allComments = $comments;
         self::$currentComments = [];
         
-        $html = $this->processWrittenText($essay, $settings);
+        $html = $this->processWrittenText($essay, $writingSettings);
         
         $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','<span data-w="$1" data-p="$2">', $html);
         $html = str_replace('</w-p>','</span>', $html);
@@ -404,7 +409,7 @@ class HtmlProcessing
     static function getCurrentComments(): \DOMElement 
     {
         $commentHandling = Dependencies::getInstance()->commentHandling();
-        $html = $commentHandling->getCommentsHtml(self::$currentComments);
+        $html = $commentHandling->getCommentsHtml(self::$currentComments, self::$correctionSettings);
 
         $doc = new DOMDocument;
         $doc->loadXML('<root xml:id="root">' . $html . '</root>');
