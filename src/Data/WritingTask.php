@@ -64,4 +64,11 @@ class WritingTask
     {
         return $this->writing_excluded;
     }
+    
+    public function withWriterName(?string $writer_name) : self
+    {
+        $clone = clone $this;
+        $clone->writer_name = $writer_name;
+        return $clone;
+    }
 }
