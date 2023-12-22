@@ -11,10 +11,6 @@ The service has no own status. It provides API functions:
 * [Corrector](./src/Corrector/README.md) includes the service functions to user the corrector.
 * [Data](./src/Data/README.md) defines data objects for the use of the writer and corrector APIs.
 
-This pilot version is currently **under development** to complete the functionality required by the [EDUTIEK project](https://www.edutiek.de).
-
-An initial set of features is available in the **pre-test version** named LongEssayService which is maintained in a different [GitHub repository](https://github.com/fneumann/LongEssayService)
-
 ### Usage
 
 Add the following dependency to your application:
