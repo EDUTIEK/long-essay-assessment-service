@@ -1,4 +1,4 @@
-# Long Essay Assessment Service (Pilot Version)
+# Long Essay Assessment Service
 
 This service can be integrated by PHP based systems to use two javascript applications which provide user interfaces 
 for the writing and correction of long text-based exams:
