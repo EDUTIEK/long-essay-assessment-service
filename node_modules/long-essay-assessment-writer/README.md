@@ -1,9 +1,8 @@
-# long-essay-assessment-writer (Pilot Version)
+# long-essay-assessment-writer  
 
 Web App to write long Essays in an exam.
 Used by the [long-essay-assessment-service](https://github.com/EDUTIEK/long-essay-asessment-service).
 
-**Under Development**
 
 ## Project Setup
 

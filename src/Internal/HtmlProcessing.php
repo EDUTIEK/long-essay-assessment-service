@@ -256,15 +256,15 @@ class HtmlProcessing
                     case 'h1':
                         return self::toLatin(self::$h1Counter, true) . '. ';
                     case 'h2':
-                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ';
+                        return self::toRoman(self::$h2Counter) . '. ';
                     case 'h3':
-                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ' . self::$h3Counter  . ' ';
+                        return self::$h3Counter  . '. ';
                     case 'h4':
-                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ' . self::$h3Counter  . ' ' . self::toLatin(self::$h4Counter) . '. ';
+                        return self::toLatin(self::$h4Counter) . '. ';
                     case 'h5':
-                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ' . self::$h3Counter  . ' ' . self::toLatin(self::$h4Counter) . '. ' . self::toLatin(self::$h5Counter) . self::toLatin(self::$h5Counter) . '. ';
+                        return self::toLatin(self::$h5Counter) . self::toLatin(self::$h5Counter) . '. ';
                     case 'h6':
-                        return self::toLatin(self::$h1Counter, true) . '. ' . self::toRoman(self::$h2Counter) . '. ' . self::$h3Counter  . ' ' . self::toLatin(self::$h4Counter) . '. ' . self::toLatin(self::$h5Counter) . self::toLatin(self::$h5Counter)  . '. (' . self::$h6Counter  . ') ';
+                        return '(' . self::$h6Counter  . ') ';
                 }
         }
         
