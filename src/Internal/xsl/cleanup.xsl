@@ -11,6 +11,11 @@
         <xsl:apply-templates select="*" />
     </xsl:template>
 
+    <!-- keep simple line breaks -->
+    <xsl:template match="br">
+        <xsl:copy></xsl:copy>
+    </xsl:template>
+
     <!-- copy only allowed elements, without attributes -->
     <xsl:template match="h1|h2|h3|h4|h5|h6|p|ul|ol|li|strong|em|u">
         <xsl:if test="node()">
