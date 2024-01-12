@@ -13,14 +13,18 @@ class WritingSettings
     const FORMATTING_OPTIONS_MEDIUM = 'medium';
     const FORMATTING_OPTIONS_FULL = 'full';
 
-    protected $headline_scheme;
-    protected $formatting_options;
-    protected $notice_boards;
-    protected $copy_allowed;
+    private string $headline_scheme;
+    private string $formatting_options;
+    private int $notice_boards;
+    private bool $copy_allowed;
     private string $primary_color;
     private string $primary_text_color;
 
-    private bool $add_paragraph_numbers = true;
+    private bool $add_paragraph_numbers;
+    private int $top_margin;
+    private int $bottom_margin;
+    private int $left_margin;
+    private int $right_margin;
 
     /**
      * Constructor (see getters)
@@ -31,7 +35,12 @@ class WritingSettings
         int $notice_boards,
         bool $copy_allowed,
         string $primary_color,
-        string $primary_text_color
+        string $primary_text_color,
+        bool $add_paragraph_numbers,
+        int $top_margin,
+        int $bottom_margin,
+        int $left_margin,
+        int $right_margin
     )
     {
         switch ($headline_scheme) {
@@ -65,6 +74,11 @@ class WritingSettings
         $this->copy_allowed = $copy_allowed;
         $this->primary_color = $primary_color;
         $this->primary_text_color = $primary_text_color;
+        $this->add_paragraph_numbers = $add_paragraph_numbers;
+        $this->top_margin = $top_margin;
+        $this->bottom_margin = $bottom_margin;
+        $this->left_margin = $left_margin;
+        $this->right_margin = $right_margin;
     }
 
     /**
@@ -128,11 +142,23 @@ class WritingSettings
         return $this->add_paragraph_numbers;
     }
 
-    public function withAddParagraphNumbers(bool $add_paragraph_numbers) : self
+    public function getTopMargin() : int
     {
-        $clone = clone $this;
-        $clone->add_paragraph_numbers = $add_paragraph_numbers;
-        return $clone;
+        return $this->top_margin;
     }
 
+    public function getBottomMargin() : int
+    {
+        return $this->bottom_margin;
+    }
+
+    public function getLeftMargin() : int
+    {
+        return $this->left_margin;
+    }
+
+    public function getRightMargin() : int
+    {
+        return $this->right_margin;
+    }
 }

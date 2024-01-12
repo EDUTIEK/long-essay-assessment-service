@@ -94,10 +94,10 @@ class Service extends Base\BaseService
                     PdfPart::FORMAT_A4,
                     PdfPart::ORIENTATION_PORTRAIT
                 ))->withPrintHeader(true)
-                  ->withPrintFooter(true)
+                  ->withPrintFooter(false)
                   ->withElement(new PdfImage(
                       $path,
-                      0,0, 210,297     // A5
+                      0,0, 210,297     // A4
                   ));
             }
         }

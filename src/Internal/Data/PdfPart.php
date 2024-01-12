@@ -132,7 +132,7 @@ class PdfPart
     }
 
     /**
-     * Get the margin between page top and header
+     * Get the margin between page top and header (mm)
      * @return int
      */
     public function getHeaderMargin(): int
@@ -141,7 +141,7 @@ class PdfPart
     }
 
     /**
-     * Set the margin between page top and header
+     * Set the margin between page top and header (mm)
      * @param int $header_margin
      * @return PdfPart
      */
@@ -153,7 +153,7 @@ class PdfPart
     }
 
     /**
-     * Get the margin between page bottom and footer
+     * Get the margin between page bottom and footer (mm)
      * @return int
      */
     public function getFooterMargin(): int
@@ -162,7 +162,7 @@ class PdfPart
     }
 
     /**
-     * Set the margin between page bottom and footer
+     * Set the margin between page bottom and footer (mm)
      * @param int $footer_margin
      * @return PdfPart
      */
@@ -174,7 +174,7 @@ class PdfPart
     }
 
     /**
-     *  Get the margin between page top and content
+     *  Get the margin between page top and content (mm)
      * @return int
      */
     public function getTopMargin(): int
@@ -183,7 +183,7 @@ class PdfPart
     }
 
     /**
-     * Set the margin between page top and content
+     * Set the margin between page top and content (mm)
      * @param int $top_margin
      * @return PdfPart
      */
@@ -195,7 +195,7 @@ class PdfPart
     }
 
     /**
-     * Get the margin between page bottom and content
+     * Get the margin between page bottom and content (mm)
      * @return int
      */
     public function getBottomMargin(): int
@@ -204,7 +204,7 @@ class PdfPart
     }
 
     /**
-     * Set the margin between page bottom and content
+     * Set the margin between page bottom and content (mm)
      * @param int $bottom_margin
      * @return PdfPart
      */
@@ -216,7 +216,7 @@ class PdfPart
     }
 
     /**
-     * Get the margin between page left side and content
+     * Get the margin between page left side and content (mm)
      * @return int
      */
     public function getLeftMargin(): int
@@ -225,7 +225,7 @@ class PdfPart
     }
 
     /**
-     * Set the margin between page left side and content
+     * Set the margin between page left side and content (mm)
      * @param int $left_margin
      * @return PdfPart
      */
@@ -237,7 +237,7 @@ class PdfPart
     }
 
     /**
-     * Get the margin between page right side and content
+     * Get the margin between page right side and content (mm)
      * @return int
      */
     public function getRightMargin(): int
@@ -246,7 +246,7 @@ class PdfPart
     }
 
     /**
-     * Set the margin between page right side and content
+     * Set the margin between page right side and content (mm)
      * @param int $right_margin
      * @return PdfPart
      */

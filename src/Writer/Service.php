@@ -91,14 +91,31 @@ class Service extends Base\BaseService
 
     /**
      * Get a plain pdf (without header/hooter) from the text that has been processed for the corrector
-     * This PDF can afterwards be converted to an image for graphical marking and commenting
+     * This PDF can be converted to an image for graphical marking and commenting
      */
     public function getProcessedTextAsPlainPdf() : string
     {
         $essay = $this->context->getWrittenEssay();
-        return $this->dependencies->pdfGeneration()->generatePlainPdfFromHtml(
-            $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings()->withAddParagraphNumbers(false))
-        );
+        $settings = $this->context->getWritingSettings();
+
+        $style = file_get_contents(__DIR__ . '/templates/plain_style.html');
+        $html = $this->dependencies->html()->processWrittenText($essay, $settings);
+
+        $part = (new PdfPart(
+            PdfPart::FORMAT_A4,
+            PdfPart::ORIENTATION_PORTRAIT,
+            [new PdfHtml($style . $html)]
+        ))
+            ->withTopMargin($settings->getTopMargin())
+            ->withBottomMargin($settings->getBottomMargin())
+            ->withLeftMargin($settings->getLeftMargin())
+            ->withRightMargin($settings->getRightMargin())
+            ->withHeaderMargin(0)
+            ->withFooterMargin(10)
+            ->withPrintHeader(false)
+            ->withPrintFooter(true);
+
+        return $this->dependencies->pdfGeneration()->generatePdf([$part]);
     }
 
     /**
