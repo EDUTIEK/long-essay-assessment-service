@@ -24,55 +24,26 @@ class PdfGeneration
 
 
     /**
-     * Main font name (helvetica, times, ...)
+     * Main text of the page
      */
     protected $main_font = 'times';
-
-    /**
-     * Size of the main text
-     */
     protected $main_font_size = 10;
 
-    /**
-     * Font used in the header
-     */
     protected $header_font = 'helvetica';
-
-
-    /**
-     * Size of the header text
-     */
     protected $header_font_size = 12;
 
-    /**
-     * Font used in the footer
-     */
     protected $footer_font = 'helvetica';
-
-    /**
-     * Size of the footer text
-     */
     protected $footer_font_size = 10;
 
-    /**
-     * Font used fpr monospace text
-     */
     protected $mono_font = 'courier';
 
-    /**
-     * Header margin.
-     */
     protected $header_margin = 5;
-
-    /**
-     * Footer margin.
-     */
     protected $footer_margin = 10;
 
-    /**
-     * Bottom margin.
-     */
-    protected $bottom_margin = 10;
+    protected $top_margin = 20;
+    protected $bottom_margin = 20;
+    protected $left_margin = 20;
+    protected $right_margin = 20;
     
 
     /**
@@ -192,18 +163,21 @@ class PdfGeneration
      * @param string $html
      * @return string
      */
-    public function generatePlainPdfFromHtml(string $html) 
+    public function generatePlainPdfFromHtml(string $html)
     {
         $pdf = new Tcpdf($this->page_orientation, $this->pdf_unit, $this->page_format, true, 'UTF-8', false, 2);
 
         $pdf->setAllowLocalFiles(true);
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
+        $pdf->setTopMargin($this->top_margin);
         $pdf->SetAutoPageBreak(true, $this->bottom_margin);
-        $pdf->SetFont($this->main_font, '', $this->main_font_size, '', true);
-
+        $pdf->setLeftMargin($this->left_margin);
+        $pdf->setRightMargin($this->right_margin);
         $pdf->AddPage();
-        $pdf->writeHtml($html, false, true);
+
+        $style = file_get_contents(__DIR__ . '/templates/plain_style.html');
+        $pdf->writeHtml($style . $html, false, true);
 
         return $pdf->Output('dummy.pdf', 'S');
     }

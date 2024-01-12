@@ -97,7 +97,7 @@ class Service extends Base\BaseService
     {
         $essay = $this->context->getWrittenEssay();
         return $this->dependencies->pdfGeneration()->generatePlainPdfFromHtml(
-            $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings())
+            $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings()->withAddParagraphNumbers(false))
         );
     }
 

@@ -81,8 +81,8 @@ class HtmlProcessing
         // remove ascii control characters except tab, cr and lf
         $html = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $html);
 
-        $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl', $essay ? $essay->getServiceVersion() : 0);
-        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl', $essay ? $essay->getServiceVersion() : 0);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl', $essay ? $essay->getServiceVersion() : 0, false);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl', $essay ? $essay->getServiceVersion() : 0,  $settings->getAddParagraphNumbers());
 
         return $html;
     }
@@ -103,7 +103,7 @@ class HtmlProcessing
         
         $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','<span data-w="$1" data-p="$2">', $html);
         $html = str_replace('</w-p>','</span>', $html);
-        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl', $essay ? $essay->getServiceVersion() : 0);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl', $essay ? $essay->getServiceVersion() : 0,  false);
 
         return $html;
     }
@@ -114,7 +114,7 @@ class HtmlProcessing
      * The process_version is a number which can be increased with a new version of the processing
      * This number is provided as a parameter to the XSLT processing
      */
-    protected function processXslt(string $html, string $xslt_file, int $service_version) : string
+    protected function processXslt(string $html, string $xslt_file, int $service_version, bool $add_paragraph_numbers) : string
     {
         try {
             // get the xslt document
@@ -128,6 +128,7 @@ class HtmlProcessing
             $xslt->registerPhpFunctions();
             $xslt->importStyleSheet($xslt_doc);
             $xslt->setParameter('', 'service_version', $service_version);
+            $xslt->setParameter('', 'add_paragraph_numbers', (int) $add_paragraph_numbers);
 
             // get the html document
             $dom_doc = new \DOMDocument('1.0', 'UTF-8');

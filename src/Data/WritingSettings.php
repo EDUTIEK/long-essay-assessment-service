@@ -20,6 +20,8 @@ class WritingSettings
     private string $primary_color;
     private string $primary_text_color;
 
+    private bool $add_paragraph_numbers = true;
+
     /**
      * Constructor (see getters)
      */
@@ -119,6 +121,18 @@ class WritingSettings
     public function getPrimaryTextColor(): string
     {
         return $this->primary_text_color;
+    }
+
+    public function getAddParagraphNumbers() : bool
+    {
+        return $this->add_paragraph_numbers;
+    }
+
+    public function withAddParagraphNumbers(bool $add_paragraph_numbers) : self
+    {
+        $clone = clone $this;
+        $clone->add_paragraph_numbers = $add_paragraph_numbers;
+        return $clone;
     }
 
 }
