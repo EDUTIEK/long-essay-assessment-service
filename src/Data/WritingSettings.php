@@ -4,6 +4,11 @@ namespace Edutiek\LongEssayAssessmentService\Data;
 
 class WritingSettings
 {
+    /**
+     * Minimum margin on all sides of text converted to a page image (mm)
+     */
+    const MIN_MARGIN = 5;
+
     const HEADLINE_SCHEME_NONE = 'none';
     const HEADLINE_SCHEME_NUMERIC = 'numeric';
     const HEADLINE_SCHEME_EDUTIEK = 'edutiek';
@@ -21,10 +26,9 @@ class WritingSettings
     private string $primary_text_color;
 
     private bool $add_paragraph_numbers;
-    private int $top_margin;
-    private int $bottom_margin;
-    private int $left_margin;
-    private int $right_margin;
+    private bool $add_correction_margin;
+    private int $left_correction_margin;
+    private int $right_correction_margin;
 
     /**
      * Constructor (see getters)
@@ -37,10 +41,9 @@ class WritingSettings
         string $primary_color,
         string $primary_text_color,
         bool $add_paragraph_numbers,
-        int $top_margin,
-        int $bottom_margin,
-        int $left_margin,
-        int $right_margin
+        bool $add_correction_margin,
+        int $left_correction_margin,
+        int $right_correction_margin
     )
     {
         switch ($headline_scheme) {
@@ -74,11 +77,11 @@ class WritingSettings
         $this->copy_allowed = $copy_allowed;
         $this->primary_color = $primary_color;
         $this->primary_text_color = $primary_text_color;
+
         $this->add_paragraph_numbers = $add_paragraph_numbers;
-        $this->top_margin = $top_margin;
-        $this->bottom_margin = $bottom_margin;
-        $this->left_margin = $left_margin;
-        $this->right_margin = $right_margin;
+        $this->add_correction_margin = $add_correction_margin;
+        $this->left_correction_margin = $left_correction_margin;
+        $this->right_correction_margin = $right_correction_margin;
     }
 
     /**
@@ -137,28 +140,54 @@ class WritingSettings
         return $this->primary_text_color;
     }
 
+    /**
+     * Get if a column with paragraph numbers should be added
+     */
     public function getAddParagraphNumbers() : bool
     {
         return $this->add_paragraph_numbers;
     }
 
-    public function getTopMargin() : int
+    /**
+     * Get if a left or right correction margin should be added
+     */
+    public function getAddCorrectionMargin() : bool
     {
-        return $this->top_margin;
+        return $this->add_correction_margin;
     }
 
-    public function getBottomMargin() : int
+    /**
+     * Get the height of a top correction margin (mm)
+     */
+    public function getTopCorrectionMargin() : int
     {
-        return $this->bottom_margin;
+        return self::MIN_MARGIN;
     }
 
-    public function getLeftMargin() : int
+    /**
+     * Get the height of a bottom correction margin (mm)
+     */
+    public function getBottomCorrectionMargin() : int
     {
-        return $this->left_margin;
+        return self::MIN_MARGIN;
     }
 
-    public function getRightMargin() : int
+
+    /**
+     * Get the width of a left correction margin (mm)
+     */
+    public function getLeftCorrectionMargin() : int
     {
-        return $this->right_margin;
+        return $this->add_correction_margin ? max($this->left_correction_margin, self::MIN_MARGIN) : self::MIN_MARGIN;
     }
+
+    /**
+     * Get the width of a right correction margin (mm)
+     */
+    public function getRightCorrectionMargin() : int
+    {
+        return $this->add_correction_margin ? max($this->right_correction_margin, self::MIN_MARGIN) : self::MIN_MARGIN;
+    }
+
+
 }

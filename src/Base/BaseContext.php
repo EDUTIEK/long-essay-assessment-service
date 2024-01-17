@@ -6,6 +6,7 @@ use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 use Edutiek\LongEssayAssessmentService\Data\ApiToken;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
 use Edutiek\LongEssayAssessmentService\Data\WritingSettings;
+use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
 
 /**
  * Common interface for Writer and Corrector contexts
@@ -122,6 +123,12 @@ interface BaseContext
      * e.g. the headline scheme or formatting options
      */
     public function getWritingSettings(): WritingSettings;
+
+    /**
+     * Get the settings to be used for the pdf generation
+     * e.g. margins and header/footer inclusion
+     */
+    public function getPdfSettings(): PdfSettings;
 
 
     /**

@@ -4,6 +4,8 @@ namespace Edutiek\LongEssayAssessmentService\Base;
 
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
 use Edutiek\LongEssayAssessmentService\Internal\Authentication;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfElement;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
 
 /**
@@ -154,5 +156,31 @@ abstract class BaseService
             );
         }
         return '';
+    }
+
+    /**
+     * Get a standard pdf part
+     * It may consist of several elements and span over several pages
+     * It respects the pdf settings from the service context
+     *
+     * @param PdfElement[] $elements
+     * @return PdfPart
+     */
+    protected function getStandardPdfPart(array $elements = []): PdfPart
+    {
+        $pdfSettings = $this->context->getPdfSettings();
+
+        return (new PdfPart(
+           PdfPart::FORMAT_A4,
+           PdfPart::ORIENTATION_PORTRAIT,
+            $elements
+        ))  ->withTopMargin($pdfSettings->getContentTopMargin())
+            ->withBottomMargin($pdfSettings->getContentBottomMargin())
+            ->withLeftMargin($pdfSettings->getLeftMargin())
+            ->withRightMargin($pdfSettings->getRightMargin())
+            ->withHeaderMargin($pdfSettings->getHeaderMargin())
+            ->withFooterMargin($pdfSettings->getFooterMargin())
+            ->withPrintHeader($pdfSettings->getAddHeader())
+            ->withPrintFooter($pdfSettings->getAddFooter());
     }
 }

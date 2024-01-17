@@ -132,7 +132,7 @@ class Service extends Base\BaseService
         ];
 
         $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/overview_de.html', $renderContext);
-        return [(new PdfPart())->withElement(new PdfHtml($html))];
+        return [$this->getStandardPdfPart([new PdfHtml($html)])];
     }
 
     /**
@@ -187,8 +187,8 @@ class Service extends Base\BaseService
             }
 
         }
-        
-        return [(new PdfPart())->withElement(new PdfHtml($html))];
+
+        return [$this->getStandardPdfPart([new PdfHtml($html)])];
     }
 
     /**
@@ -203,7 +203,8 @@ class Service extends Base\BaseService
         ];
 
         $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_text_de.html', $renderContext);
-        return [(new PdfPart())->withElement(new PdfHtml($html))];
+
+        return [$this->getStandardPdfPart([new PdfHtml($html)])];
     }
 
 
@@ -269,7 +270,7 @@ class Service extends Base\BaseService
                     PdfPart::FORMAT_A4,
                     PdfPart::ORIENTATION_LANDSCASPE
                 ))->withPrintHeader(false)
-                  ->withPrintFooter(true)
+                  ->withPrintFooter(false)
                   ->withElement(new PdfImage(
                       $path,
                         0,0, 148,210     // A5
@@ -287,12 +288,7 @@ class Service extends Base\BaseService
                 'comments' => $this->dependencies->html()->processCommentsForPdf($essay, $this->context->getWritingSettings(), $this->context->getCorrectionSettings(), $comments)
             ]];
             $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
-            $pdfParts[] = (new PdfPart(
-                PdfPart::FORMAT_A4,
-                PdfPart::ORIENTATION_PORTRAIT
-            ))->withElement(new PdfHtml(
-                $html
-            ));
+            $pdfParts[] = $this->getStandardPdfPart([new PdfHtml($html)]);
         }
         
         return $pdfParts;

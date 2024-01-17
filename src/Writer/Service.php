@@ -70,56 +70,31 @@ class Service extends Base\BaseService
     /**
      * Get a pdf from the text that has been processed for the corrector
      * This PDF is intended to document the writing.
-     * It has a header showing the task, writer name and writing time
      * It may include the page images of an uploaded PDF
      */
     public function getWritingAsPdf(WritingTask $task, WrittenEssay $essay, bool $withHeader = true) : string
     {
-        $settings = $this->context->getWritingSettings();
-        $html = $this->dependencies->html()->processWrittenText($essay, $settings);
-
-        $leftMargin = $settings->getLeftMargin();
-        $rightMargin = $settings->getRightMargin();
-        $topMargin = max($settings->getTopMargin(), 15);
-        $bottomMargin = max($settings->getBottomMargin(), 10);
+        $writingSettings = $this->context->getWritingSettings();
+        $pdfSettings = $this->context->getPdfSettings();
+        $html = $this->dependencies->html()->processWrittenText($essay, $writingSettings);
 
         $pdfParts = [];
         if (!empty($pages = $this->context->getPagesOfWriter())) {
             foreach ($pages as $page) {
                 $image = $this->context->getPageImage($page->getKey());
                 $path = $this->getPageImagePathForPdf($image);
-                $pdfParts[] = (new PdfPart(
-                    PdfPart::FORMAT_A4,
-                    PdfPart::ORIENTATION_PORTRAIT,
+                $pdfParts[] = $this->getStandardPdfPart(
                     [new PdfImage($path,
-                        0,
-                        $withHeader ? 15 : 0,
-                        210, // A4
-                        297- ($withHeader ? 15 : 0)  // A4
+                        $pdfSettings->getLeftMargin(),
+                        $pdfSettings->getContentTopMargin(),
+                        210-$pdfSettings->getLeftMargin()-$pdfSettings->getRightMargin(), // A4
+                        297-$pdfSettings->getContentTopMargin()-$pdfSettings->getContentBottomMargin() // A4
                     )]
-                ))  ->withTopMargin($topMargin)
-                    ->withBottomMargin($bottomMargin)
-                    ->withLeftMargin($leftMargin)
-                    ->withRightMargin($rightMargin)
-                    ->withHeaderMargin(4)
-                    ->withFooterMargin(5)
-                    ->withPrintHeader($withHeader)
-                    ->withPrintFooter(false); // page number is already included
+                );
             }
         }
         else {
-            $pdfParts[] = (new PdfPart(
-                PdfPart::FORMAT_A4,
-                PdfPart::ORIENTATION_PORTRAIT,
-                [new PdfHtml($html)]
-            ))  ->withTopMargin($topMargin)
-                ->withBottomMargin($bottomMargin)
-                ->withLeftMargin($leftMargin)
-                ->withRightMargin($rightMargin)
-                ->withHeaderMargin(4)
-                ->withFooterMargin(5)
-                ->withPrintHeader($withHeader)
-                ->withPrintFooter(true);
+            $pdfParts[] = $this->getStandardPdfPart([new PdfHtml($html)]);
         }
 
         return $this->dependencies->pdfGeneration()->generatePdf(
@@ -148,27 +123,17 @@ class Service extends Base\BaseService
             PdfPart::ORIENTATION_PORTRAIT,
             [new PdfHtml($style . $html)]
         ))
-            ->withTopMargin($settings->getTopMargin())
-            ->withBottomMargin($settings->getBottomMargin())
-            ->withLeftMargin($settings->getLeftMargin())
-            ->withRightMargin($settings->getRightMargin())
+            ->withTopMargin($settings->getTopCorrectionMargin())
+            ->withBottomMargin($settings->getBottomCorrectionMargin())
+            ->withLeftMargin($settings->getLeftCorrectionMargin())
+            ->withRightMargin($settings->getRightCorrectionMargin())
             ->withHeaderMargin(0)
-            ->withFooterMargin(10)
+            ->withFooterMargin(0)
             ->withPrintHeader(false)
             ->withPrintFooter(true);
 
         return $this->dependencies->pdfGeneration()->generatePdf([$part]);
     }
-
-    /**
-     * Get the html the text that has been processed for the corrector
-     */
-    public function getProcessedTextAsHtml() : string
-    {
-        $essay = $this->context->getWrittenEssay();
-        return  $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings());
-    }
-
 
 
 
