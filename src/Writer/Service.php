@@ -5,6 +5,9 @@ use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
+use Edutiek\LongEssayAssessmentService\Data\WritingTask;
+use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfImage;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
 
@@ -66,22 +69,61 @@ class Service extends Base\BaseService
 
     /**
      * Get a pdf from the text that has been processed for the corrector
-     * This PDF is intended to document the writing. It has a header and footer
-     * @see \Edutiek\LongEssayAssessmentService\Corrector\Service::getWritingAsPdf
+     * This PDF is intended to document the writing.
+     * It has a header showing the task, writer name and writing time
+     * It may include the page images of an uploaded PDF
      */
-    public function getProcessedTextAsPdf() : string
+    public function getWritingAsPdf(WritingTask $task, WrittenEssay $essay, bool $withHeader = true) : string
     {
-        $task = $this->context->getWritingTask();
-        $essay = $this->context->getWrittenEssay();
+        $settings = $this->context->getWritingSettings();
+        $html = $this->dependencies->html()->processWrittenText($essay, $settings);
 
-        $part = (new PdfPart(
-            PdfPart::FORMAT_A4,
-            PdfPart::ORIENTATION_PORTRAIT
-        ))->withElement(
-            new PdfHtml($this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings())));
+        $leftMargin = $settings->getLeftMargin();
+        $rightMargin = $settings->getRightMargin();
+        $topMargin = max($settings->getTopMargin(), 15);
+        $bottomMargin = max($settings->getBottomMargin(), 10);
+
+        $pdfParts = [];
+        if (!empty($pages = $this->context->getPagesOfWriter())) {
+            foreach ($pages as $page) {
+                $image = $this->context->getPageImage($page->getKey());
+                $path = $this->getPageImagePathForPdf($image);
+                $pdfParts[] = (new PdfPart(
+                    PdfPart::FORMAT_A4,
+                    PdfPart::ORIENTATION_PORTRAIT,
+                    [new PdfImage($path,
+                        0,
+                        $withHeader ? 15 : 0,
+                        210, // A4
+                        297- ($withHeader ? 15 : 0)  // A4
+                    )]
+                ))  ->withTopMargin($topMargin)
+                    ->withBottomMargin($bottomMargin)
+                    ->withLeftMargin($leftMargin)
+                    ->withRightMargin($rightMargin)
+                    ->withHeaderMargin(4)
+                    ->withFooterMargin(5)
+                    ->withPrintHeader($withHeader)
+                    ->withPrintFooter(false); // page number is already included
+            }
+        }
+        else {
+            $pdfParts[] = (new PdfPart(
+                PdfPart::FORMAT_A4,
+                PdfPart::ORIENTATION_PORTRAIT,
+                [new PdfHtml($html)]
+            ))  ->withTopMargin($topMargin)
+                ->withBottomMargin($bottomMargin)
+                ->withLeftMargin($leftMargin)
+                ->withRightMargin($rightMargin)
+                ->withHeaderMargin(4)
+                ->withFooterMargin(5)
+                ->withPrintHeader($withHeader)
+                ->withPrintFooter(true);
+        }
 
         return $this->dependencies->pdfGeneration()->generatePdf(
-            [$part],
+            $pdfParts,
             $this->context->getSystemName(),
             $task->getWriterName(),
             $task->getTitle(),

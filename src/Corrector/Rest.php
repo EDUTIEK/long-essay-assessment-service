@@ -208,7 +208,7 @@ class Rest extends Base\BaseRest
                 foreach ($this->context->getPagesOfItem($item->getKey()) as $page) {
                     $pages[] = [
                         'key' => $page->getKey(),
-                        'item_key' => $page->getItemKey(),
+                        'item_key' => $item->getKey(),
                         'page_no' => $page->getPageNo(),
                         'width' => $page->getWidth(),
                         'height' => $page->getHeight(),

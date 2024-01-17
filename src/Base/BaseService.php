@@ -2,6 +2,7 @@
 
 namespace Edutiek\LongEssayAssessmentService\Base;
 
+use Edutiek\LongEssayAssessmentService\Data\PageImage;
 use Edutiek\LongEssayAssessmentService\Internal\Authentication;
 use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
 
@@ -136,5 +137,22 @@ abstract class BaseService
         }
 
         return implode(' - ', $parts);
+    }
+
+    /**
+     * Get the path of a writer page image for pdf processing
+     * @param PageImage|null $image
+     * @return string
+     */
+    protected function getPageImagePathForPdf(?PageImage $image) : string
+    {
+        if (isset($image)) {
+            return $this->dependencies->image()->getImageSrcAsPathForTCPDF(
+                $image,
+                $this->context->getAbsoluteTempPath(),
+                $this->context->getRelativeTempPath()
+            );
+        }
+        return '';
     }
 }
