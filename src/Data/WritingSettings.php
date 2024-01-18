@@ -7,7 +7,7 @@ class WritingSettings
     /**
      * Minimum margin on all sides of text converted to a page image (mm)
      */
-    const MIN_MARGIN = 5;
+    const MIN_MARGIN = 0;
 
     const HEADLINE_SCHEME_NONE = 'none';
     const HEADLINE_SCHEME_NUMERIC = 'numeric';
