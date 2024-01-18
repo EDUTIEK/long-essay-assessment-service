@@ -7,7 +7,7 @@ class PdfSettings
     /**
      * Minimum margin on all sides of the pdf (mm)
      */
-    const MIN_MARGIN = 5;
+    const MIN_MARGIN = 0;
 
     /**
      * Height of a header (mm)

@@ -3,6 +3,8 @@
 namespace Edutiek\LongEssayAssessmentService\Writer;
 use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Base;
+use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
+use Edutiek\LongEssayAssessmentService\Data\WritingSettings;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
 use Edutiek\LongEssayAssessmentService\Data\WritingTask;
@@ -68,15 +70,20 @@ class Service extends Base\BaseService
 
 
     /**
-     * Get a pdf from the text that has been processed for the corrector
-     * This PDF is intended to document the writing.
-     * It may include the page images of an uploaded PDF
+     * Get a combined pdf file from the written text and from an uploaded pdf file
+     *
+     * @param bool $plainContent get the content without header/footer, for image creation or download by corrector
      */
-    public function getWritingAsPdf(WritingTask $task, WrittenEssay $essay, bool $withHeader = true) : string
+    public function getWritingAsPdf(WritingTask $task, WrittenEssay $essay, bool $plainContent = false) : string
     {
-        $writingSettings = $this->context->getWritingSettings();
-        $pdfSettings = $this->context->getPdfSettings();
-        $html = $this->dependencies->html()->processWrittenText($essay, $writingSettings);
+        if ($plainContent) {
+            $pdfSettings = new PdfSettings(false, false, 0, 0, 0, 0);
+            $style = file_get_contents(__DIR__ . '/templates/plain_style.html');
+        }
+        else {
+            $pdfSettings = $this->context->getPdfSettings();
+            $style = '';
+        }
 
         $pdfParts = [];
         if (!empty($pages = $this->context->getPagesOfWriter())) {
@@ -87,14 +94,43 @@ class Service extends Base\BaseService
                     [new PdfImage($path,
                         $pdfSettings->getLeftMargin(),
                         $pdfSettings->getContentTopMargin(),
-                        210-$pdfSettings->getLeftMargin()-$pdfSettings->getRightMargin(), // A4
-                        297-$pdfSettings->getContentTopMargin()-$pdfSettings->getContentBottomMargin() // A4
-                    )]
+                        210 // A4
+                        - $pdfSettings->getLeftMargin()-$pdfSettings->getRightMargin(),
+                        297 // A4
+                        - $pdfSettings->getContentTopMargin()-$pdfSettings->getContentBottomMargin()
+                    )],
+                    $pdfSettings
                 );
             }
         }
         else {
-            $pdfParts[] = $this->getStandardPdfPart([new PdfHtml($html)]);
+            $writingSettings = $this->context->getWritingSettings();
+
+            $add_left = 0;
+            $add_right = 0;
+            if ($plainContent) {
+                $pdfSettings = new PdfSettings(
+                    $pdfSettings->getAddHeader(),
+                    $pdfSettings->getAddFooter(),
+                    $pdfSettings->getTopMargin() + $writingSettings->getTopCorrectionMargin(),
+                    $pdfSettings->getTopMargin() + $writingSettings->getBottomCorrectionMargin(),
+                    $pdfSettings->getLeftMargin(),
+                    $pdfSettings->getRightMargin()
+                );
+                $add_left = $writingSettings->getLeftCorrectionMargin();
+                $add_right = $writingSettings->getRightCorrectionMargin();
+            }
+
+            $html = $this->dependencies->html()->processWrittenText($essay, $writingSettings);
+            $pdfParts[] = $this->getStandardPdfPart([
+                new PdfHtml($style . $html,
+                    $pdfSettings->getLeftMargin()  + $add_left,
+                    $pdfSettings->getContentTopMargin(),
+                    210 // A4
+                        - $pdfSettings->getLeftMargin() - $pdfSettings->getRightMargin() - $add_left - $add_right,
+                    297  // A4
+                        - $pdfSettings->getContentTopMargin()- $pdfSettings->getContentBottomMargin()
+                )], $pdfSettings);
         }
 
         return $this->dependencies->pdfGeneration()->generatePdf(
@@ -104,35 +140,6 @@ class Service extends Base\BaseService
             $task->getTitle(),
             $task->getWriterName() . ' ' . $this->formatDates($essay->getEditStarted(), $essay->getEditEnded())
         );
-    }
-
-    /**
-     * Get a plain pdf (without header/hooter) from the text that has been processed for the corrector
-     * This PDF can be converted to an image for graphical marking and commenting
-     */
-    public function getProcessedTextAsPlainPdf() : string
-    {
-        $essay = $this->context->getWrittenEssay();
-        $settings = $this->context->getWritingSettings();
-
-        $style = file_get_contents(__DIR__ . '/templates/plain_style.html');
-        $html = $this->dependencies->html()->processWrittenText($essay, $settings);
-
-        $part = (new PdfPart(
-            PdfPart::FORMAT_A4,
-            PdfPart::ORIENTATION_PORTRAIT,
-            [new PdfHtml($style . $html)]
-        ))
-            ->withTopMargin($settings->getTopCorrectionMargin())
-            ->withBottomMargin($settings->getBottomCorrectionMargin())
-            ->withLeftMargin($settings->getLeftCorrectionMargin())
-            ->withRightMargin($settings->getRightCorrectionMargin())
-            ->withHeaderMargin(0)
-            ->withFooterMargin(0)
-            ->withPrintHeader(false)
-            ->withPrintFooter(true);
-
-        return $this->dependencies->pdfGeneration()->generatePdf([$part]);
     }
 
 

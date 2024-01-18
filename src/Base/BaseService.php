@@ -3,6 +3,7 @@
 namespace Edutiek\LongEssayAssessmentService\Base;
 
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
+use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
 use Edutiek\LongEssayAssessmentService\Internal\Authentication;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfElement;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
@@ -166,9 +167,11 @@ abstract class BaseService
      * @param PdfElement[] $elements
      * @return PdfPart
      */
-    protected function getStandardPdfPart(array $elements = []): PdfPart
+    protected function getStandardPdfPart(array $elements = [], ?PdfSettings $pdfSettings = null): PdfPart
     {
-        $pdfSettings = $this->context->getPdfSettings();
+        if (!isset($pdfSettings)) {
+            $pdfSettings = $this->context->getPdfSettings();
+        }
 
         return (new PdfPart(
            PdfPart::FORMAT_A4,

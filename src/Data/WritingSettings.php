@@ -4,11 +4,6 @@ namespace Edutiek\LongEssayAssessmentService\Data;
 
 class WritingSettings
 {
-    /**
-     * Minimum margin on all sides of text converted to a page image (mm)
-     */
-    const MIN_MARGIN = 0;
-
     const HEADLINE_SCHEME_NONE = 'none';
     const HEADLINE_SCHEME_NUMERIC = 'numeric';
     const HEADLINE_SCHEME_EDUTIEK = 'edutiek';
@@ -161,7 +156,7 @@ class WritingSettings
      */
     public function getTopCorrectionMargin() : int
     {
-        return self::MIN_MARGIN;
+        return 5;
     }
 
     /**
@@ -169,7 +164,7 @@ class WritingSettings
      */
     public function getBottomCorrectionMargin() : int
     {
-        return self::MIN_MARGIN;
+        return 5;
     }
 
 
@@ -178,7 +173,7 @@ class WritingSettings
      */
     public function getLeftCorrectionMargin() : int
     {
-        return $this->add_correction_margin ? max($this->left_correction_margin, self::MIN_MARGIN) : self::MIN_MARGIN;
+        return $this->add_correction_margin ? $this->left_correction_margin : 0;
     }
 
     /**
@@ -186,7 +181,7 @@ class WritingSettings
      */
     public function getRightCorrectionMargin() : int
     {
-        return $this->add_correction_margin ? max($this->right_correction_margin, self::MIN_MARGIN) : self::MIN_MARGIN;
+        return $this->add_correction_margin ? $this->right_correction_margin : 0;
     }
 
 
