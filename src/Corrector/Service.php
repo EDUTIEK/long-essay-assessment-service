@@ -4,6 +4,7 @@ namespace Edutiek\LongEssayAssessmentService\Corrector;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\DocuItem;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
+use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfImage;
@@ -132,7 +133,7 @@ class Service extends Base\BaseService
         ];
 
         $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/overview_de.html', $renderContext);
-        return [$this->getStandardPdfPart([new PdfHtml($html)])];
+        return [$this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false)];
     }
 
     /**
@@ -156,8 +157,6 @@ class Service extends Base\BaseService
             'include_comment_points_relevant' => $summary->getIncludeCommentPoints() == CorrectionSummary::INCLUDE_RELEVANT,
             'include_criteria_points_info' => $summary->getIncludeCriteriaPoints() == CorrectionSummary::INCLUDE_INFO,
             'include_criteria_points_relevant' => $summary->getIncludeCriteriaPoints() == CorrectionSummary::INCLUDE_RELEVANT,
-            'include_writer_notes_info' => $summary->getIncludeWriterNotes() == CorrectionSummary::INCLUDE_INFO,
-            'include_writer_notes_relevant' => $summary->getIncludeWriterNotes() == CorrectionSummary::INCLUDE_RELEVANT,
             'positive_rating' => $this->context->getCorrectionSettings()->getPositiveRating(),
             'negative_rating' => $this->context->getCorrectionSettings()->getNegativeRating()
         ];
@@ -188,7 +187,7 @@ class Service extends Base\BaseService
 
         }
 
-        return [$this->getStandardPdfPart([new PdfHtml($html)])];
+        return [$this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false)];
     }
 
     /**
@@ -204,7 +203,7 @@ class Service extends Base\BaseService
 
         $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_text_de.html', $renderContext);
 
-        return [$this->getStandardPdfPart([new PdfHtml($html)])];
+        return [$this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false)];
     }
 
 
@@ -266,20 +265,18 @@ class Service extends Base\BaseService
                 }
                 $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
 
-                $pdfParts[] = (new PdfPart(
-                    PdfPart::FORMAT_A4,
-                    PdfPart::ORIENTATION_LANDSCASPE
-                ))->withPrintHeader(false)
-                  ->withPrintFooter(false)
-                  ->withElement(new PdfImage(
-                      $path,
+                $pdfSettings = new PdfSettings(false, false, 5,5,5,5);
+                $pdfParts[] = $this->getStandardPdfPart([
+                    new PdfImage(
+                        $path,
                         0,0, 148,210     // A5
-                    ))
-                  ->withElement(new PdfHtml(
-                      $html,
-                      150
-                  ));
-            }
+                    ),
+                    new PdfHtml(
+                        $html,
+                        150
+                    )
+                ], $pdfSettings)->withOrientation(PdfPart::ORIENTATION_LANDSCASPE);
+             }
         }
         else {
             $essay = $item->getWrittenEssay();
@@ -288,7 +285,7 @@ class Service extends Base\BaseService
                 'comments' => $this->dependencies->html()->processCommentsForPdf($essay, $this->context->getWritingSettings(), $this->context->getCorrectionSettings(), $comments)
             ]];
             $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
-            $pdfParts[] = $this->getStandardPdfPart([new PdfHtml($html)]);
+            $pdfParts[] = $this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false);
         }
         
         return $pdfParts;

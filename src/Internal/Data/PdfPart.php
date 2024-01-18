@@ -256,4 +256,18 @@ class PdfPart
         $clone->right_margin = $right_margin;
         return $clone;
     }
+
+    public function withFormat(string $format) : PdfPart
+    {
+        $clone = clone $this;
+        $clone->format = $format;
+        return $clone;
+    }
+
+    public function withOrientation(string $orientation) : PdfPart
+    {
+        $clone = clone $this;
+        $clone->orientation = $orientation;
+        return $clone;
+    }
 }

@@ -131,10 +131,10 @@ abstract class BaseService
                     ->setTimestamp($start);
 
                 if ($this->context->getLanguage() == 'de') {
-                    $parts[] = $date->format('d.m.Y H:i:s');
+                    $parts[] = $date->format('d.m.Y H:i');
                 }
                 else {
-                    $parts[] = $date->format('Y-m-d H:i:s');
+                    $parts[] = $date->format('Y-m-d H:i');
                 }
             }
         }
