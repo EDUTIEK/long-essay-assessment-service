@@ -23,20 +23,18 @@
         <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::initCurrentComments', string(td[1]/node()))" />
         <xsl:copy>
             <xsl:copy-of select="@*" />
-            <td style="width: 5%;">
+            <td style="width: 8mm;">
                 <!-- paragraph number -->
                 <xsl:apply-templates select="td[1]/node()" />
             </td>
-            <td style="width: 60%;">
+            <td style="width: 92mm;">
                 <!-- text -->
                 <xsl:apply-templates select="td[2]/node()" />
             </td>   
-            <td style="width: 35%;">
+            <td>
                 <!-- comments -->
                 <xsl:for-each select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::getCurrentComments')/node()">
-                    <p style="font-family: sans-serif; font-size:8px;">
-                        <xsl:copy-of select="." />
-                    </p>
+                    <xsl:copy-of select="." />
                 </xsl:for-each>
             </td>
         </xsl:copy>

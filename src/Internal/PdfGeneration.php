@@ -44,9 +44,9 @@ class PdfGeneration
      *
      * @param PdfPart[] $parts      Parts of the PDF
      * @param string $creator       Name of the creator app, e.h. name of the LMS
-     * @param string $author
-     * @param string $title
-     * @param string $subject
+     * @param string $author        Name of the author, e.g. user creating the PDF
+     * @param string $title         will be shown bold as first line in header
+     * @param string $subject       will be shown as second line in header
      * @param string $keywords
      * @return string
      */

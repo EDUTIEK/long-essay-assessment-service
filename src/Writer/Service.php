@@ -78,11 +78,9 @@ class Service extends Base\BaseService
     {
         if ($plainContent) {
             $pdfSettings = new PdfSettings(false, false, 0, 0, 0, 0);
-            $style = file_get_contents(__DIR__ . '/templates/plain_style.html');
         }
         else {
             $pdfSettings = $this->context->getPdfSettings();
-            $style = '';
         }
 
         $pdfParts = [];
@@ -105,32 +103,20 @@ class Service extends Base\BaseService
         }
         else {
             $writingSettings = $this->context->getWritingSettings();
-
-            $add_left = 0;
-            $add_right = 0;
-            if ($plainContent) {
-                $pdfSettings = new PdfSettings(
-                    $pdfSettings->getAddHeader(),
-                    $pdfSettings->getAddFooter(),
-                    $pdfSettings->getTopMargin() + $writingSettings->getTopCorrectionMargin(),
-                    $pdfSettings->getTopMargin() + $writingSettings->getBottomCorrectionMargin(),
-                    $pdfSettings->getLeftMargin(),
-                    $pdfSettings->getRightMargin()
-                );
-                $add_left = $writingSettings->getLeftCorrectionMargin();
-                $add_right = $writingSettings->getRightCorrectionMargin();
-            }
-
-            $html = $this->dependencies->html()->processWrittenText($essay, $writingSettings);
+            $html = $this->dependencies->html()->processWrittenText($essay, $writingSettings, true);
             $pdfParts[] = $this->getStandardPdfPart([
-                new PdfHtml($style . $html,
-                    $pdfSettings->getLeftMargin()  + $add_left,
+                new PdfHtml($html,
+                    $pdfSettings->getLeftMargin() + $writingSettings->getLeftCorrectionMargin(),
                     $pdfSettings->getContentTopMargin(),
                     210 // A4
-                        - $pdfSettings->getLeftMargin() - $pdfSettings->getRightMargin() - $add_left - $add_right,
-                    297  // A4
+                        - $pdfSettings->getLeftMargin() - $pdfSettings->getRightMargin()
+                        - $writingSettings->getLeftCorrectionMargin() - $writingSettings->getRightCorrectionMargin(),
+                    297 // A4
                         - $pdfSettings->getContentTopMargin()- $pdfSettings->getContentBottomMargin()
-                )], $pdfSettings);
+                )], $pdfSettings
+                    ->withTopMargin($pdfSettings->getTopMargin() + $writingSettings->getTopCorrectionMargin())
+                    ->withBottomMargin($pdfSettings->getBottomMargin() + $writingSettings->getBottomCorrectionMargin())
+            );
         }
 
         return $this->dependencies->pdfGeneration()->generatePdf(

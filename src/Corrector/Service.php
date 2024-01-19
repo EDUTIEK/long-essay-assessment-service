@@ -285,7 +285,11 @@ class Service extends Base\BaseService
                 'comments' => $this->dependencies->html()->processCommentsForPdf($essay, $this->context->getWritingSettings(), $this->context->getCorrectionSettings(), $comments)
             ]];
             $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
-            $pdfParts[] = $this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false);
+            $pdfParts[] =
+                $this->getStandardPdfPart([
+                    new PdfHtml($html)
+                    ]
+                )->withPrintFooter(false);
         }
         
         return $pdfParts;

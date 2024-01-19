@@ -67,8 +67,10 @@ class HtmlProcessing
      * and split up all text to single word embedded in <w-p> elements.
      *      the 'w' attribute is the word number
      *      the 'p' attribute is the paragraph number
+     *
+     * @param bool $forPdf  styles and tweaks for pdf processing should be added
      */
-    public function processWrittenText(?WrittenEssay $essay, WritingSettings $settings) : string
+    public function processWrittenText(?WrittenEssay $essay, WritingSettings $settings, bool $forPdf = false) : string
     {
         self::$writingSettings = $settings;
         
@@ -81,8 +83,13 @@ class HtmlProcessing
         // remove ascii control characters except tab, cr and lf
         $html = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $html);
 
-        $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl', $essay ? $essay->getServiceVersion() : 0, false);
-        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl', $essay ? $essay->getServiceVersion() : 0,  $settings->getAddParagraphNumbers());
+        $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl', $essay ? $essay->getServiceVersion() : 0);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl', $essay ? $essay->getServiceVersion() : 0, $settings->getAddParagraphNumbers(), $forPdf);
+
+        if ($forPdf) {
+            $style = file_get_contents(__DIR__ . '/styles/plain_style.html');
+            return $style . "\n" . $html;
+        }
 
         return $html;
     }
@@ -99,11 +106,11 @@ class HtmlProcessing
         self::$allComments = $comments;
         self::$currentComments = [];
         
-        $html = $this->processWrittenText($essay, $writingSettings);
+        $html = $this->processWrittenText($essay, $writingSettings, true);
         
         $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','<span data-w="$1" data-p="$2">', $html);
         $html = str_replace('</w-p>','</span>', $html);
-        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl', $essay ? $essay->getServiceVersion() : 0,  false);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl', $essay ? $essay->getServiceVersion() : 0);
 
         return $html;
     }
@@ -114,7 +121,7 @@ class HtmlProcessing
      * The process_version is a number which can be increased with a new version of the processing
      * This number is provided as a parameter to the XSLT processing
      */
-    protected function processXslt(string $html, string $xslt_file, int $service_version, bool $add_paragraph_numbers) : string
+    protected function processXslt(string $html, string $xslt_file, int $service_version, bool $add_paragraph_numbers = false, bool $for_pdf = false) : string
     {
         try {
             // get the xslt document
@@ -129,6 +136,7 @@ class HtmlProcessing
             $xslt->importStyleSheet($xslt_doc);
             $xslt->setParameter('', 'service_version', $service_version);
             $xslt->setParameter('', 'add_paragraph_numbers', (int) $add_paragraph_numbers);
+            $xslt->setParameter('', 'for_pdf', (int) $for_pdf);
 
             // get the html document
             $dom_doc = new \DOMDocument('1.0', 'UTF-8');

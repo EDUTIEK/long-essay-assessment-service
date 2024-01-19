@@ -85,7 +85,7 @@ class CommentHandling
                     $content .= '<br />(' . $comment->getPoints() . ' Punkte)';
                 }
                 
-                $content = '<p>' . $content . '</p>';
+                $content = '<p style="font-family: sans-serif; font-size:10px;">' . $content . '</p>';
                 
                 $html .= $content . "\n";   
             }

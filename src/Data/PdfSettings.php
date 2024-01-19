@@ -108,4 +108,46 @@ class PdfSettings
         return $this->getBottomMargin() + ($this->getAddFooter() ? self::FOOTER_HEIGHT : 0);
     }
 
+    public function withAddHeader(bool $add_header) : self
+    {
+        $clone = clone $this;
+        $clone->add_header = $add_header;
+        return $clone;
+    }
+
+    public function withAddFooter(bool $add_footer) : self
+    {
+        $clone = clone $this;
+        $clone->add_footer = $add_footer;
+        return $clone;
+    }
+
+    public function withTopMargin(int $top_margin) : self
+    {
+        $clone = clone $this;
+        $clone->top_margin = $top_margin;
+        return $clone;
+    }
+
+    public function withBottomMargin(int $bottom_margin) : self
+    {
+        $clone = clone $this;
+        $clone->bottom_margin = $bottom_margin;
+        return $clone;
+    }
+
+    public function withLeftMargin(int $left_margin) : self
+    {
+        $clone = clone $this;
+        $clone->left_margin = $left_margin;
+        return $clone;
+    }
+
+    public function withRightMargin(int $right_margin) : self
+    {
+        $clone = clone $this;
+        $clone->right_margin = $right_margin;
+        return $clone;
+    }
+
 }
