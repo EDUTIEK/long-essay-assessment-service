@@ -2,7 +2,6 @@
 
 namespace Edutiek\LongEssayAssessmentService\Internal;
 
-use Edutiek\LongEssayAssessmentService\Data\CorrectionPage;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
 use LongEssayPDFConverter\ImageMagick\PDFImage;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
@@ -84,12 +83,12 @@ class ImageProcessing
 
     /**
      * Apply the marks of comments to a page image
-     * @param CorrectionPage    $page
+     * @param int    $page_number
      * @param PageImage         $image
      * @param CorrectionComment[] $comments
      * @return PageImage
      */
-    public function applyCommentsMarks(CorrectionPage $page, PageImage $image, array $comments) : PageImage
+    public function applyCommentsMarks(int $page_number, PageImage $image, array $comments) : PageImage
     {
         $commentHandler = Dependencies::getInstance()->commentHandling();
         
@@ -98,7 +97,7 @@ class ImageProcessing
             'font' => ['name' => null, 'size' => 50]]);
         $shapes = [];
         foreach ($comments as $comment) {
-            if ($comment->getParentNumber() == $page->getPageNo() && !empty($comment->getMarks())) {
+            if ($comment->getParentNumber() == $page_number && !empty($comment->getMarks())) {
                 foreach ($comment->getMarks() as $mark) {
                     $filled = in_array($mark->getShape(), CorrectionMark::FILLED_SHAPES);
                     if ($filled) {
@@ -148,7 +147,7 @@ class ImageProcessing
                 
             case CorrectionMark::SHAPE_CIRCLE:
             default:
-                return new Shape\Circle($this->getShapeSymbol($mark), '#000000', 100, $pos, $label, $color);
+                return new Shape\Circle($this->getShapeSymbol($mark), '#000000', 80, $pos, $label, $color);
         }
     }
 

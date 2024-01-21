@@ -3,8 +3,13 @@
 namespace Edutiek\LongEssayAssessmentService\Writer;
 use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Base;
+use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
+use Edutiek\LongEssayAssessmentService\Data\WritingSettings;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
+use Edutiek\LongEssayAssessmentService\Data\WritingTask;
+use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfImage;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
 
@@ -65,51 +70,63 @@ class Service extends Base\BaseService
 
 
     /**
-     * Get a pdf from the text that has been processed for the corrector
-     * This PDF is intended to document the writing. It has a header and footer
-     * @see \Edutiek\LongEssayAssessmentService\Corrector\Service::getWritingAsPdf
+     * Get a combined pdf file from the written text and from an uploaded pdf file
+     *
+     * @param bool $plainContent get the content without header/footer, for image creation or download by corrector
      */
-    public function getProcessedTextAsPdf() : string
+    public function getWritingAsPdf(WritingTask $task, WrittenEssay $essay, bool $plainContent = false) : string
     {
-        $task = $this->context->getWritingTask();
-        $essay = $this->context->getWrittenEssay();
+        if ($plainContent) {
+            $pdfSettings = new PdfSettings(false, false, 0, 0, 0, 0);
+        }
+        else {
+            $pdfSettings = $this->context->getPdfSettings();
+        }
 
-        $part = (new PdfPart(
-            PdfPart::FORMAT_A4,
-            PdfPart::ORIENTATION_PORTRAIT
-        ))->withElement(
-            new PdfHtml($this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings())));
+        $pdfParts = [];
+        if (!empty($pages = $this->context->getPagesOfWriter())) {
+            foreach ($pages as $page) {
+                $image = $this->context->getPageImage($page->getKey());
+                $path = $this->getPageImagePathForPdf($image);
+                $pdfParts[] = $this->getStandardPdfPart(
+                    [new PdfImage($path,
+                        $pdfSettings->getLeftMargin(),
+                        $pdfSettings->getContentTopMargin(),
+                        210 // A4
+                        - $pdfSettings->getLeftMargin()-$pdfSettings->getRightMargin(),
+                        297 // A4
+                        - $pdfSettings->getContentTopMargin()-$pdfSettings->getContentBottomMargin()
+                    )],
+                    $pdfSettings
+                );
+            }
+        }
+        else {
+            $writingSettings = $this->context->getWritingSettings();
+            $html = $this->dependencies->html()->processWrittenText($essay, $writingSettings, true);
+            $pdfParts[] = $this->getStandardPdfPart([
+                new PdfHtml($html,
+                    $pdfSettings->getLeftMargin() + $writingSettings->getLeftCorrectionMargin(),
+                    $pdfSettings->getContentTopMargin(),
+                    210 // A4
+                        - $pdfSettings->getLeftMargin() - $pdfSettings->getRightMargin()
+                        - $writingSettings->getLeftCorrectionMargin() - $writingSettings->getRightCorrectionMargin(),
+                    297 // A4
+                        - $pdfSettings->getContentTopMargin()- $pdfSettings->getContentBottomMargin()
+                )], $pdfSettings
+                    ->withTopMargin($pdfSettings->getTopMargin() + $writingSettings->getTopCorrectionMargin())
+                    ->withBottomMargin($pdfSettings->getBottomMargin() + $writingSettings->getBottomCorrectionMargin())
+            );
+        }
 
         return $this->dependencies->pdfGeneration()->generatePdf(
-            [$part],
+            $pdfParts,
             $this->context->getSystemName(),
             $task->getWriterName(),
             $task->getTitle(),
             $task->getWriterName() . ' ' . $this->formatDates($essay->getEditStarted(), $essay->getEditEnded())
         );
     }
-
-    /**
-     * Get a plain pdf (without header/hooter) from the text that has been processed for the corrector
-     * This PDF can afterwards be converted to an image for graphical marking and commenting
-     */
-    public function getProcessedTextAsPlainPdf() : string
-    {
-        $essay = $this->context->getWrittenEssay();
-        return $this->dependencies->pdfGeneration()->generatePlainPdfFromHtml(
-            $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings()->withAddParagraphNumbers(false))
-        );
-    }
-
-    /**
-     * Get the html the text that has been processed for the corrector
-     */
-    public function getProcessedTextAsHtml() : string
-    {
-        $essay = $this->context->getWrittenEssay();
-        return  $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings());
-    }
-
 
 
 

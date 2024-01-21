@@ -2,7 +2,11 @@
 
 namespace Edutiek\LongEssayAssessmentService\Base;
 
+use Edutiek\LongEssayAssessmentService\Data\PageImage;
+use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
 use Edutiek\LongEssayAssessmentService\Internal\Authentication;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfElement;
+use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
 
 /**
@@ -127,14 +131,59 @@ abstract class BaseService
                     ->setTimestamp($start);
 
                 if ($this->context->getLanguage() == 'de') {
-                    $parts[] = $date->format('d.m.Y H:i:s');
+                    $parts[] = $date->format('d.m.Y H:i');
                 }
                 else {
-                    $parts[] = $date->format('Y-m-d H:i:s');
+                    $parts[] = $date->format('Y-m-d H:i');
                 }
             }
         }
 
         return implode(' - ', $parts);
+    }
+
+    /**
+     * Get the path of a writer page image for pdf processing
+     * @param PageImage|null $image
+     * @return string
+     */
+    protected function getPageImagePathForPdf(?PageImage $image) : string
+    {
+        if (isset($image)) {
+            return $this->dependencies->image()->getImageSrcAsPathForTCPDF(
+                $image,
+                $this->context->getAbsoluteTempPath(),
+                $this->context->getRelativeTempPath()
+            );
+        }
+        return '';
+    }
+
+    /**
+     * Get a standard pdf part
+     * It may consist of several elements and span over several pages
+     * It respects the pdf settings from the service context
+     *
+     * @param PdfElement[] $elements
+     * @return PdfPart
+     */
+    protected function getStandardPdfPart(array $elements = [], ?PdfSettings $pdfSettings = null): PdfPart
+    {
+        if (!isset($pdfSettings)) {
+            $pdfSettings = $this->context->getPdfSettings();
+        }
+
+        return (new PdfPart(
+           PdfPart::FORMAT_A4,
+           PdfPart::ORIENTATION_PORTRAIT,
+            $elements
+        ))  ->withTopMargin($pdfSettings->getContentTopMargin())
+            ->withBottomMargin($pdfSettings->getContentBottomMargin())
+            ->withLeftMargin($pdfSettings->getLeftMargin())
+            ->withRightMargin($pdfSettings->getRightMargin())
+            ->withHeaderMargin($pdfSettings->getHeaderMargin())
+            ->withFooterMargin($pdfSettings->getFooterMargin())
+            ->withPrintHeader($pdfSettings->getAddHeader())
+            ->withPrintFooter($pdfSettings->getAddFooter());
     }
 }

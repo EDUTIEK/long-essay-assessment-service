@@ -8,11 +8,9 @@ namespace Edutiek\LongEssayAssessmentService\Data;
  * The actual page content has to be provided as a PageImage object
  * @see PageImage
  */
-class CorrectionPage
+class PageData
 {
     private string $key;
-    private string $item_key;
-    
     private int $page_no;
     
     private int $width;
@@ -24,7 +22,6 @@ class CorrectionPage
     /**
      * Constructor
      * @param string   $key - unique key of the page
-     * @param string   $item_key - key of the correction item to which the page belongs
      * @param int      $page_no - sequential number of the page in the item (starting with 1)
      * @param int      $width - with of the full page image
      * @param int      $height - height of the full page image
@@ -33,7 +30,6 @@ class CorrectionPage
      */
     public function __construct(
         string $key,
-        string $item_key,
         int $page_no,
         int $width,
         int $height,
@@ -42,7 +38,6 @@ class CorrectionPage
     )
     {
         $this->key = $key;
-        $this->item_key = $item_key;
         $this->page_no = $page_no;
         $this->width = $width;
         $this->height = $height;
@@ -58,13 +53,6 @@ class CorrectionPage
         return $this->key;
     }
 
-    /**
-     * Get the key of the correction item to which the page belongs
-     */
-    public function getItemKey(): string
-    {
-        return $this->item_key;
-    }
 
     /**
      * Get the sequential number of the page in the item (starting with 1)
@@ -76,7 +64,7 @@ class CorrectionPage
     }
     
     /**
-     * Get the with of the full page image
+     * Get the width of the full page image
      */
     public function getWidth(): int
     {

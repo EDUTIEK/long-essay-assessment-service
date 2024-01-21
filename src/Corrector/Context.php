@@ -3,6 +3,7 @@
 namespace Edutiek\LongEssayAssessmentService\Corrector;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionItem;
+use Edutiek\LongEssayAssessmentService\Data\PageData;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionSettings;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionSummary;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionTask;
@@ -13,7 +14,6 @@ use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionRatingCriterion;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
-use Edutiek\LongEssayAssessmentService\Data\CorrectionPage;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPreferences;
 
 /**
@@ -91,7 +91,7 @@ interface Context extends Base\BaseContext
 
     /**
      * Get the list of pdf pages from an uploaded essay of a correction item
-     * @return CorrectionPage[]
+     * @return PageData[]
      */
     public function getPagesOfItem(string $item_key): array;
 

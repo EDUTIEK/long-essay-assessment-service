@@ -4,11 +4,11 @@ namespace Edutiek\LongEssayAssessmentService\Corrector;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\DocuItem;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
+use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfImage;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionSummary;
-use Edutiek\LongEssayAssessmentService\Data\PageImage;
 
 /**
  * API of the LongEssayAssessmentService for an LMS related to the correction of essays
@@ -71,52 +71,6 @@ class Service extends Base\BaseService
         $server->run();
     }
 
-    /**
-     * Get a pdf from a written essay
-     * @see \Edutiek\LongEssayAssessmentService\Writer\Service::getProcessedTextAsPdf
-     * 
-     * @param DocuItem    $item
-     * @param string|null $forCorrectorKey
-     * @return string
-     */
-    public function getWritingAsPdf(DocuItem $item) : string
-    {
-        $task = $item->getWritingTask();
-        $essay = $item->getWrittenEssay();
-
-        $pdfParts = [];
-
-        if (!empty($itemPages = $this->context->getPagesOfItem($item->getKey()))) {
-            foreach ($itemPages as $itemPage) {
-                $image = $this->context->getPageImage($itemPage->getKey());
-                $path = $this->getPageImagePathForPdf($image);
-                $pdfParts[] = (new PdfPart(
-                    PdfPart::FORMAT_A4,
-                    PdfPart::ORIENTATION_PORTRAIT
-                ))->withPrintHeader(true)
-                  ->withPrintFooter(true)
-                  ->withElement(new PdfImage(
-                      $path,
-                      0,0, 210,297     // A5
-                  ));
-            }
-        }
-        else {
-            $pdfParts[] = (new PdfPart(
-                PdfPart::FORMAT_A4,
-                PdfPart::ORIENTATION_PORTRAIT
-            ))->withElement(
-                new PdfHtml($this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings())));
-        }
-        
-        return $this->dependencies->pdfGeneration()->generatePdf(
-            $pdfParts,
-            $this->context->getSystemName(),
-            $task->getWriterName(),
-            $task->getTitle(),
-            $task->getWriterName() . ' ' . $this->formatDates($essay->getEditStarted(), $essay->getEditEnded())
-        );
-    }
 
     /**
      * Get a pdf from a corrected essay
@@ -179,7 +133,7 @@ class Service extends Base\BaseService
         ];
 
         $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/overview_de.html', $renderContext);
-        return [(new PdfPart())->withElement(new PdfHtml($html))];
+        return [$this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false)];
     }
 
     /**
@@ -203,8 +157,6 @@ class Service extends Base\BaseService
             'include_comment_points_relevant' => $summary->getIncludeCommentPoints() == CorrectionSummary::INCLUDE_RELEVANT,
             'include_criteria_points_info' => $summary->getIncludeCriteriaPoints() == CorrectionSummary::INCLUDE_INFO,
             'include_criteria_points_relevant' => $summary->getIncludeCriteriaPoints() == CorrectionSummary::INCLUDE_RELEVANT,
-            'include_writer_notes_info' => $summary->getIncludeWriterNotes() == CorrectionSummary::INCLUDE_INFO,
-            'include_writer_notes_relevant' => $summary->getIncludeWriterNotes() == CorrectionSummary::INCLUDE_RELEVANT,
             'positive_rating' => $this->context->getCorrectionSettings()->getPositiveRating(),
             'negative_rating' => $this->context->getCorrectionSettings()->getNegativeRating()
         ];
@@ -234,8 +186,8 @@ class Service extends Base\BaseService
             }
 
         }
-        
-        return [(new PdfPart())->withElement(new PdfHtml($html))];
+
+        return [$this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false)];
     }
 
     /**
@@ -250,7 +202,8 @@ class Service extends Base\BaseService
         ];
 
         $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_text_de.html', $renderContext);
-        return [(new PdfPart())->withElement(new PdfHtml($html))];
+
+        return [$this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false)];
     }
 
 
@@ -307,25 +260,23 @@ class Service extends Base\BaseService
                 $image = $this->context->getPageImage($itemPage->getKey());
                 $path = '';
                 if (isset($image)) {
-                    $commented = $this->dependencies->image()->applyCommentsMarks($itemPage, $image, $pageComments);
+                    $commented = $this->dependencies->image()->applyCommentsMarks($itemPage->getPageNo(), $image, $pageComments);
                     $path = $this->getPageImagePathForPdf($commented);
                 }
                 $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
 
-                $pdfParts[] = (new PdfPart(
-                    PdfPart::FORMAT_A4,
-                    PdfPart::ORIENTATION_LANDSCASPE
-                ))->withPrintHeader(false)
-                  ->withPrintFooter(true)
-                  ->withElement(new PdfImage(
-                      $path,
+                $pdfSettings = new PdfSettings(false, false, 5,5,5,5);
+                $pdfParts[] = $this->getStandardPdfPart([
+                    new PdfImage(
+                        $path,
                         0,0, 148,210     // A5
-                    ))
-                  ->withElement(new PdfHtml(
-                      $html,
-                      150
-                  ));
-            }
+                    ),
+                    new PdfHtml(
+                        $html,
+                        150
+                    )
+                ], $pdfSettings)->withOrientation(PdfPart::ORIENTATION_LANDSCASPE);
+             }
         }
         else {
             $essay = $item->getWrittenEssay();
@@ -334,31 +285,13 @@ class Service extends Base\BaseService
                 'comments' => $this->dependencies->html()->processCommentsForPdf($essay, $this->context->getWritingSettings(), $this->context->getCorrectionSettings(), $comments)
             ]];
             $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_content_de.html', $renderContext);
-            $pdfParts[] = (new PdfPart(
-                PdfPart::FORMAT_A4,
-                PdfPart::ORIENTATION_PORTRAIT
-            ))->withElement(new PdfHtml(
-                $html
-            ));
+            $pdfParts[] =
+                $this->getStandardPdfPart([
+                    new PdfHtml($html)
+                    ]
+                )->withPrintFooter(false);
         }
         
         return $pdfParts;
-    }
-    
-    /**
-     * Get the path of a writer page image for pdf processing
-     * @param PageImage|null $image
-     * @return string
-     */
-    protected function getPageImagePathForPdf(?PageImage $image) : string
-    {
-        if (isset($image)) {
-            return $this->dependencies->image()->getImageSrcAsPathForTCPDF(
-                $image,
-                $this->context->getAbsoluteTempPath(),
-                $this->context->getRelativeTempPath()
-            );
-        }
-        return '';
     }
 }

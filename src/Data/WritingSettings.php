@@ -13,14 +13,17 @@ class WritingSettings
     const FORMATTING_OPTIONS_MEDIUM = 'medium';
     const FORMATTING_OPTIONS_FULL = 'full';
 
-    protected $headline_scheme;
-    protected $formatting_options;
-    protected $notice_boards;
-    protected $copy_allowed;
+    private string $headline_scheme;
+    private string $formatting_options;
+    private int $notice_boards;
+    private bool $copy_allowed;
     private string $primary_color;
     private string $primary_text_color;
 
-    private bool $add_paragraph_numbers = true;
+    private bool $add_paragraph_numbers;
+    private bool $add_correction_margin;
+    private int $left_correction_margin;
+    private int $right_correction_margin;
 
     /**
      * Constructor (see getters)
@@ -31,7 +34,11 @@ class WritingSettings
         int $notice_boards,
         bool $copy_allowed,
         string $primary_color,
-        string $primary_text_color
+        string $primary_text_color,
+        bool $add_paragraph_numbers,
+        bool $add_correction_margin,
+        int $left_correction_margin,
+        int $right_correction_margin
     )
     {
         switch ($headline_scheme) {
@@ -65,6 +72,11 @@ class WritingSettings
         $this->copy_allowed = $copy_allowed;
         $this->primary_color = $primary_color;
         $this->primary_text_color = $primary_text_color;
+
+        $this->add_paragraph_numbers = $add_paragraph_numbers;
+        $this->add_correction_margin = $add_correction_margin;
+        $this->left_correction_margin = $left_correction_margin;
+        $this->right_correction_margin = $right_correction_margin;
     }
 
     /**
@@ -123,16 +135,54 @@ class WritingSettings
         return $this->primary_text_color;
     }
 
+    /**
+     * Get if a column with paragraph numbers should be added
+     */
     public function getAddParagraphNumbers() : bool
     {
         return $this->add_paragraph_numbers;
     }
 
-    public function withAddParagraphNumbers(bool $add_paragraph_numbers) : self
+    /**
+     * Get if a left or right correction margin should be added
+     */
+    public function getAddCorrectionMargin() : bool
     {
-        $clone = clone $this;
-        $clone->add_paragraph_numbers = $add_paragraph_numbers;
-        return $clone;
+        return $this->add_correction_margin;
     }
+
+    /**
+     * Get the height of a top correction margin (mm)
+     */
+    public function getTopCorrectionMargin() : int
+    {
+        return 5;
+    }
+
+    /**
+     * Get the height of a bottom correction margin (mm)
+     */
+    public function getBottomCorrectionMargin() : int
+    {
+        return 5;
+    }
+
+
+    /**
+     * Get the width of a left correction margin (mm)
+     */
+    public function getLeftCorrectionMargin() : int
+    {
+        return $this->add_correction_margin ? $this->left_correction_margin : 0;
+    }
+
+    /**
+     * Get the width of a right correction margin (mm)
+     */
+    public function getRightCorrectionMargin() : int
+    {
+        return $this->add_correction_margin ? $this->right_correction_margin : 0;
+    }
+
 
 }

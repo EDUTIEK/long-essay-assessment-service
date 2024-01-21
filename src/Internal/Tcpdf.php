@@ -5,12 +5,19 @@ namespace Edutiek\LongEssayAssessmentService\Internal;
 class Tcpdf extends \TCPDF
 {
     public function Footer() {
-        // Position at 15 mm from bottom
-        $this->SetY(-15);
-        $this->SetX(-20);
+
+        $margins = $this->getMargins();
+        // hack, but works with different right margins
+        $rightMargin = (int) $margins['right'] + 12;
+        $footerMargin = (int) $margins['footer'];
+
+        $this->SetY(-$footerMargin);
+        $this->SetX(-$rightMargin);
+
         // Set font
         $this->SetFont('helvetica', 'I', 8);
+
         // Page number
-        $this->Cell(0, 10, $this->getAliasNumPage().' / '.$this->getAliasNbPages(), 0, false, 'L', 0, '', 0, false, 'T', 'M');
+        $this->Cell(0, 10, $this->getAliasNumPage().' / '.$this->getAliasNbPages(), 0, false, 'L', 0, '', 0, false, 'B', 'B');
     }
 }

@@ -37,15 +37,6 @@ class PdfGeneration
 
     protected $mono_font = 'courier';
 
-    protected $header_margin = 5;
-    protected $footer_margin = 10;
-
-    protected $top_margin = 20;
-    protected $bottom_margin = 20;
-    protected $left_margin = 20;
-    protected $right_margin = 20;
-    
-
     /**
      * Generate a pdf from an HTML text
      * Compliance with PDF/A-2B shall be achieved
@@ -53,9 +44,9 @@ class PdfGeneration
      *
      * @param PdfPart[] $parts      Parts of the PDF
      * @param string $creator       Name of the creator app, e.h. name of the LMS
-     * @param string $author
-     * @param string $title
-     * @param string $subject
+     * @param string $author        Name of the author, e.g. user creating the PDF
+     * @param string $title         will be shown bold as first line in header
+     * @param string $subject       will be shown as second line in header
      * @param string $keywords
      * @return string
      */
@@ -97,7 +88,6 @@ class PdfGeneration
             $pdf->SetMargins($part->getLeftMargin(), $part->getTopMargin(), $part->getRightMargin(), true);
             $pdf->setPrintHeader($part->getPrintHeader());
             $pdf->setHeaderMargin($part->getHeaderMargin());
-
             $pdf->setPrintFooter($part->getPrintFooter());
             $pdf->setFooterMargin($part->getFooterMargin());
 
@@ -106,7 +96,7 @@ class PdfGeneration
             foreach ($part->getElements() as $element) 
             {
                 if ($element instanceof Data\PdfHtml) {
-                    $pdf->SetAutoPageBreak(true, $this->bottom_margin);
+                    $pdf->SetAutoPageBreak(true, $part->getBottomMargin());
                     $pdf->writeHtmlCell(
                         (float) $element->getWidth(),
                         (float) $element->getHeight(),
@@ -151,34 +141,9 @@ class PdfGeneration
             // important to do this here to avoid an overlapping with next part if html content is longer than a page
             $pdf->lastPage();
         }
-        
 
         // Close and output PDF document
         // This method has several options, check the source code documentation for more information.
-        return $pdf->Output('dummy.pdf', 'S');
-    }
-
-    /**
-     * Generate a plain pdf (without header/footer and margins) that can be used for conversion to a correction page
-     * @param string $html
-     * @return string
-     */
-    public function generatePlainPdfFromHtml(string $html)
-    {
-        $pdf = new Tcpdf($this->page_orientation, $this->pdf_unit, $this->page_format, true, 'UTF-8', false, 2);
-
-        $pdf->setAllowLocalFiles(true);
-        $pdf->setPrintHeader(false);
-        $pdf->setPrintFooter(false);
-        $pdf->setTopMargin($this->top_margin);
-        $pdf->SetAutoPageBreak(true, $this->bottom_margin);
-        $pdf->setLeftMargin($this->left_margin);
-        $pdf->setRightMargin($this->right_margin);
-        $pdf->AddPage();
-
-        $style = file_get_contents(__DIR__ . '/templates/plain_style.html');
-        $pdf->writeHtml($style . $html, false, true);
-
         return $pdf->Output('dummy.pdf', 'S');
     }
 }
