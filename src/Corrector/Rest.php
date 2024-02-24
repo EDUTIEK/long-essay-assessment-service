@@ -152,7 +152,8 @@ class Rest extends Base\BaseRest
                 'stitch_when_distance' => $settings->getStitchWhenDistance(),
                 'stitch_when_decimals' => $settings->getStitchWhenDecimals(),
                 'positive_rating' => $settings->getPositiveRating(),
-                'negative_rating' => $settings->getNegativeRating()
+                'negative_rating' => $settings->getNegativeRating(),
+                'headline_scheme' => $settings->getHeadlineScheme()
             ],
             'preferences' => [
                 'essay_page_zoom' => $preferences->getEssayPageZoom(),

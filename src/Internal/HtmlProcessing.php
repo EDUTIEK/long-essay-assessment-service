@@ -33,7 +33,11 @@ class HtmlProcessing
 
     /** @var ?CorrectionSettings */
     static $correctionSettings = null;
-    
+
+    /** @var bool */
+    static $forPdf = false;
+
+
     /**
      * All Comments that should be merged
      * @var CorrectionComment[]
@@ -46,7 +50,7 @@ class HtmlProcessing
      */
     static array $currentComments = [];
 
-    
+
     /**
      * Fill a template with data
      * @param string $template
@@ -73,6 +77,7 @@ class HtmlProcessing
     public function processWrittenText(?WrittenEssay $essay, WritingSettings $settings, bool $forPdf = false) : string
     {
         self::$writingSettings = $settings;
+        self::$forPdf = $forPdf;
         
         self::initParaCounter();
         self::initWordCounter();
@@ -86,14 +91,9 @@ class HtmlProcessing
         $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl', $essay ? $essay->getServiceVersion() : 0);
         $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl', $essay ? $essay->getServiceVersion() : 0, $settings->getAddParagraphNumbers(), $forPdf);
 
-        if ($forPdf) {
-            $style = file_get_contents(__DIR__ . '/styles/plain_style.html');
-            return $style . "\n" . $html;
-        }
-
-        return $html;
+        return $this->getStyles() . "\n" . $html;
     }
-    
+
 
     /**
      * Process the written text for inclusion in a pdf with comments at the side comments
@@ -102,9 +102,11 @@ class HtmlProcessing
      */
     public function processCommentsForPdf(?WrittenEssay $essay, WritingSettings $writingSettings, CorrectionSettings $correctionSettings, array $comments) : string
     {
+        self::$writingSettings = $writingSettings;
         self::$correctionSettings = $correctionSettings;
         self::$allComments = $comments;
         self::$currentComments = [];
+        self::$forPdf = true;
         
         $html = $this->processWrittenText($essay, $writingSettings, true);
         
@@ -112,9 +114,27 @@ class HtmlProcessing
         $html = str_replace('</w-p>','</span>', $html);
         $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl', $essay ? $essay->getServiceVersion() : 0);
 
-        return $html;
+        return $this->getStyles() . "\n" . $html;
     }
-    
+
+
+    /**
+     * Get styles to be added to the HTML
+     * @param WritingSettings $settings
+     * @return void
+     */
+    protected function getStyles() : string
+    {
+        if (self::$forPdf) {
+            $styles = file_get_contents(__DIR__ . '/styles/plain_style.html');
+            if (self::$writingSettings->getHeadlineScheme() == 'three') {
+                $styles .= "\n" . file_get_contents(__DIR__ . '/styles/headlines-three.html');
+            }
+            return $styles;
+        }
+        return '';
+    }
+
 
     /**
      * Get the XSLt Processor for an XSL file
@@ -153,6 +173,28 @@ class HtmlProcessing
         }
         catch (\Throwable $e) {
             return 'HTML PROCESSING ERROR:<br>' . $e->getMessage() . '<hr>' . $html;
+        }
+    }
+
+    /**
+     * Get the paragraph counter tag for PDF generation
+     * This should help for a correct vertical alignment with the counted block in TCPDF
+     */
+    static function paraCounterTag($tag) : string
+    {
+        if (self::$forPdf) {
+            switch ($tag) {
+                case 'pre':
+                case 'ol':
+                case 'ul':
+                case 'li':
+                    return 'p';
+                default:
+                    return $tag;
+            }
+        }
+        else {
+            return 'p';
         }
     }
 

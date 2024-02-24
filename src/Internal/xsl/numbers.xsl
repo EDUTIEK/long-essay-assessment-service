@@ -23,18 +23,21 @@
     </xsl:template>
 
     <!--  Add numbers to the paragraph like elements -->
-    <xsl:template match="body/h1|body/h2|body/h3|body/h4|body/h5|body/h6|body/p|body/ul|body/ol">
+    <xsl:template match="body/h1|body/h2|body/h3|body/h4|body/h5|body/h6|body/p|body/ul|body/ol|body/pre">
         <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::nextParaCounter')" />
+        <xsl:variable name="counterTag" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::ParaCounterTag', local-name())" />
         <xsl:variable name="prefix" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::nextHeadlinePrefix', local-name())" />
         <tr style="vertical-align:top;">
             <xsl:if test="$add_paragraph_numbers = 1">
-                <td style="vertical-align:top;">
+                <td style="text-align:left;">
                     <xsl:attribute name="style">
                         <xsl:if test="$for_pdf = 1">width: 10%;</xsl:if>
                         <xsl:if test="$for_pdf = 0">width: 5%;</xsl:if>
                     </xsl:attribute>
-                    <p style="text-align: left;">
-                        <span class="ParagraphNumber" style="font-family:sans-serif; font-size:10px;">
+                    <!-- for TCPDF, use correct wrapping element to set the correct line height -->
+                    <xsl:element name="{$counterTag}">
+                        <xsl:attribute name="style">text-align:left;</xsl:attribute>
+                        <span class="ParagraphNumber" style="font-family:sans-serif; font-size:10px; font-weight:normal;">
                             <xsl:choose>
                                 <xsl:when test="$service_version >= 20231218">
                                     <!-- from this version on paragraph numbers should be included to the word counter for comment markup  -->
@@ -48,9 +51,10 @@
                                     <xsl:value-of select="$counter" />
                                 </xsl:otherwise>
                             </xsl:choose>
-                    </span>
-                     <xsl:if test="$for_pdf = 1">&#160;</xsl:if><!-- for TCPDF, the non-breaking space sets the correct line height -->
-                    </p>
+                        </span>
+                        <!-- for TCPDF, use non-breaking space to set the correct line height -->
+                        <xsl:if test="$for_pdf = 1">&#160;</xsl:if>
+                    </xsl:element>
                 </td>
             </xsl:if>
             <td>

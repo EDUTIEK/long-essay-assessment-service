@@ -4,6 +4,10 @@ namespace Edutiek\LongEssayAssessmentService\Data;
 
 class CorrectionSettings
 {
+    public function isMutualVisibility() : bool
+    {
+        return $this->mutual_visibility;
+    }
     private $mutual_visibility;
     private $multi_color_highlight;
     private $max_points;
@@ -12,7 +16,7 @@ class CorrectionSettings
     private bool $stitch_when_decimals;
     private string $positive_rating;
     private string $negative_rating;
-
+    private string $headline_scheme;
 
     /**
      * Constructor (see getters)
@@ -25,7 +29,8 @@ class CorrectionSettings
         bool $stitch_when_distance,
         bool $stitch_when_decimals,
         string $positive_rating,
-        string $negative_rating
+        string $negative_rating,
+        string $headline_scheme
     )
     {
         $this->mutual_visibility = $mutual_visibility;
@@ -36,6 +41,7 @@ class CorrectionSettings
         $this->stitch_when_decimals = $stitch_when_decimals;
         $this->positive_rating = $positive_rating;
         $this->negative_rating = $negative_rating;
+        $this->headline_scheme = $headline_scheme;
     }
 
     /**
@@ -100,5 +106,11 @@ class CorrectionSettings
     public function getNegativeRating(): string
     {
         return $this->negative_rating;
+    }
+
+
+    public function getHeadlineScheme() : string
+    {
+        return $this->headline_scheme;
     }
 }

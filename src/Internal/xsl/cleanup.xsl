@@ -17,7 +17,7 @@
     </xsl:template>
 
     <!-- copy only allowed elements, without attributes -->
-    <xsl:template match="h1|h2|h3|h4|h5|h6|p|ul|ol|li|strong|em|u">
+    <xsl:template match="h1|h2|h3|h4|h5|h6|p|ul|ol|li|pre|strong|em|u">
         <xsl:if test="node()">
             <xsl:copy><xsl:apply-templates select="node()" /></xsl:copy>
         </xsl:if>

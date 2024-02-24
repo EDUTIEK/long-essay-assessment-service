@@ -4,7 +4,8 @@ namespace Edutiek\LongEssayAssessmentService\Data;
 
 class WritingSettings
 {
-    const HEADLINE_SCHEME_NONE = 'none';
+    const HEADLINE_SCHEME_SINGLE = 'single';
+    const HEADLINE_SCHEME_THREE = 'three';
     const HEADLINE_SCHEME_NUMERIC = 'numeric';
     const HEADLINE_SCHEME_EDUTIEK = 'edutiek';
 
@@ -24,6 +25,7 @@ class WritingSettings
     private bool $add_correction_margin;
     private int $left_correction_margin;
     private int $right_correction_margin;
+    private bool $allow_spellcheck;
 
     /**
      * Constructor (see getters)
@@ -38,11 +40,13 @@ class WritingSettings
         bool $add_paragraph_numbers,
         bool $add_correction_margin,
         int $left_correction_margin,
-        int $right_correction_margin
+        int $right_correction_margin,
+        bool $allow_spellcheck
     )
     {
         switch ($headline_scheme) {
-            case self::HEADLINE_SCHEME_NONE:
+            case self::HEADLINE_SCHEME_SINGLE:
+            case self::HEADLINE_SCHEME_THREE:
             case self::HEADLINE_SCHEME_NUMERIC:
             case self::HEADLINE_SCHEME_EDUTIEK:
                 $this->headline_scheme = $headline_scheme;
@@ -77,6 +81,7 @@ class WritingSettings
         $this->add_correction_margin = $add_correction_margin;
         $this->left_correction_margin = $left_correction_margin;
         $this->right_correction_margin = $right_correction_margin;
+        $this->allow_spellcheck = $allow_spellcheck;
     }
 
     /**
@@ -184,5 +189,12 @@ class WritingSettings
         return $this->add_correction_margin ? $this->right_correction_margin : 0;
     }
 
+    /**
+     * Get whether browser spellcheck is allowed
+     */
+    public function getAllowSpellcheck() : bool
+    {
+        return $this->allow_spellcheck;
+    }
 
 }

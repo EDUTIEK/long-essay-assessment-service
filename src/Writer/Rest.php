@@ -122,7 +122,8 @@ class Rest extends Base\BaseRest
                 'notice_boards' => $settings->getNoticeBoards(),
                 'copy_allowed' => $settings->isCopyAllowed(),
                 'primary_color' => $settings->getPrimaryColor(),
-                'primary_text_color' => $settings->getPrimaryTextColor()
+                'primary_text_color' => $settings->getPrimaryTextColor(),
+                'allow_spellcheck' => $settings->getAllowSpellcheck()
             ],
             'preferences' => [
                 'instructions_zoom' => $preferences->getInstructionsZoom(),
