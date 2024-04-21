@@ -9,17 +9,24 @@ use LongEssayImageSketch\ImageMagick\Sketch;
 use LongEssayImageSketch\Shape;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionMark;
 use LongEssayImageSketch\Point;
+use LongEssayPDFConverter\Ghostscript\PDFImageGS;
 
 class ImageProcessing
 {
     /**
      * Create page images from a pdf file
      * @param resource $pdf - file handlers of pdf file
+     * @param string $path_to_ghostscript ghostscript executable
+     * @param string $workdir working directory
      * @return PageImage[]
      */
-    public function createImagesFromPdf($pdf) : array
+    public function createImagesFromPdf($pdf, string $path_to_ghostscript = null, string $workdir = null) : array
     {
-        $PDFImage = new PDFImage();
+        if (!empty($path_to_ghostscript) && !empty($workdir)) {
+            $PDFImage = new PDFImageGS($path_to_ghostscript, $workdir);
+        } else {
+            $PDFImage = new PDFImage();
+        }
 
         $images = [];
         $page_descriptors = $PDFImage->asOnePerPage($pdf, PDFImage::NORMAL);

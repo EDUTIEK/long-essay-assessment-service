@@ -163,13 +163,15 @@ class Service extends Base\BaseService
     /**
      * Create the page images from pdf files
      * @param resource[] $pdfs - file handlers of pdf files
+     * @param string $path_to_ghostscript ghostscript executable
+     * @param string $workdir working directory
      * @return PageImage[]
      */
-    public function createPageImagesFromPdfs(array $pdfs) : array 
+    public function createPageImagesFromPdfs(array $pdfs, string $path_to_ghostscript = null, string $workdir = null) : array
     {
         $images = [];
         foreach ($pdfs as $pdf) {
-            $images = array_merge($images,  $this->dependencies->image()->createImagesFromPdf($pdf));
+            $images = array_merge($images,  $this->dependencies->image()->createImagesFromPdf($pdf, $path_to_ghostscript, $workdir));
         }
         return $images;
     }
