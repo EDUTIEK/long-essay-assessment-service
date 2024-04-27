@@ -194,4 +194,39 @@ class CorrectionSummary
         $clone->last_change = $last_change;
         return $clone;
     }
+
+    public function withIncludeComments(?int $include_comments) : CorrectionSummary
+    {
+        $clone = clone $this;
+        $clone->include_comments = $include_comments;
+        return $clone;
+    }
+
+    public function withIncludeCommentRatings(?int $include_comment_ratings) : CorrectionSummary
+    {
+        $clone = clone $this;
+        $clone->include_comment_ratings = $include_comment_ratings;
+        return $clone;
+    }
+
+    public function withIncludeCommentPoints(?int $include_comment_points) : CorrectionSummary
+    {
+        $clone = clone $this;
+        $clone->include_comment_points = $include_comment_points;
+        return $clone;
+    }
+
+    public function withIncludeCriteriaPoints(?int $include_criteria_points) : CorrectionSummary
+    {
+        $clone = clone $this;
+        $clone->include_criteria_points = $include_criteria_points;
+        return $clone;
+    }
+
+    public function withIncludeWriterNotes(?int $include_writer_notes) : CorrectionSummary
+    {
+        $clone = clone $this;
+        $clone->include_writer_notes = $include_writer_notes;
+        return $clone;
+    }
 }
