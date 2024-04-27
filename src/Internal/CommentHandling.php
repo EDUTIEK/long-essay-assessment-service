@@ -71,11 +71,13 @@ class CommentHandling
                     $content .= ' ' . $settings->getPositiveRating();
                 }
 
+                $content = htmlentities($content);
+
                 $color = $this->getTextBackgroundColor([$comment]);
                 $content = '<strong style="background-color:'. $color . ';">' . $content . '</strong>';
                 
                 if (!empty($comment->getComment())) {
-                    $content .= ' ' . $comment->getComment();
+                    $content .= ' ' . htmlentities($comment->getComment());
                 }
                 
                 if ($comment->showPoints() && $comment->getPoints() == 1) {
@@ -87,7 +89,10 @@ class CommentHandling
                 
                 $content = '<p style="font-family: sans-serif; font-size:10px;">' . $content . '</p>';
                 
-                $html .= $content . "\n";   
+                $html .= $content . "\n";
+
+                // remove ascii control characters except tab, cr and lf
+                $html = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $html);
             }
         }
         return $html;
