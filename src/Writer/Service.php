@@ -20,9 +20,9 @@ use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
 class Service extends Base\BaseService
 {
     /**
-     * @const Path of the frontend web app, relative to the service root directory, without starting slash
+     * @const node module name of the frontend
      */
-    public const FRONTEND_RELATIVE_PATH = 'node_modules/long-essay-assessment-writer/dist/index.html';
+    protected const FRONTEND_MODULE = 'long-essay-assessment-writer';
 
     /** @var Context */
     protected $context;

@@ -57,7 +57,7 @@ interface BaseContext
      * Get the Url of the frontend
      * This URL should point to the index.html of the frontend
      * Standard is to use the base URL of the installed LongEssayAssessmentService and add the FRONTEND_RELATIVE_PATH
-     * @see Service::FRONTEND_RELATIVE_PATH
+     * @see Service::getFrontendRelativeUrl()
      */
     public function getFrontendUrl(): string;
 

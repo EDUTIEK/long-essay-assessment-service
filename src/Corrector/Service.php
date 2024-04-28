@@ -17,9 +17,9 @@ use Edutiek\LongEssayAssessmentService\Data\CorrectionSummary;
 class Service extends Base\BaseService
 {
     /**
-     * @const Path of the frontend web app, relative to the service root directory, without starting slash
+     * @const node module name of the frontend
      */
-    public const FRONTEND_RELATIVE_PATH = 'node_modules/long-essay-assessment-corrector/dist/index.html';
+    protected const FRONTEND_MODULE = 'long-essay-assessment-corrector';
 
     /** @var Context */
     protected $context;

@@ -16,9 +16,9 @@ use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
 abstract class BaseService
 {
     /**
-     * @const Path of the frontend web app, relative to the service root directory, without starting slash
+     * @const node module name of the frontend
      */
-    public const FRONTEND_RELATIVE_PATH = '';
+    protected const FRONTEND_MODULE = '';
 
     /** @var BaseContext  */
     protected $context;
@@ -36,6 +36,20 @@ abstract class BaseService
     {
         $this->context = $context;
         $this->dependencies = new Dependencies();
+    }
+
+    /**
+     * Get the URL of the frontent, relative to the service root directory, without starting slash
+     * This add also a query string with the revision to avoid an outdated cached app
+     * @return void
+     */
+    public static function getFrontendRelativeUrl() : string
+    {
+        $json = json_decode(file_get_contents(__DIR__ . '/../../package-lock.json'), true);
+        $resolved = $json['packages']['node_modules/' . static::FRONTEND_MODULE]['resolved'] ?? '';
+        $revision = (string) parse_url($resolved, PHP_URL_FRAGMENT);
+
+        return 'node_modules/' . static::FRONTEND_MODULE . '/dist/index.html?' . substr($revision, 0, 7);
     }
 
 
@@ -58,6 +72,9 @@ abstract class BaseService
         // use this if browsers prevent cookies being saved for a redirection
         // $this->redirectByHtml($this->context->getFrontendUrl());
 
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
         header('Location: ' . $this->context->getFrontendUrl());
         exit;
     }
