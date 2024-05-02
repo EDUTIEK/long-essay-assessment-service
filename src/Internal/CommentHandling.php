@@ -71,13 +71,13 @@ class CommentHandling
                     $content .= ' ' . $settings->getPositiveRating();
                 }
 
-                $content = htmlentities($content);
+                $content = htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8');
 
                 $color = $this->getTextBackgroundColor([$comment]);
                 $content = '<strong style="background-color:'. $color . ';">' . $content . '</strong>';
                 
                 if (!empty($comment->getComment())) {
-                    $content .= ' ' . htmlentities($comment->getComment());
+                    $content .= ' ' . htmlspecialchars($comment->getComment(), ENT_NOQUOTES, 'UTF-8');
                 }
                 
                 if ($comment->showPoints() && $comment->getPoints() == 1) {
