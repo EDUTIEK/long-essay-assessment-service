@@ -102,13 +102,13 @@ class PdfGeneration
                         (float) $element->getHeight(),
                         $element->getLeft(),
                         $element->getTop(),
-                        $element->getHtml(), 
-                        0, 
-                        0,
-                        false,
-                        true,
-                        '',
-                        true
+                        $element->getHtml(),
+                        0,      // border
+                        0,      // ln
+                        false,  // fill
+                        true,   // reseth
+                        '',     // align
+                        true    // autopadding
                     );
                 }
                 elseif ($element instanceof Data\PdfImage) {

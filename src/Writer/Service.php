@@ -111,8 +111,7 @@ class Service extends Base\BaseService
                     210 // A4
                         - $pdfSettings->getLeftMargin() - $pdfSettings->getRightMargin()
                         - $writingSettings->getLeftCorrectionMargin() - $writingSettings->getRightCorrectionMargin(),
-                    297 // A4
-                        - $pdfSettings->getContentTopMargin()- $pdfSettings->getContentBottomMargin()
+                    null
                 )], $pdfSettings
                     ->withTopMargin($pdfSettings->getTopMargin() + $writingSettings->getTopCorrectionMargin())
                     ->withBottomMargin($pdfSettings->getBottomMargin() + $writingSettings->getBottomCorrectionMargin())

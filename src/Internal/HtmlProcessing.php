@@ -88,6 +88,12 @@ class HtmlProcessing
         // remove ascii control characters except tab, cr and lf
         $html = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $html);
 
+        // don't process an empty text
+        $html = trim($html);
+        if (empty($html)) {
+            return '';
+        }
+
         $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl', $essay ? $essay->getServiceVersion() : 0);
         $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl', $essay ? $essay->getServiceVersion() : 0, $settings->getAddParagraphNumbers(), $forPdf);
 
