@@ -236,20 +236,6 @@ class Service extends Base\BaseService
         if (!empty($itemPages = $this->context->getPagesOfItem($item->getKey()))) {
             foreach ($itemPages as $itemPage) {
                 $pageComments = $this->dependencies->commentHandling()->getSortedCommentsOfParent($comments, $itemPage->getPageNo());
-                $commentsContext = [];
-                foreach ($pageComments as $comment) {
-                    
-                    if ($comment->hasDetailsToShow()) {
-                        $commentsContext[] = [
-                            'label' => $comment->getLabel(),
-                            'text' => $comment->getComment(),
-                            'cardinal' => $comment->showRating() && $comment->getRating() == CorrectionComment::RATING_CARDINAL,
-                            'excellent' => $comment->showRating() && $comment->getRating() == CorrectionComment::RAITNG_EXCELLENT,
-                            'one_point' => $comment->showPoints() && $comment->getPoints() == 1,
-                            'points' => $comment->showPoints() ? $comment->getPoints() : 0
-                        ];
-                    }
-                }
                 $renderContext= [
                     'page' => [
                         'corrector_name' => $summary->getCorrectorName(),

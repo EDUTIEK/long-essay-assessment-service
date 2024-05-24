@@ -117,7 +117,7 @@ class ImageProcessing
         }
         if (!empty($shapes)) {
             $sketched = $sketch->applyShapes($shapes, $image->getImage());
-            return new PageImage($sketched, 'image/x-png', $image->getWidth(), $image->getHeight());
+            return new PageImage($sketched, 'image/jpeg', $image->getWidth(), $image->getHeight());
         }
         else {
             return $image;
