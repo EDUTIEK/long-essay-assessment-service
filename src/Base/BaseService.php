@@ -145,7 +145,7 @@ abstract class BaseService
             if (!empty($date)) {
                 $date = (new \DateTimeImmutable())
                     ->setTimezone(new \DateTimeZone($this->context->getTimezone()))
-                    ->setTimestamp($start);
+                    ->setTimestamp($date);
 
                 if ($this->context->getLanguage() == 'de') {
                     $parts[] = $date->format('d.m.Y H:i');
