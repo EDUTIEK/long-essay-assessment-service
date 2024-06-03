@@ -18,9 +18,17 @@
 
     <!-- copy only allowed elements, without attributes -->
     <xsl:template match="h1|h2|h3|h4|h5|h6|p|ul|ol|li|pre|strong|em|u">
-        <xsl:if test="node()">
-            <xsl:copy><xsl:apply-templates select="node()" /></xsl:copy>
-        </xsl:if>
+        <xsl:choose>
+            <xsl:when test="$service_version >= 20240603">
+                <!-- copy empty elements from 2024-03-06 on -->
+                <xsl:copy><xsl:apply-templates select="node()" /></xsl:copy>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:if test="node()">
+                    <xsl:copy><xsl:apply-templates select="node()" /></xsl:copy>
+                </xsl:if>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <!-- copy only content -->
