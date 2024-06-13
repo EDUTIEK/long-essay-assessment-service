@@ -88,12 +88,15 @@ class Service extends Base\BaseService
         }
         
         foreach ($item->getCorrectionSummaries() as $summary) {
-            if (!isset($forCorrectorKey) || $summary->getCorrectorKey() == $forCorrectorKey) {
+            if ($summary->isAuthorized() || $summary->getCorrectorKey() == $forCorrectorKey) {
                 $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionResult($item, $summary));
                 if ($summary->getIncludeComments()) {
                     $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionContent($item, $summary));
                 }
                 $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionText($item, $summary));
+            }
+            else {
+                $pdfParts = array_merge($pdfParts, $this->getPdfCorrectionOpen($item, $summary));
             }
         }
         
@@ -133,6 +136,21 @@ class Service extends Base\BaseService
         ];
 
         $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/overview_de.html', $renderContext);
+        return [$this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false)];
+    }
+
+    /**
+     * Get a minimal part with a correctors name and the notice that correction is not yet authorized
+     * @param DocuItem          $item
+     * @param CorrectionSummary $summary
+     * @return array
+     */
+    protected function getPdfCorrectionOpen(DocuItem $item, CorrectionSummary $summary) : array
+    {
+        $renderContext = [
+            'corrector_name' =>  $summary->getCorrectorName(),
+        ];
+        $html = $this->dependencies->html()->fillTemplate(__DIR__ . '/templates/corrector_open_de.html', $renderContext);
         return [$this->getStandardPdfPart([new PdfHtml($html)])->withPrintFooter(false)];
     }
 
