@@ -35,7 +35,7 @@
     "edutiek/long-essay-pdf-converter": "dev-main",
     "edutiek/long-essay-image-sketch": "dev-main",
     "mustache/mustache": "^2.14",
-    "slim/slim": "^3.11",
+    "slim/slim": "^4.14",
     "tecnickcom/tcpdf": "^6.3",
     "yetanotherape/diff-match-patch": "^1.1"
   }
