@@ -59,15 +59,7 @@ class Service extends Base\BaseService
      */
     public function handleRequest()
     {
-        $server = new Rest(
-            [
-                'settings' => [
-                    'displayErrorDetails' => true
-                ]
-            ]
-        );
-
-        $server->init($this->context, $this->dependencies);
+        $server = new Rest($this->context, $this->dependencies);
         $server->run();
     }
 

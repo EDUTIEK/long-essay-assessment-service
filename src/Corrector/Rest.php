@@ -8,13 +8,12 @@ use Edutiek\LongEssayAssessmentService\Data\CorrectionSummary;
 use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 use Edutiek\LongEssayAssessmentService\Internal\Authentication;
 use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Http\StatusCode;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionMark;
-use ILIAS\Plugin\LongEssayAssessment\Data\Corrector\CorrectorPreferences;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPreferences;
 
 /**
@@ -42,16 +41,16 @@ class Rest extends Base\BaseRest
      * @param Context $context
      * @param Dependencies $dependencies
      */
-    public function init(BaseContext $context, Dependencies $dependencies)
+    public function run()
     {
-        parent::init($context, $dependencies);
-        $this->get('/data', [$this,'getData']);
-        $this->get('/item/{key}', [$this,'getItem']);
-        $this->get('/file/{key}', [$this,'getFile']);
-        $this->get('/image/{item_key}/{key}', [$this,'getPageImage']);
-        $this->get('/thumb/{item_key}/{key}', [$this,'getPageThumb']);
-        $this->put('/changes/{key}', [$this, 'putChanges']);
-        $this->put('/stitch/{key}', [$this, 'putStitchDecision']);
+        $this->app->get('/data', [$this,'getData']);
+        $this->app->get('/item/{key}', [$this,'getItem']);
+        $this->app->get('/file/{key}', [$this,'getFile']);
+        $this->app->get('/image/{item_key}/{key}', [$this,'getPageImage']);
+        $this->app->get('/thumb/{item_key}/{key}', [$this,'getPageThumb']);
+        $this->app->put('/changes/{key}', [$this, 'putChanges']);
+        $this->app->put('/stitch/{key}', [$this, 'putStitchDecision']);
+        $this->app->run();
     }
 
     /**

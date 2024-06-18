@@ -6,17 +6,19 @@ use Edutiek\LongEssayAssessmentService\Data\EnvResource;
 use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 use Edutiek\LongEssayAssessmentService\Internal\Authentication;
 use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 use Slim\App;
-use Slim\Http\Request;
-use Slim\Http\Response;
 use Slim\Http\StatusCode;
-
+use Slim\Factory\AppFactory;
 
 /**
  * Base class for the REST handlers of the writer and corrector apps
  */
-abstract class BaseRest extends App
+abstract class BaseRest
 {
+    protected App $app;
+
     /** @var BaseContext */
     protected $context;
 
@@ -38,13 +40,19 @@ abstract class BaseRest extends App
     /** @var string */
     protected $purpose;
 
-    /**
-     * Init server / add handlers
-     */
-    public function init(BaseContext $context, Dependencies $dependencies)
+
+
+    public function __construct(BaseContext $context, Dependencies $dependencies)
     {
         $this->context = $context;
         $this->dependencies = $dependencies;
+
+        $this->app = AppFactory::create();
+        $this->app->addRoutingMiddleware();
+        $this->app->addErrorMiddleware(true, true, true);
+
+        $parts = parse_url($context->getBackendUrl());
+        $this->app->setBasePath($parts['path']);
     }
 
 
@@ -61,7 +69,7 @@ abstract class BaseRest extends App
         $this->request = $request;
         $this->response = $response;
         $this->args = $args;
-        $this->params = $request->getParams();
+        $this->params = $request->getQueryParams();
         $this->purpose = $purpose;
 
         $user_key = $this->params['LongEssayUser'];
@@ -103,14 +111,19 @@ abstract class BaseRest extends App
             $this->setResponse(StatusCode::HTTP_UNAUTHORIZED, 'current token is expired');
             return false;
         }
-//        todo: client ip may change in mobile clients, perhaps make the check configurable
-//        if (!$this->dependencies->auth()->checkRemoteAddress($token)) {
-//            $this->setResponse(StatusCode::HTTP_UNAUTHORIZED, 'client ip is not valid');
-//            return false;
-//        }
         if (!$this->dependencies->auth()->checkSignature($token, $user_key, $env_key, $signature)) {
             $this->setResponse(StatusCode::HTTP_UNAUTHORIZED, 'signature is wrong');
             return false;
+        }
+
+        // Parse a JSON body
+        // see https://www.slimframework.com/docs/v4/objects/request.html#the-request-body
+        $contentType = $this->request->getHeaderLine('Content-Type');
+        if (strstr($contentType, 'application/json')) {
+            $contents = json_decode(file_get_contents('php://input'), true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $this->request = $this->request->withParsedBody($contents);
+            }
         }
 
         return true;
@@ -157,11 +170,12 @@ abstract class BaseRest extends App
      */
     protected function setResponse(int $status,  $json = []): Response
     {
-        return $this->response = $this->response
+        $this->response = $this->response
             ->withHeader('Content-Type', 'application/json')
             ->withHeader('LongEssayTime', (string) time())
-            ->withStatus($status)
-            ->withJson($json);
+            ->withStatus($status);
+        $this->response->getBody()->write(json_encode($json));
+        return $this->response;
     }
 
     /**

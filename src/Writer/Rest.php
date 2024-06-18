@@ -3,13 +3,11 @@
 namespace Edutiek\LongEssayAssessmentService\Writer;
 
 use Edutiek\LongEssayAssessmentService\Base;
-use Edutiek\LongEssayAssessmentService\Base\BaseContext;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
 use Edutiek\LongEssayAssessmentService\Internal\Authentication;
-use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Http\StatusCode;
 use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Data\WrittenNote;
@@ -31,16 +29,16 @@ class Rest extends Base\BaseRest
     /**
      * Init server / add handlers
      */
-    public function init(BaseContext $context, Dependencies $dependencies)
+    public function run()
     {
-        parent::init($context, $dependencies);
-        $this->get('/data', [$this,'getData']);
-        $this->get('/update', [$this,'getUpdate']);
-        $this->get('/file/{key}', [$this,'getFile']);
-        $this->put('/start', [$this,'putStart']);
-        $this->put('/steps', [$this,'putSteps']);
-        $this->put('/changes', [$this, 'putChanges']);
-        $this->put('/final', [$this,'putFinal']);
+        $this->app->get('/data', [$this,'getData']);
+        $this->app->get('/update', [$this,'getUpdate']);
+        $this->app->get('/file/{key}', [$this,'getFile']);
+        $this->app->put('/start', [$this,'putStart']);
+        $this->app->put('/steps', [$this,'putSteps']);
+        $this->app->put('/changes', [$this, 'putChanges']);
+        $this->app->put('/final', [$this,'putFinal']);
+        $this->app->run();
     }
 
     /**

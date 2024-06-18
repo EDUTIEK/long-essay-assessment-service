@@ -4,13 +4,11 @@ namespace Edutiek\LongEssayAssessmentService\Writer;
 use DiffMatchPatch\DiffMatchPatch;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
-use Edutiek\LongEssayAssessmentService\Data\WritingSettings;
 use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
 use Edutiek\LongEssayAssessmentService\Data\WritingTask;
 use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfImage;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
 
 /**
@@ -56,15 +54,7 @@ class Service extends Base\BaseService
      */
     public function handleRequest()
     {
-        $server = new Rest(
-            [
-                'settings' => [
-                    'displayErrorDetails' => true
-                ]
-            ]
-        );
-
-        $server->init($this->context, $this->dependencies);
+        $server = new Rest($this->context, $this->dependencies);
         $server->run();
     }
 
