@@ -1,4 +1,9 @@
+{{#corrector_name}}
 <h1>Korrektur von {{corrector_name}}</h1>
+{{/corrector_name}}
+{{^corrector_name}}
+<h1>Korrektur</h1>
+{{/corrector_name}}
 
 {{#is_authorized}}
 <b>Korrigiert:</b> {{last_change}}<br>

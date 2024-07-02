@@ -1,5 +1,11 @@
 {{#page}}
-<p><strong>Seite {{page_no}} von Korrektor {{corrector_name}}</strong></p>
+{{#corrector_name}}
+<p><strong>Seite {{page_no}} der Korrektur</strong></p>
+{{/corrector_name}}
+{{^corrector_name}}
+<p><strong>Seite {{page_no}} von {{corrector_name}}</strong></p>
+{{/corrector_name}}
+
 {{{comments}}}
 {{/page}}
 

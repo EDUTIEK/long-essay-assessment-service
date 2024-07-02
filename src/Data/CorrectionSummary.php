@@ -229,4 +229,19 @@ class CorrectionSummary
         $clone->include_writer_notes = $include_writer_notes;
         return $clone;
     }
+
+    public function withCorrectorName(?string $corrector_name) : CorrectionSummary
+    {
+        $clone = clone $this;
+        $clone->corrector_name = $corrector_name;
+        return $clone;
+    }
+
+    public function withGradeTitle(?string $grade_title) : CorrectionSummary
+    {
+        $clone = clone $this;
+        $clone->grade_title = $grade_title;
+        return $clone;
+    }
+
 }
