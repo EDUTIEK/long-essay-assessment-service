@@ -22,11 +22,22 @@
 {{#correction_finalized}}
 <br>
 <b>Korrektur beeendet:</b> {{correction_finalized}}<br>
-<b>Korrektur beeendet durch:</b> {{correction_finalized_by}}<br>
-<b>Finale Punktzahl:</b> {{final_points}}<br>
-<b>Finale Bewertung:</b> {{final_grade}}<br>
+
+{{#correction_finalized_by}}
+<b>Korrektur beeendet durch:</b> {{.}}<br>
+{{/correction_finalized_by}}
+
+{{#final_points}}
+<b>Finale Punktzahl:</b> {{.}}<br>
+{{/final_points}}
+
+{{#final_grade}}
+<b>Finale Bewertung:</b> {{.}}<br>
+{{/final_grade}}
+
 {{#stitch_comment}}
 <b>Stichentscheid mit Begründung:</b><br> {{.}}
 {{/stitch_comment}}
+
 {{/correction_finalized}}
 {{/correction}}

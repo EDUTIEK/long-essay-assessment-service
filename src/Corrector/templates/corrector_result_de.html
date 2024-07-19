@@ -7,8 +7,15 @@
 
 {{#is_authorized}}
 <b>Korrigiert:</b> {{last_change}}<br>
-<b>Vergebene Punkte:</b> {{points}}<br>
-<b>Bewertung:</b> {{grade_title}}<br>
+
+{{#points}}
+<b>Vergebene Punkte:</b> {{.}}<br>
+{{/points}}
+
+{{#grade_title}}
+<b>Bewertung:</b> {{.}}<br>
+{{/grade_title}}
+
 {{/is_authorized}}
 {{^is_authorized}}
 <b>Korrektur:</b> noch nicht abgeschlossen<br>
