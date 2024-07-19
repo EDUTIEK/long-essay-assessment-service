@@ -12,8 +12,7 @@ class CorrectionPreferences
     private int $include_comment_ratings;     
     private int $include_comment_points;      
     private int $include_criteria_points;     
-    private int $include_writer_notes;       
-    
+
     /**
      * Constructor (see getters)
      */
@@ -25,8 +24,7 @@ class CorrectionPreferences
         int $include_comments = CorrectionSummary::INCLUDE_INFO,            
         int $include_comment_ratings = CorrectionSummary::INCLUDE_INFO,     
         int $include_comment_points = CorrectionSummary::INCLUDE_INFO,      
-        int $include_criteria_points = CorrectionSummary::INCLUDE_INFO,     
-        int $include_writer_notes = CorrectionSummary::INCLUDE_INFO       
+        int $include_criteria_points = CorrectionSummary::INCLUDE_INFO
     )
     {
         $this->corrector_key = $corrector_key;
@@ -37,7 +35,6 @@ class CorrectionPreferences
         $this->include_comment_ratings = $include_comment_ratings;
         $this->include_comment_points = $include_comment_points;
         $this->include_criteria_points = $include_criteria_points;
-        $this->include_writer_notes = $include_writer_notes;
     }
 
     /**
@@ -103,13 +100,4 @@ class CorrectionPreferences
     {
         return $this->include_criteria_points;
     }
-
-    /**
-     * Get how to include writer notes in the authorized correction
-     */
-    public function getIncludeWriterNotes(): int
-    {
-        return $this->include_writer_notes;
-    }
-
 }

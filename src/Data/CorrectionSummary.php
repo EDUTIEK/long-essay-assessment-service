@@ -28,8 +28,7 @@ class CorrectionSummary
     private ?int $include_comment_ratings;
     private ?int $include_comment_points;
     private ?int $include_criteria_points;
-    private ?int $include_writer_notes;
-    
+
     private ?string $corrector_name;
     private ?string $grade_title;
 
@@ -46,7 +45,6 @@ class CorrectionSummary
         ?int $include_comment_ratings = null,
         ?int $include_comment_points = null,
         ?int $include_criteria_points = null,
-        ?int $include_writer_notes = null,
 
         // for documentation
         ?string $corrector_name = '',
@@ -64,8 +62,7 @@ class CorrectionSummary
         $this->include_comment_ratings = $include_comment_ratings;
         $this->include_comment_points = $include_comment_points;
         $this->include_criteria_points = $include_criteria_points;
-        $this->include_writer_notes = $include_writer_notes;
-        
+
         $this->corrector_name = $corrector_name;
         $this->grade_title = $grade_title;
 
@@ -158,14 +155,6 @@ class CorrectionSummary
     {
         return $this->include_criteria_points;
     }
-    
-    /**
-     * Get the level of including writer notes to the documentation
-     */
-    public function getIncludeWriterNotes(): ?int
-    {
-        return $this->include_writer_notes;
-    }
 
     /**
      * Get the corrector name
@@ -220,13 +209,6 @@ class CorrectionSummary
     {
         $clone = clone $this;
         $clone->include_criteria_points = $include_criteria_points;
-        return $clone;
-    }
-
-    public function withIncludeWriterNotes(?int $include_writer_notes) : CorrectionSummary
-    {
-        $clone = clone $this;
-        $clone->include_writer_notes = $include_writer_notes;
         return $clone;
     }
 

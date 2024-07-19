@@ -15,6 +15,7 @@ use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionMark;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPreferences;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionSettings;
 
 /**
  * Handler of REST requests from the corrector app
@@ -152,7 +153,12 @@ class Rest extends Base\BaseRest
                 'stitch_when_decimals' => $settings->getStitchWhenDecimals(),
                 'positive_rating' => $settings->getPositiveRating(),
                 'negative_rating' => $settings->getNegativeRating(),
-                'headline_scheme' => $settings->getHeadlineScheme()
+                'headline_scheme' => $settings->getHeadlineScheme(),
+                'fixed_inclusions' => $settings->hasFixedInclusions(),
+                'include_comments' => $settings->getIncludeComments(),
+                'include_comment_ratings' => $settings->getIncludeCommentRatings(),
+                'include_comment_points' => $settings->getIncludeCommentPoints(),
+                'include_criteria_points' => $settings->getIncludeCriteriaPoints()
             ],
             'preferences' => [
                 'essay_page_zoom' => $preferences->getEssayPageZoom(),
@@ -161,8 +167,7 @@ class Rest extends Base\BaseRest
                 'include_comments' => $preferences->getIncludeComments(),
                 'include_comment_ratings' => $preferences->getIncludeCommentRatings(),
                 'include_comment_points' => $preferences->getIncludeCommentPoints(),
-                'include_criteria_points' => $preferences->getIncludeCriteriaPoints(),
-                'include_writer_notes' => $preferences->getIncludeWriterNotes()
+                'include_criteria_points' => $preferences->getIncludeCriteriaPoints()
             ],
             'resources' => $resources,
             'levels' => $levels,
@@ -247,8 +252,7 @@ class Rest extends Base\BaseRest
                             'include_comments' => $summary->getIncludeComments(),
                             'include_comment_ratings' => $summary->getIncludeCommentRatings(),
                             'include_comment_points' => $summary->getIncludeCommentPoints(),
-                            'include_criteria_points' => $summary->getIncludeCriteriaPoints(),
-                            'include_writer_notes' => $summary->getIncludeWriterNotes(),
+                            'include_criteria_points' => $summary->getIncludeCriteriaPoints()
                         ];
                     }
                     else {
@@ -264,8 +268,7 @@ class Rest extends Base\BaseRest
                             'include_comments' => null,
                             'include_comment_ratings' => null,
                             'include_comment_points' => null,
-                            'include_criteria_points' => null,
-                            'include_writer_notes' => null,
+                            'include_criteria_points' => null
                         ];
                     }
                     
@@ -477,8 +480,7 @@ class Rest extends Base\BaseRest
                             isset($data['include_comments']) ? (int) $data['include_comments'] : null,
                             isset($data['include_comment_ratings']) ? (int) $data['include_comment_ratings'] : null,
                             isset($data['include_comment_points']) ? (int) $data['include_comment_points'] : null,
-                            isset($data['include_criteria_points']) ? (int) $data['include_criteria_points'] : null,
-                            isset($data['include_writer_notes']) ? (int) $data['include_writer_notes'] : null
+                            isset($data['include_criteria_points']) ? (int) $data['include_criteria_points'] : null
                         );
 
                         if ($this->context->saveCorrectionSummary($summary)) {
@@ -502,8 +504,7 @@ class Rest extends Base\BaseRest
                     (int) $data['include_comments'],
                     (int) $data['include_comment_ratings'],
                     (int) $data['include_comment_points'],
-                    (int) $data['include_criteria_points'],
-                    (int) $data['include_writer_notes']
+                    (int) $data['include_criteria_points']
                 );
                 if ($this->context->saveCorrectionPreferences($preferences)) {
                     $preferences_done[$change['key']] = $change['key'];
