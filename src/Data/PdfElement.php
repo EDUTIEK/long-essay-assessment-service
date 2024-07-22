@@ -1,6 +1,6 @@
 <?php
 
-namespace Edutiek\LongEssayAssessmentService\Internal\Data;
+namespace Edutiek\LongEssayAssessmentService\Data;
 
 abstract class PdfElement
 {

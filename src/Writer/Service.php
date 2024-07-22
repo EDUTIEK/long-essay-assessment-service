@@ -8,8 +8,8 @@ use Edutiek\LongEssayAssessmentService\Data\WritingStep;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
 use Edutiek\LongEssayAssessmentService\Data\WritingTask;
 use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfImage;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
+use Edutiek\LongEssayAssessmentService\Data\PdfImage;
+use Edutiek\LongEssayAssessmentService\Data\PdfHtml;
 
 /**
  * API of the LongEssayAssessmentService for an LMS related to the writing of essays

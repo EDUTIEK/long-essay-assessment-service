@@ -1,9 +1,9 @@
 <?php
 
-namespace Edutiek\LongEssayAssessmentService\Internal;
+namespace Edutiek\LongEssayAssessmentService\Base;
 
-
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
+use Edutiek\LongEssayAssessmentService\Data;
+use Edutiek\LongEssayAssessmentService\Internal\Tcpdf;
 
 class PdfGeneration
 {
@@ -42,7 +42,7 @@ class PdfGeneration
      * Compliance with PDF/A-2B shall be achieved
      * @see https://de.wikipedia.org/wiki/PDF/A
      *
-     * @param PdfPart[] $parts      Parts of the PDF
+     * @param Data\PdfPart[] $parts      Parts of the PDF
      * @param string $creator       Name of the creator app, e.h. name of the LMS
      * @param string $author        Name of the author, e.g. user creating the PDF
      * @param string $title         will be shown bold as first line in header

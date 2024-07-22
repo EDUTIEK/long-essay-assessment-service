@@ -1,6 +1,6 @@
 <?php
 
-namespace Edutiek\LongEssayAssessmentService\Internal\Data;
+namespace Edutiek\LongEssayAssessmentService\Data;
 
 class PdfHtml extends PdfElement
 {

@@ -2,6 +2,8 @@
 
 namespace Edutiek\LongEssayAssessmentService\Internal;
 
+use Edutiek\LongEssayAssessmentService\Base\PdfGeneration;
+
 class Dependencies
 {
     private static self $instance;
@@ -15,10 +17,10 @@ class Dependencies
 
     /** @var ImageProcessing */
     protected $imageProcessing;
-    
+
     /** @var PdfGeneration */
     protected $pdfGeneration;
-    
+
     /** @var CommentHandling */
     protected $commentHandling;
 

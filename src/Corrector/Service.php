@@ -5,9 +5,9 @@ use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\DocuItem;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfHtml;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfImage;
+use Edutiek\LongEssayAssessmentService\Data\PdfPart;
+use Edutiek\LongEssayAssessmentService\Data\PdfHtml;
+use Edutiek\LongEssayAssessmentService\Data\PdfImage;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionSummary;
 
 /**

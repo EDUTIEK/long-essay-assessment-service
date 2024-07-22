@@ -1,6 +1,6 @@
 <?php
 
-namespace Edutiek\LongEssayAssessmentService\Internal\Data;
+namespace Edutiek\LongEssayAssessmentService\Data;
 
 /**
  * Part that has to be added to the Pdf

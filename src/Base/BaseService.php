@@ -5,9 +5,10 @@ namespace Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\PageImage;
 use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
 use Edutiek\LongEssayAssessmentService\Internal\Authentication;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfElement;
-use Edutiek\LongEssayAssessmentService\Internal\Data\PdfPart;
+use Edutiek\LongEssayAssessmentService\Data\PdfElement;
+use Edutiek\LongEssayAssessmentService\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Internal\Dependencies;
+use Edutiek\LongEssayAssessmentService\Base\PdfGeneration;
 
 /**
  * Common API of the Writer and Corrector services
@@ -160,6 +161,14 @@ abstract class BaseService
     }
 
     /**
+     * Get the object for PDG generation
+     */
+    public function getPdfGeneration() : PdfGeneration
+    {
+        return $this->dependencies->pdfGeneration();
+    }
+
+    /**
      * Get the path of a writer page image for pdf processing
      * @param PageImage|null $image
      * @return string
@@ -182,9 +191,8 @@ abstract class BaseService
      * It respects the pdf settings from the service context
      *
      * @param PdfElement[] $elements
-     * @return PdfPart
      */
-    protected function getStandardPdfPart(array $elements = [], ?PdfSettings $pdfSettings = null): PdfPart
+    public function getStandardPdfPart(array $elements = [], ?PdfSettings $pdfSettings = null): PdfPart
     {
         if (!isset($pdfSettings)) {
             $pdfSettings = $this->context->getPdfSettings();
