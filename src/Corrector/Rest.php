@@ -205,9 +205,7 @@ class Rest extends Base\BaseRest
 
             if ($item->getKey() == $args['key']) {
 
-                $task = $this->context->getCorrectionTask();
                 $essay = $this->context->getEssayOfItem($item->getKey());
-
 
                 $pages = [];
                 foreach ($this->context->getPagesOfItem($item->getKey()) as $page) {
@@ -302,14 +300,6 @@ class Rest extends Base\BaseRest
                 }
 
                 $json = [
-                    'task' => [
-                        'title' => $task->getTitle(),
-                        'instructions' => $task->getInstructions(),
-                        'solution' => $task->getSolution(),
-                        'correction_end' => $task->getCorrectionEnd(),
-                        'correction_allowed' => $item->isCorrectionAllowed(),
-                        'authorization_allowed' => $item->isAuthorizationAllowed()
-                    ],
                     'essay' => [
                         'text'=> isset($essay) ? $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings()) : null,
                         'started' => isset($essay) ? $essay->getEditStarted() : null,
