@@ -131,7 +131,9 @@ class Rest extends Base\BaseRest
         foreach ($this->context->getCorrectionItems(true) as $item) {
             $items[] = [
                 'key' => $item->getKey(),
-                'title' => $item->getTitle()
+                'title' => $item->getTitle(),
+                'correction_allowed' => $item->isCorrectionAllowed(),
+                'authorization_allowed' => $item->isAuthorizationAllowed()
             ];
         }
 
@@ -300,6 +302,12 @@ class Rest extends Base\BaseRest
                 }
 
                 $json = [
+                    'item' => [
+                        'key' => $item->getKey(),
+                        'title' => $item->getTitle(),
+                        'correction_allowed' => $item->isCorrectionAllowed(),
+                        'authorization_allowed' => $item->isAuthorizationAllowed()
+                    ],
                     'essay' => [
                         'text'=> isset($essay) ? $this->dependencies->html()->processWrittenText($essay, $this->context->getWritingSettings()) : null,
                         'started' => isset($essay) ? $essay->getEditStarted() : null,
