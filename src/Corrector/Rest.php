@@ -425,7 +425,7 @@ class Rest extends Base\BaseRest
             switch ($change['action'] ?? '') {
                 case 'save':
                     if (!empty($data = $change['payload'] ?? null)) {
-                        if ($data['item_key'] != $change['item_key'] || $data['corrector_key'] != $this->currentCorrectorKey) {
+                        if ($data['item_key'] != $change['item_key']) {
                             continue 2;
                         }
                         $points = new CorrectionPoints(
