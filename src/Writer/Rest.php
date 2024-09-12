@@ -125,7 +125,8 @@ class Rest extends Base\BaseRest
             ],
             'preferences' => [
                 'instructions_zoom' => $preferences->getInstructionsZoom(),
-                'editor_zoom' => $preferences->getEditorZoom()
+                'editor_zoom' => $preferences->getEditorZoom(),
+                'word_count_enabled' => $preferences->getWordCountEnabled()
             ],
             'task' => [
                 'title' => $task->getTitle(),
@@ -310,8 +311,9 @@ class Rest extends Base\BaseRest
         foreach ((array) $body['preferences'] as $change) {
             if (!empty($data = $change['payload'] ?? null)) {
                 $preferences = new WritingPreferences(
-                    (float) $data['instructions_zoom'],
-                    (float) $data['editor_zoom'],
+                    (float) ($data['instructions_zoom'] ?? 1),
+                    (float) ($data['editor_zoom'] ?? 1),
+                    (bool) ($data['word_count_enabled'] ?? false),
                 );
                 $this->context->setWritingPreferences($preferences);
                 $preferences_done[$change['key']] = $change['key'];
