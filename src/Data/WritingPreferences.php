@@ -14,12 +14,14 @@ class WritingPreferences
     public function __construct(
         float $instructions_zoom = 0.25,           
         float $editor_zoom =  1,
-        bool $word_count_enabled = false
+        bool $word_count_enabled = false,
+        bool $word_count_characters = false
     )
     {
         $this->instructions_zoom = $instructions_zoom;
         $this->editor_zoom = $editor_zoom;
         $this->word_count_enabled = $word_count_enabled;
+        $this->word_count_characters = $word_count_characters;
     }
     
     /**
@@ -39,4 +41,10 @@ class WritingPreferences
     {
         return $this->word_count_enabled;
     }
+
+    public function getWordCountCharacters(): bool
+    {
+        return $this->word_count_characters;
+    }
+
 }
