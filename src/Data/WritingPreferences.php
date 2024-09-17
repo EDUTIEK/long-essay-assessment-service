@@ -7,6 +7,7 @@ class WritingPreferences
     private float $instructions_zoom;
     private float $editor_zoom;
     private bool $word_count_enabled;
+    private bool $word_count_characters;
 
     /**
      * Constructor (see getters)
