@@ -75,6 +75,14 @@ class Rest extends Base\BaseRest
         $task = $this->context->getWritingTask();
         $essay = $this->context->getWrittenEssay();
 
+        $alerts = [];
+        foreach ($this->context->getAlerts() as $alert) {
+            $alerts[] = [
+                'message' => $alert->getMessage(),
+                'time' => $alert->getTime(),
+                'key' => $alert->getKey()
+            ];
+        }
 
         $notes = [];
         foreach ($this->context->getWrittenNotes() as $note) {
@@ -142,6 +150,7 @@ class Rest extends Base\BaseRest
                 'authorized' => $essay->isAuthorized(),
                 'steps' => $steps,
             ],
+            'alerts' => $alerts,
             'notes' => $notes,
             'resources' => $resources,
         ];
