@@ -94,8 +94,11 @@ class HtmlProcessing
             return '';
         }
 
-        $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl', $essay ? $essay->getServiceVersion() : 0);
-        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl', $essay ? $essay->getServiceVersion() : 0, $settings->getAddParagraphNumbers(), $forPdf);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl',
+            $essay ? $essay->getServiceVersion() : 0);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl',
+            $essay ? $essay->getServiceVersion() : 0,
+            $settings->getAddParagraphNumbers(), $forPdf);
 
         return $this->getStyles() . "\n" . $html;
     }
@@ -118,7 +121,9 @@ class HtmlProcessing
         
         $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','<span data-w="$1" data-p="$2">', $html);
         $html = str_replace('</w-p>','</span>', $html);
-        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl', $essay ? $essay->getServiceVersion() : 0);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl',
+            $essay ? $essay->getServiceVersion() : 0,
+            $writingSettings->getAddParagraphNumbers());
 
         return $this->getStyles() . "\n" . $html;
     }
@@ -194,7 +199,8 @@ class HtmlProcessing
                 case 'ol':
                 case 'ul':
                 case 'li':
-                    return 'p';
+                case 'p':
+                    return 'div';
                 default:
                     return $tag;
             }

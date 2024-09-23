@@ -18,7 +18,19 @@
 
     <xsl:template match="body">
         <table border="0" style="border-spacing: 10px;">
-            <xsl:apply-templates select="node()" />
+            <xsl:choose>
+                <xsl:when test="$add_paragraph_numbers = 1">
+                    <thead class="sr-only">
+                        <tr><td>Absatz</td><td>Inhalt</td></tr>
+                    </thead>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:attribute name="role">presentation</xsl:attribute>
+                </xsl:otherwise>
+            </xsl:choose>
+            <tbody>
+                <xsl:apply-templates select="node()" />
+            </tbody>
         </table>
     </xsl:template>
 
@@ -28,6 +40,9 @@
         <xsl:variable name="counterTag" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::ParaCounterTag', local-name())" />
         <xsl:variable name="prefix" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::nextHeadlinePrefix', local-name())" />
         <tr style="vertical-align:top;">
+            <xsl:attribute name="data-p">
+                <xsl:value-of select="$counter" />
+            </xsl:attribute>
             <xsl:if test="$add_paragraph_numbers = 1">
                 <td style="text-align:left;">
                     <xsl:attribute name="style">
@@ -37,7 +52,7 @@
                     <!-- for TCPDF, use correct wrapping element to set the correct line height -->
                     <xsl:element name="{$counterTag}">
                         <xsl:attribute name="style">text-align:left;</xsl:attribute>
-                        <span class="ParagraphNumber" style="font-family:sans-serif; font-size:10px; font-weight:normal;">
+                        <span class="ParagraphNumber" style="font-family:sans-serif; font-size:0.6em; font-weight:normal;">
                             <xsl:choose>
                                 <xsl:when test="$service_version >= 20231218">
                                     <!-- from this version on paragraph numbers should be included to the word counter for comment markup  -->
