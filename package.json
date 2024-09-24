@@ -2,7 +2,7 @@
   "name": "long-essay-assessment-service",
   "version": "1.0.1",
   "dependencies": {
-    "long-essay-assessment-corrector": "github:EDUTIEK/long-essay-assessment-corrector",
+    "long-essay-assessment-corrector": "github:EDUTIEK/long-essay-assessment-corrector#ally",
     "long-essay-assessment-writer": "github:EDUTIEK/long-essay-assessment-writer#ally"
   }
 }
