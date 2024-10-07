@@ -157,7 +157,7 @@ abstract class BaseService
             }
         }
 
-        return implode(' - ', $parts);
+        return implode(' - ', array_unique($parts));
     }
 
     /**
