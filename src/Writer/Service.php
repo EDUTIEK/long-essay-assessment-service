@@ -63,8 +63,9 @@ class Service extends Base\BaseService
      * Get a combined pdf file from the written text and from an uploaded pdf file
      *
      * @param bool $plainContent get the content without header/footer, for image creation or download by corrector
+     * @param bool $onlyText use just the written text of an essay. Don't use the uploaded PDF and don't create page images
      */
-    public function getWritingAsPdf(WritingTask $task, WrittenEssay $essay, bool $plainContent = false) : string
+    public function getWritingAsPdf(WritingTask $task, WrittenEssay $essay, bool $plainContent = false, bool $onlyText = false) : string
     {
         if ($plainContent) {
             $pdfSettings = new PdfSettings(false, false, 0, 0, 0, 0);
@@ -74,7 +75,7 @@ class Service extends Base\BaseService
         }
 
         $pdfParts = [];
-        if (!empty($pages = $this->context->getPagesOfWriter())) {
+        if (!$onlyText && !empty($pages = $this->context->getPagesOfWriter())) {
             foreach ($pages as $page) {
                 $image = $this->context->getPageImage($page->getKey());
                 $path = $this->getPageImagePathForPdf($image);
