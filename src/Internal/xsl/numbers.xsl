@@ -16,22 +16,11 @@
         <xsl:apply-templates select="node()" />
     </xsl:template>
 
+    <!-- use specialized table elements for accessibility -->
     <xsl:template match="body">
-        <table border="0" style="border-spacing: 10px;">
-            <xsl:choose>
-                <xsl:when test="$add_paragraph_numbers = 1">
-                    <thead class="sr-only">
-                        <tr><td>Absatz</td><td>Inhalt</td></tr>
-                    </thead>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:attribute name="role">presentation</xsl:attribute>
-                </xsl:otherwise>
-            </xsl:choose>
-            <tbody>
-                <xsl:apply-templates select="node()" />
-            </tbody>
-        </table>
+        <xlas-table border="0" style="border-spacing: 10px;">
+            <xsl:apply-templates select="node()" />
+        </xlas-table>
     </xsl:template>
 
     <!--  Add numbers to the paragraph like elements -->
@@ -39,12 +28,12 @@
         <xsl:variable name="counter" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::nextParaCounter')" />
         <xsl:variable name="counterTag" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::ParaCounterTag', local-name())" />
         <xsl:variable name="prefix" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::nextHeadlinePrefix', local-name())" />
-        <tr style="vertical-align:top;">
+        <xlas-tr class="long-essay-content-row" style="vertical-align:top;">
             <xsl:attribute name="data-p">
                 <xsl:value-of select="$counter" />
             </xsl:attribute>
             <xsl:if test="$add_paragraph_numbers = 1">
-                <td style="text-align:left;">
+                <xlas-td class="long-essay-counter-column" style="text-align:left;">
                     <xsl:attribute name="style">
                         <xsl:if test="$for_pdf = 1">width: 10%;</xsl:if>
                         <xsl:if test="$for_pdf = 0">width: 5%;</xsl:if>
@@ -52,6 +41,7 @@
                     <!-- for TCPDF, use correct wrapping element to set the correct line height -->
                     <xsl:element name="{$counterTag}">
                         <xsl:attribute name="style">text-align:left;</xsl:attribute>
+                        <span class="sr-only">Absatz</span>
                         <span class="ParagraphNumber" style="font-family:sans-serif; font-size:0.6em; font-weight:normal;">
                             <xsl:choose>
                                 <xsl:when test="$service_version >= 20231218">
@@ -70,13 +60,12 @@
                         <!-- for TCPDF, use non-breaking space to set the correct line height -->
                         <xsl:if test="$for_pdf = 1">&#160;</xsl:if>
                     </xsl:element>
-                </td>
+                </xlas-td>
             </xsl:if>
-            <td>
+            <xlas-td class="long-essay-content-column">
                 <xsl:if test="$add_paragraph_numbers = 1">
                     <xsl:attribute name="style">
                         <xsl:if test="$for_pdf = 1">width: 90%;</xsl:if>
-                        <xsl:if test="$for_pdf = 0">width: 95%;</xsl:if>
                     </xsl:attribute>
                 </xsl:if>
                 <xsl:copy>
@@ -102,8 +91,8 @@
                     
                     <xsl:apply-templates select="node()" />
                 </xsl:copy>
-            </td>
-        </tr>
+            </xlas-td>
+        </xlas-tr>
     </xsl:template>
 
 
