@@ -188,7 +188,8 @@ class Service extends Base\BaseService
                     $renderContext['criteria'][] = [
                         'title' => $criterion->getTitle(),
                         'description' => $criterion->getDescription(),
-                        'points' => $points[$criterion->getKey()] ?? 0
+                        'points' => $points[$criterion->getKey()] ?? 0,
+                        'is_general' => $criterion->getIsGeneral()
                     ];
                 }
 

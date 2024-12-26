@@ -124,7 +124,8 @@ class Rest extends Base\BaseRest
                 'corrector_key' => $criterion->getCorrectorKey(),
                 'title' => $criterion->getTitle(),
                 'description' => $criterion->getDescription(),
-                'points' => $criterion->getPoints()
+                'points' => $criterion->getPoints(),
+                'is_general' => $criterion->getIsGeneral()
             ];
         }
         $items = [];

@@ -3,12 +3,18 @@
 <table border="1" cellspacing="0" cellpadding="3">
     <tr>
         <td>Kriterium</td>
+        <td>Bezug</td>
         <td>Teilpunkte</td>
     </tr>
     
     {{#criteria}}
     <tr>
         <td>{{title}}</td>
+        <td>
+            {{#is_general}}Allgemein{{/is_general}}
+            {{^is_general}}Textstellen{{/is_general}}
+        </td>
+
         <td>{{points}}</td>
     </tr>
     {{/criteria}}
