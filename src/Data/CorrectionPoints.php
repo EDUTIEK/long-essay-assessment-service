@@ -9,7 +9,7 @@ class CorrectionPoints
     private string $corrector_key;
     private string $comment_key;
     private string $criterion_key;
-    private int $points;
+    private float $points;
 
     public function __construct(
         string $key,
@@ -17,7 +17,7 @@ class CorrectionPoints
         string $corrector_key,
         string $comment_key,
         string $criterion_key,
-        int $points
+        float $points
     ) {
         $this->key = $key;
         $this->item_key = $item_key;
@@ -62,7 +62,7 @@ class CorrectionPoints
     }
 
     /**
-     * Get the key of the criterion for which the oints are given
+     * Get the key of the criterion for which the points are given
      */
     public function getCriterionKey(): string
     {
@@ -72,7 +72,7 @@ class CorrectionPoints
     /**
      * Get the given points
      */
-    public function getPoints(): int
+    public function getPoints(): float
     {
         return $this->points;
     }

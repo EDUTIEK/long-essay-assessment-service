@@ -285,7 +285,6 @@ class Rest extends Base\BaseRest
                                 'end_position' => $comment->getEndPosition(),
                                 'parent_number' => $comment->getParentNumber(),
                                 'comment' => $comment->getComment(),
-                                'points' => $comment->getPoints(),
                                 'rating' => $comment->getRating(),
                                 'marks' => CorrectionMark::multiToArray($comment->getMarks())
                             ];
@@ -294,6 +293,7 @@ class Rest extends Base\BaseRest
                             $points[] = [
                                 'key' => $point->getKey(),
                                 'item_key' => $point->getItemKey(),
+                                'corrector_key' => $point->getCorrectorKey(),
                                 'comment_key' => $point->getCommentKey(),
                                 'criterion_key' => $point->getCriterionKey(),
                                 'points' => $point->getPoints()
@@ -396,7 +396,6 @@ class Rest extends Base\BaseRest
                             (int) $data['parent_number'],
                             (string) $data['comment'],
                             (string) $data['rating'],
-                            (int) $data['points'],
                             CorrectionMark::multiFromArray((array) ($data['marks'] ?? []))
                         );
 

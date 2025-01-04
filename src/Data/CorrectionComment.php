@@ -20,13 +20,13 @@ class CorrectionComment
     protected int $parent_number = 0;
     protected string $comment = '';
     protected string $rating = '';
-    protected int $points = 0;
     protected array $marks = [];
     
     // not in constructor
     protected string $label = '';
     protected bool $show_rating = true;
     protected bool $show_points = true;
+    protected int $points = 0;
 
     /**
      * Constructor
@@ -38,7 +38,6 @@ class CorrectionComment
      * @param int $parent_number - number of the parent paragraph of the first marked word or the page number of the correction marks
      * @param string $comment - textual comment
      * @param string $rating - rating flag (see constants)
-     * @param int    $points - points directly assigned to this comment (not to a criterion)
      * @param CorrectionMark[]  $marks - correction marks which are assigned to this comment
      */
     public function __construct(
@@ -50,7 +49,6 @@ class CorrectionComment
         int $parent_number,
         string $comment,
         string $rating,
-        int $points,
         array $marks = []
     )
     {
@@ -62,7 +60,6 @@ class CorrectionComment
         $this->parent_number = $parent_number;
         $this->comment = $comment;
         $this->rating = $rating;
-        $this->points = $points;
         $this->marks = $marks;
     }
 
@@ -135,13 +132,6 @@ class CorrectionComment
         return $this->rating;
     }
 
-    /**
-     * Get the points directly assigned to this comment (not to a criterion)
-     */
-    public function getPoints(): int
-    {
-        return $this->points;
-    }
 
     /**
      * Get the correction marks which are assigned to this comment
@@ -151,6 +141,16 @@ class CorrectionComment
     {
         return $this->marks;
     }
+
+
+    /**
+     * Get the points that are assigned for showing
+     */
+    public function getPoints(): int
+    {
+        return $this->points;
+    }
+
 
     /**
      * @return string

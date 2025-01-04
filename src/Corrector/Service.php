@@ -3,7 +3,6 @@
 namespace Edutiek\LongEssayAssessmentService\Corrector;
 use Edutiek\LongEssayAssessmentService\Base;
 use Edutiek\LongEssayAssessmentService\Data\DocuItem;
-use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\PdfSettings;
 use Edutiek\LongEssayAssessmentService\Data\PdfPart;
 use Edutiek\LongEssayAssessmentService\Data\PdfHtml;
@@ -227,17 +226,14 @@ class Service extends Base\BaseService
         $pdfParts = [];
         $comments = [];
 
-        $hasCriteria = !empty($this->context->getRatingCriteria($summary->getCorrectorKey()));
         foreach ($item->getCommentsByCorrectorKey($summary->getCorrectorKey()) as $comment) {
            
-            // put criteria related points into comment
-            if ($hasCriteria) {
-                $points = 0;
-                foreach($this->context->getCorrectionPoints($comment->getItemKey(), $comment->getCorrectorKey(), $comment->getKey()) as $pointsObject) {
-                    $points += $pointsObject->getPoints();
-                }
-                $comment = $comment->withPoints($points);
+            // put points into comment for showing
+            $points = 0;
+            foreach($this->context->getCorrectionPoints($comment->getItemKey(), $comment->getCorrectorKey(), $comment->getKey()) as $pointsObject) {
+                $points += $pointsObject->getPoints();
             }
+            $comment = $comment->withPoints($points);
             $comments[] = $comment
                 ->withShowRating($summary->getIncludeCommentRatings() > CorrectionSummary::INCLUDE_NOT)
                 ->withShowPoints($summary->getIncludeCommentPoints() > CorrectionSummary::INCLUDE_NOT);
