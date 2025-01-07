@@ -432,7 +432,7 @@ class Rest extends Base\BaseRest
                             (string) $data['key'],
                             (string) $data['item_key'],
                             $this->currentCorrectorKey,
-                            (string) ($comment_matching[$data['comment_key']] ?? $data['comment_key']),
+                            (string) ($comments_done[$data['comment_key']] ?? $data['comment_key']),
                             (string) $data['criterion_key'],
                             (int) $data['points']
                         );
