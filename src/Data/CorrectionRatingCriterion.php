@@ -9,18 +9,20 @@ class CorrectionRatingCriterion
     protected string $title;
     protected string $description;
     protected string $points;
+    protected bool $is_general;
 
 
     /**
      * Constructor (see getters)
      */
-    public function __construct(string $key, string $corrector_key, string $title, string $description, int $points)
+    public function __construct(string $key, string $corrector_key, string $title, string $description, int $points, bool $is_general = false)
     {
         $this->key = $key;
         $this->corrector_key = $corrector_key;
         $this->title = $title;
         $this->description = $description;
         $this->points = $points;
+        $this->is_general = $is_general;
     }
 
     /**
@@ -64,5 +66,10 @@ class CorrectionRatingCriterion
     public function getPoints(): float
     {
         return $this->points;
+    }
+
+    public function getIsGeneral(): bool
+    {
+        return $this->is_general;
     }
 }

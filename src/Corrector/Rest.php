@@ -124,7 +124,8 @@ class Rest extends Base\BaseRest
                 'corrector_key' => $criterion->getCorrectorKey(),
                 'title' => $criterion->getTitle(),
                 'description' => $criterion->getDescription(),
-                'points' => $criterion->getPoints()
+                'points' => $criterion->getPoints(),
+                'is_general' => $criterion->getIsGeneral()
             ];
         }
         $items = [];
@@ -284,7 +285,6 @@ class Rest extends Base\BaseRest
                                 'end_position' => $comment->getEndPosition(),
                                 'parent_number' => $comment->getParentNumber(),
                                 'comment' => $comment->getComment(),
-                                'points' => $comment->getPoints(),
                                 'rating' => $comment->getRating(),
                                 'marks' => CorrectionMark::multiToArray($comment->getMarks())
                             ];
@@ -293,6 +293,7 @@ class Rest extends Base\BaseRest
                             $points[] = [
                                 'key' => $point->getKey(),
                                 'item_key' => $point->getItemKey(),
+                                'corrector_key' => $point->getCorrectorKey(),
                                 'comment_key' => $point->getCommentKey(),
                                 'criterion_key' => $point->getCriterionKey(),
                                 'points' => $point->getPoints()
@@ -395,7 +396,6 @@ class Rest extends Base\BaseRest
                             (int) $data['parent_number'],
                             (string) $data['comment'],
                             (string) $data['rating'],
-                            (int) $data['points'],
                             CorrectionMark::multiFromArray((array) ($data['marks'] ?? []))
                         );
 
@@ -432,7 +432,7 @@ class Rest extends Base\BaseRest
                             (string) $data['key'],
                             (string) $data['item_key'],
                             $this->currentCorrectorKey,
-                            (string) ($comment_matching[$data['comment_key']] ?? $data['comment_key']),
+                            (string) ($comments_done[$data['comment_key']] ?? $data['comment_key']),
                             (string) $data['criterion_key'],
                             (int) $data['points']
                         );
