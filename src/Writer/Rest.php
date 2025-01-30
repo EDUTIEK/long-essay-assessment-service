@@ -99,6 +99,7 @@ class Rest extends Base\BaseRest
                 'key' => $resource->getKey(),
                 'title' => $resource->getTitle(),
                 'type' => $resource->getType(),
+                'embedded' => $resource->getEmbedded(),
                 'source' => $resource->getSource(),
                 'mimetype' => $resource->getMimetype(),
                 'size' => $resource->getSize()

@@ -16,6 +16,7 @@ class EnvResource
     protected $key;
     protected $title;
     protected $type;
+    protected $embedded;
     protected $source;
     protected $mimetype;
     protected $size;
@@ -23,11 +24,12 @@ class EnvResource
     /**
      * Constructor (see getters)
      */
-    public function __construct(string $key, string $title, string $type, string $source, ?string $mimetype = null, ?int $size = null)
+    public function __construct(string $key, string $title, string $type, bool $embedded, string $source, ?string $mimetype = null, ?int $size = null)
     {
         $this->key = $key;
         $this->title = $title;
         $this->type = $type;
+        $this->embedded = $embedded;
         $this->source = $source;
         $this->mimetype = $mimetype;
         $this->size = $size;
@@ -75,6 +77,14 @@ class EnvResource
     }
 
     /**
+     * URL resource should be viewed embedded (in an iframe)
+     */
+    public function getEmbedded(): bool
+    {
+        return $this->embedded;
+    }
+
+    /**
      * Get the source
      * If the resource type is a file then the source is the file name
      * If the resource type is a url, then the source is the actual url
@@ -83,7 +93,6 @@ class EnvResource
     {
         return $this->source;
     }
-
 
     /**
      * Mimetype of a file resource
@@ -102,4 +111,5 @@ class EnvResource
     {
         return $this->size;
     }
+
 }
