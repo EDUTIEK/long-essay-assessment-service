@@ -35,13 +35,15 @@
             <xsl:if test="$add_paragraph_numbers = 1">
                 <xlas-td class="long-essay-counter-column" style="text-align:left;">
                     <xsl:attribute name="style">
-                        <xsl:if test="$for_pdf = 1">width: 10%;</xsl:if>
+                        <xsl:if test="$for_pdf = 1">width: 8mm;</xsl:if>
                         <xsl:if test="$for_pdf = 0">width: 5%;</xsl:if>
                     </xsl:attribute>
                     <!-- for TCPDF, use correct wrapping element to set the correct line height -->
                     <xsl:element name="{$counterTag}">
                         <xsl:attribute name="style">text-align:left;</xsl:attribute>
-                        <span class="sr-only">Absatz</span>
+                        <xsl:if test="$for_pdf = 0">
+                            <span class="sr-only">Absatz</span>
+                        </xsl:if>
                         <span class="ParagraphNumber" style="font-family:sans-serif; font-size:0.6em; font-weight:normal;">
                             <xsl:choose>
                                 <xsl:when test="$service_version >= 20231218">
@@ -65,7 +67,7 @@
             <xlas-td class="long-essay-content-column">
                 <xsl:if test="$add_paragraph_numbers = 1">
                     <xsl:attribute name="style">
-                        <xsl:if test="$for_pdf = 1">width: 90%;</xsl:if>
+                        <xsl:if test="$for_pdf = 1">width: 92mm;</xsl:if>
                     </xsl:attribute>
                 </xsl:if>
                 <xsl:copy>

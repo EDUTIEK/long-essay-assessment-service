@@ -100,6 +100,12 @@ class HtmlProcessing
             $essay ? $essay->getServiceVersion() : 0,
             $settings->getAddParagraphNumbers(), $forPdf);
 
+        if ($forPdf) {
+            $html = str_replace('xlas-table','table', $html);
+            $html = str_replace('xlas-tr','tr', $html);
+            $html = str_replace('xlas-td','td', $html);
+        }
+
         return $this->getStyles() . "\n" . $html;
     }
 
@@ -120,9 +126,6 @@ class HtmlProcessing
         $html = $this->processWrittenText($essay, $writingSettings, true);
         
         $html = preg_replace('/<w-p w="([0-9]+)" p="([0-9]+)">/','<span data-w="$1" data-p="$2">', $html);
-        $html = str_replace('xlas-table','table', $html);
-        $html = str_replace('xlas-tr','tr', $html);
-        $html = str_replace('xlas-td','td', $html);
         $html = str_replace('</w-p>','</span>', $html);
         $html = $this->processXslt($html, __DIR__ . '/xsl/pdf_comments.xsl',
             $essay ? $essay->getServiceVersion() : 0,
