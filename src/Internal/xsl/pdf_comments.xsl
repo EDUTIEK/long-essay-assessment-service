@@ -57,6 +57,8 @@
     <!-- add the marking and label for comments -->
     <xsl:template match="span">
         <xsl:choose>
+            <xsl:when test="@class='sr-only'">
+            </xsl:when>
             <xsl:when test="@data-w">
                 <xsl:variable name="label" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::commentLabel',string(@data-w))" />
                 <xsl:variable name="color" select="php:function('Edutiek\LongEssayAssessmentService\Internal\HtmlProcessing::commentColor',string(@data-w))" />
