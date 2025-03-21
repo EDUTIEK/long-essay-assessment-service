@@ -14,6 +14,7 @@ use Edutiek\LongEssayAssessmentService\Data\WrittenNote;
 use Edutiek\LongEssayAssessmentService\Exceptions\ContextException;
 use Edutiek\LongEssayAssessmentService\Data\WritingTask;
 use Edutiek\LongEssayAssessmentService\Data\WritingPreferences;
+use Edutiek\LongEssayAssessmentService\Data\WritingAnnotation;
 
 /**
  * Handler of REST requests from the writer app
@@ -105,6 +106,19 @@ class Rest extends Base\BaseRest
                 'size' => $resource->getSize()
             ];
         }
+
+        $annotations = [];
+        foreach ($this->context->getWritingAnnotations() as $annotation) {
+            $annotations[] = [
+                'resource_key' => $annotation->getResourceKey(),
+                'mark_key' => $annotation->getMarkKey(),
+                'mark_value' => $annotation->getMarkValue(),
+                'parent_number' => $annotation->getParentNumber(),
+                'start_position' => $annotation->getStartPosition(),
+                'end_position' => $annotation->getEndPosition(),
+                'comment' => $annotation->getComment(),
+            ];
+        }
         
         $steps = [];
         // send all steps if undo should be based on them
@@ -154,6 +168,7 @@ class Rest extends Base\BaseRest
             'alerts' => $alerts,
             'notes' => $notes,
             'resources' => $resources,
+            'annotations' => $annotations,
         ];
 
         $this->setNewDataToken();
@@ -287,8 +302,53 @@ class Rest extends Base\BaseRest
         $essay = $this->context->getWrittenEssay();
 
         $max_time = null;
+        $annotations_done = [];
         $notes_done = [];
         $preferences_done = [];
+
+        // Save annotations
+
+        foreach ((array) $body['annotations'] as $change) {
+            if (!$this->areChangesAllowed()) {
+                continue;
+            }
+            if (!$this->isChangeTimeAllowed((int) $change['server_time'] ?? 0)) {
+                continue;
+            }
+
+            switch ($change['action'] ?? '') {
+                case 'save':
+                    if (!empty(($data = $change['payload'] ?? null))) {
+
+                        $annotation = new WritingAnnotation(
+                            (string) ($data['resource_key'] ?? ''),
+                            (string) ($data['mark_key'] ?? ''),
+                             !isset($data['mark_value']) ? null : (string) $data['mark_value'],
+                            (int) ($data['parent_number'] ?? 0),
+                            (int) ($data['start_position'] ?? 0),
+                            (int) ($data['end_position'] ?? 0),
+                            isset($data['comment']) ? null : (string) $data['comment'],
+                        );
+                        $this->context->setWritingAnnotation($annotation);
+                        $annotations_done[$change['key']] = $change['key'];
+
+                        $max_time = max($max_time ?? 0, (int) $change['server_time']);
+                    }
+                    break;
+
+                case 'delete':
+                    if (!empty(($data = $change['payload'] ?? null))) {
+
+                        $this->context->deleteWritingAnnotation(
+                            (string) ($data['resource_key'] ?? ''),
+                            (string) ($data['mark_key'] ?? '')
+                        );
+                        $annotations_done[$change['key']] = $change['key'];
+                        $max_time = max($max_time ?? 0, (int) $change['server_time']);
+                    }
+                    break;
+            }
+        }
 
         // Save notes
 
@@ -339,6 +399,7 @@ class Rest extends Base\BaseRest
         }
         
         $json = [
+            'annotations' => $annotations_done,
             'notes' => $notes_done,
             'preferences' => $preferences_done,
         ];

@@ -9,6 +9,7 @@ use Edutiek\LongEssayAssessmentService\Data\WritingTask;
 use Edutiek\LongEssayAssessmentService\Data\WrittenEssay;
 use Edutiek\LongEssayAssessmentService\Data\WrittenNote;
 use Edutiek\LongEssayAssessmentService\Data\WritingPreferences;
+use Edutiek\LongEssayAssessmentService\Data\WritingAnnotation;
 
 /**
  * Required interface of a context application (e.g. an LMS) calling the writer service
@@ -75,6 +76,21 @@ interface Context extends Base\BaseContext
      */
     public function setWritingPreferences(WritingPreferences $preferences): void;
 
+    /**
+     * Get the writing Annotations
+     * @return WritingAnnotation[]
+     */
+    public function getWritingAnnotations(): array;
+
+    /**
+     * Save a writing annotation
+     */
+    public function setWritingAnnotation(WritingAnnotation $annotation): void;
+
+    /**
+     * Delete a writing annotation
+     */
+    public function deleteWritingAnnotation(string $resource_key, string $mark_key): void;
 
     /**
      * Get the writing steps that lead to the written text
