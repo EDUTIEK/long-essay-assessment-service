@@ -19,6 +19,7 @@
     "@mdi/font": "7.4.47",
     "@tinymce/tinymce-vue": "^6.0.1",
     "@vitejs/plugin-vue": "^5.0.5",
+    "annotate-pdf": "github:EDUTIEK/annotate-pdf",
     "axios": "^1.7.7",
     "diff-match-patch": "^1.0.5",
     "js-cookie": "^3.0.5",
@@ -30,10 +31,9 @@
     "unplugin-fonts": "^1.1.1",
     "unplugin-vue-components": "^0.27.2",
     "vite": "^5.3.3",
+    "vite-plugin-static-copy": "^2.3.0",
     "vite-plugin-vuetify": "^2.0.3",
     "vue": "^3.4.31",
-    "vuetify": "^3.6.11",
-    "vite-plugin-static-copy": "^2.3.0",
-    "annotate-pdf": "github:EDUTIEK/annotate-pdf"
+    "vuetify": "^3.6.11"
   }
 }
