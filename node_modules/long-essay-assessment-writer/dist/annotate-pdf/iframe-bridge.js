@@ -5,6 +5,7 @@ function run()
     window.localStorage.removeItem('pdfjs.history');
     window.localStorage.removeItem('pdfjs.preferences');
     setup(forwardEvent, actions => {
+        overwriteMethodOnce(PDFViewerApplication.pdfSidebar, 'setInitialView', setView => setView(0));
         window.addEventListener('message', event => {
             then(
                 actions[event.data.name](...event.data.args),
@@ -509,6 +510,14 @@ function diff(left, right)
     }
 
     return null;
+}
+
+function overwriteMethodOnce(obj, method, instead = Void)
+{
+    obj[method] = () => {
+        delete obj[method];
+        return instead(obj[method]);
+    };
 }
 
 function Void(){}
