@@ -327,7 +327,7 @@ class Rest extends Base\BaseRest
                             (int) ($data['parent_number'] ?? 0),
                             (int) ($data['start_position'] ?? 0),
                             (int) ($data['end_position'] ?? 0),
-                            isset($data['comment']) ? null : (string) $data['comment'],
+                            !isset($data['comment']) ? null : (string) $data['comment'],
                         );
                         $this->context->setWritingAnnotation($annotation);
                         $annotations_done[$change['key']] = $change['key'];
