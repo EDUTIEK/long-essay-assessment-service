@@ -134,7 +134,7 @@ class Rest extends Base\BaseRest
 //            ];
 //        }
         
-        
+
         
         $json = [
             'settings' => [
@@ -154,7 +154,7 @@ class Rest extends Base\BaseRest
             ],
             'task' => [
                 'title' => $task->getTitle(),
-                'instructions' => $task->getInstructions(),
+                'instructions' => $this->dependencies->html()->processHtmlForMarking($task->getInstructions()),
                 'writer_name' => $task->getWriterName(),
                 'writing_end' => $task->getWritingEnd()
             ],
@@ -200,9 +200,6 @@ class Rest extends Base\BaseRest
 
         $json = [
             'task' => [
-                'title' => $task->getTitle(),
-                'instructions' => $task->getInstructions(),
-                'writer_name' => $task->getWriterName(),
                 'writing_end' => $task->getWritingEnd(),
                 'writing_excluded' => $task->getWritingExcluded()
             ],

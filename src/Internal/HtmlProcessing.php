@@ -63,8 +63,35 @@ class HtmlProcessing
         $template = file_get_contents($template);
         return $mustache->render($template, $data);
     }
-    
-    
+
+    /**
+     * Process html text for marking
+     * This will add the paragraph numbers and headline prefixes
+     * and split up all text to single word embedded in <w-p> elements.
+     *      the 'w' attribute is the word number
+     *      the 'p' attribute is the paragraph number
+     */
+    public function processHtmlForMarking(string $html) : string
+    {
+        self::initParaCounter();
+        self::initWordCounter();
+        self::initHeadlineCounters();
+
+        // remove ascii control characters except tab, cr and lf
+        $html = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $html);
+
+        // don't process an empty text
+        $html = trim($html);
+        if (empty($html)) {
+            return '';
+        }
+
+        $html = $this->processXslt($html, __DIR__ . '/xsl/cleanup.xsl', 0);
+        $html = $this->processXslt($html, __DIR__ . '/xsl/numbers.xsl', 0);
+
+        return $html;
+    }
+
     /**
      * Process the written text for usage in the correction
      * This will add the paragraph numbers and headline prefixes
@@ -137,11 +164,13 @@ class HtmlProcessing
 
     /**
      * Get styles to be added to the HTML
-     * @param WritingSettings $settings
-     * @return void
      */
     protected function getStyles() : string
     {
+        if (!isset(self::$writingSettings)) {
+            return '';
+        }
+
         if (self::$forPdf) {
             $styles = file_get_contents(__DIR__ . '/styles/plain_style.html');
             if (self::$writingSettings->getHeadlineScheme() == 'three') {
@@ -261,6 +290,10 @@ class HtmlProcessing
     
     static function nextHeadlinePrefix($tag): string
     {
+        if (!isset(self::$writingSettings)) {
+            return '';
+        }
+
         switch ($tag) {
             case 'h1':
                 self::$h1Counter += 1;
