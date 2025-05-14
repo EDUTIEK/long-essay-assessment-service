@@ -1,5 +1,5 @@
 /**
- * Available events are: events: create, update, delete, select.
+ * Available events are: events: create, update, delete, select, pageChanged.
  * The data is in event.detail.
  *
  * @typedef {{

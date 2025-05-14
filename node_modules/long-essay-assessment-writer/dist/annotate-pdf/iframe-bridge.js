@@ -39,6 +39,7 @@ function setup(dispatch, ready){
     uiManager(manager => {
         pdfOn('annotationeditorparamschanged', checkForChanges);
         pdfOn('switchannotationeditorparams', checkForChanges);
+        pdfOnPageChanging(pageChanging);
         // pdfOn('annotationeditorstateschanged', checkForChanges);
 
         const actions = {
@@ -120,6 +121,11 @@ function setup(dispatch, ready){
             updating = null;
             deleted.forEach(x => dispatch('delete', externEntry(x)));
             updateSelection();
+        }
+
+        function pageChanging(){
+            const page = pdfCurrentPageIndex();
+            dispatch('pageChanged', page);
         }
 
         function createOrUpdateEntry(page, editor)
@@ -387,6 +393,11 @@ function pdfCurrentPageIndex()
 function pdfSwitchToPageIndex(page)
 {
     PDFViewerApplication.eventBus.dispatch('pagenumberchanged', {value: page + 1});
+}
+
+function pdfOnPageChanging(proc)
+{
+    PDFViewerApplication.eventBus.on('pagechanging', proc);
 }
 
 function pdfOn(n, proc)
