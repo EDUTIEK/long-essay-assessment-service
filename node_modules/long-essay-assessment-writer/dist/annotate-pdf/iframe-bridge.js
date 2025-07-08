@@ -28,6 +28,7 @@ function setup(dispatch, ready){
     let entries = [];
     let selecting = null; // Used to streamline select when switching editor modes.
     let updating = null; // Used to streamline updating, to prevent bogus create & delete events.
+    let deletedIds = []; // Used to prevent 'delete' events that are triggered manually.
     const selected = state(null, (oldOne, newOne) => {
         selecting = null;
         const ret = (oldOne || {}).returnPending;
@@ -107,6 +108,7 @@ function setup(dispatch, ready){
 
         function deleteEntry(entry)
         {
+            deletedIds.push(entry.id);
             entry.editor?.remove();
             const ret = entry.returnPending;
             ret && ret();
@@ -119,7 +121,8 @@ function setup(dispatch, ready){
             const deleted = entries.filter(x => !isUsed(x));
             entries = entries.filter(isUsed);
             updating = null;
-            deleted.forEach(x => dispatch('delete', externEntry(x)));
+            deleted.forEach(x => !deletedIds.includes(x.id) && dispatch('delete', externEntry(x)));
+            deletedIds = deletedIds.filter(id => !deleted.find(x => x.id === id));
             updateSelection();
         }
 
