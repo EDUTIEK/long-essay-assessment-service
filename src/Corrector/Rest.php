@@ -16,6 +16,7 @@ use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionMark;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPreferences;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionSettings;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionSnippet;
 
 /**
  * Handler of REST requests from the corrector app
@@ -98,6 +99,16 @@ class Rest extends Base\BaseRest
         $settings = $this->context->getCorrectionSettings();
         $preferences = $this->context->getCorrectionPreferences($this->currentCorrectorKey);
 
+
+        $snippets= [];
+        foreach ($this->context->getCorrectionSnippets($this->currentCorrectorKey ?? '') as $snippet) {
+            $snippets[] = [
+                'key' => $snippet->getKey(),
+                'purpose' => $snippet->getPurpose(),
+                'text' => $snippet->getText(),
+            ];
+        }
+
         $resources = [];
         foreach ($this->context->getResources() as $resource) {
             $resources[] = [
@@ -176,7 +187,8 @@ class Rest extends Base\BaseRest
             'resources' => $resources,
             'levels' => $levels,
             'criteria' => $criteria,
-            'items' => $items
+            'items' => $items,
+            'snippets' => $snippets
         ];
 
         $this->setNewDataToken();
@@ -372,6 +384,7 @@ class Rest extends Base\BaseRest
         $comments_done = [];
         $points_done = [];
         $summaries_done = [];
+        $snippets_done = [];
         $preferences_done = [];
 
         // Save comments
@@ -492,6 +505,31 @@ class Rest extends Base\BaseRest
             }
         }
 
+        foreach ((array) $body['snippets'] as $change) {
+
+            switch ($change['action'] ?? '') {
+                case 'save':
+                    if (!empty(($data = $change['payload'] ?? null))) {
+                        $snippet = new CorrectionSnippet(
+                            (string) ($data['key'] ?? ''),
+                            (string) ($data['purpose'] ?? ''),
+                            !isset($data['text']) ? null : (string) $data['text'],
+                        );
+                        $this->context->saveCorrectionSnippet($this->currentCorrectorKey, $snippet);
+                        $snippets_done[$change['key']] = $change['key'];
+                    }
+                    break;
+
+                case 'delete':
+                    $this->context->deleteCorrectionSnippet(
+                        $this->currentCorrectorKey,
+                        (string) ($change['key'] ?? '')
+                    );
+                    $snippets_done[$change['key']] = $change['key'];
+                    break;
+            }
+        }
+
         // save preferences (only one with fixed key 
         foreach ((array) $body['preferences'] as $change) {
             if (!empty($data = $change['payload'] ?? null)) {
@@ -527,6 +565,7 @@ class Rest extends Base\BaseRest
           'comments' => $comments_done,
           'points' => $points_done,
           'summaries' => $summaries_done,
+          'snippets' => $snippets_done,
           'preferences' => $preferences_done,
         ];
 

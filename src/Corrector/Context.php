@@ -15,6 +15,8 @@ use Edutiek\LongEssayAssessmentService\Data\CorrectionRatingCriterion;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionComment;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPoints;
 use Edutiek\LongEssayAssessmentService\Data\CorrectionPreferences;
+use Edutiek\LongEssayAssessmentService\Data\WritingAnnotation;
+use Edutiek\LongEssayAssessmentService\Data\CorrectionSnippet;
 
 /**
  * Required interface of a context application (e.g. an LMS) calling the corrector service
@@ -105,6 +107,12 @@ interface Context extends Base\BaseContext
      * Get if a corrector is assigned to an item
      */
     public function isCorrectorOfItem(string $item_key, string $corrector_key) : bool;
+
+    /**
+     * Get the correction snippets
+     * @return CorrectionSnippet[]
+     */
+    public function getCorrectionSnippets(string $corrector_key): array;
     
     /**
      * Get the correction summary given by a corrector for a correction item
@@ -133,6 +141,19 @@ interface Context extends Base\BaseContext
     public function saveCorrectionPreferences(CorrectionPreferences $preferences) : bool;
 
     /**
+     * Save a correction snippet
+     */
+    public function saveCorrectionSnippet(string $corrector_key, CorrectionSnippet $snippet): void;
+
+    /**
+     * Delete a correction snippet if it belongs to a corrector
+     *
+     * @param string $corrector_key key of the corrector for which the snippet should be deleted
+     * @param string $key key of the snippet object to delete
+     */
+    public function deleteCorrectionSnippet(string $corrector_key, string $key): void;
+
+    /**
      * Save the correction summary given by a corrector for a correction item
      * @return bool summary is saved
      */
@@ -147,13 +168,12 @@ interface Context extends Base\BaseContext
      */
     public function saveCorrectionComment(CorrectionComment $comment): ?string;
 
-
     /**
      * Delete a correction comment if it belongs to a corrector
      *
      * @param string $comment_key key of the comment object to delete
      * @param string $corrector_key key of the corrector for which the comment should be deleted
-     * @return bool true if the object is deleted afterwards, false if the object can't be deleted
+     * @return bool true if the object is deleted afterward, false if the object can't be deleted
      */
     public function deleteCorrectionComment(string $comment_key, string $corrector_key): bool;
 
