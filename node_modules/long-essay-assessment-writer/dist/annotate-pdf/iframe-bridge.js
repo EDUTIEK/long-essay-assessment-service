@@ -327,9 +327,23 @@ function sync(entry, name, action)
 
 function pdfOnInit(thunk)
 {
-    window.addEventListener('DOMContentLoaded', function(){
+    pdfReady(function(){
          PDFViewerApplication.pdfViewer.eventBus.on('annotationeditoruimanager', thunk);
     });
+}
+
+function pdfReady(proc)
+{
+    window.addEventListener('DOMContentLoaded', tryit);
+
+    function tryit()
+    {
+        if(window.PDFViewerApplication && PDFViewerApplication.pdfViewer && PDFViewerApplication.pdfViewer.eventBus){
+            proc();
+        }else{
+            setTimeout(tryit, 10);
+        }
+    }
 }
 
 /**
@@ -463,7 +477,7 @@ function state(initValue, onUpdate = Void)
 function switchPageWhenReady()
 {
     let call = state(Void);
-    document.addEventListener('DOMContentLoaded', () => pdfOnce('pagesloaded', () => {
+    pdfReady(() => pdfOnce('pagesloaded', () => {
         call()();
         call = proc => proc();
     }));
