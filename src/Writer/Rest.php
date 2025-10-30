@@ -509,7 +509,6 @@ class Rest extends Base\BaseRest
             ->withServiceVersion($this->dependencies->serviceVersion())
             ->withEditEnded(isset($step) ? $step->getTimestamp() : $essay->getEditEnded())
         );
-        $this->context->deleteWrittenNotes();
     }
 
     /**
