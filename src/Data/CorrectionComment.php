@@ -26,7 +26,7 @@ class CorrectionComment
     protected string $label = '';
     protected bool $show_rating = true;
     protected bool $show_points = true;
-    protected int $points = 0;
+    protected float $points = 0;
 
     /**
      * Constructor
@@ -146,7 +146,7 @@ class CorrectionComment
     /**
      * Get the points that are assigned for showing
      */
-    public function getPoints(): int
+    public function getPoints(): float
     {
         return $this->points;
     }
@@ -161,10 +161,10 @@ class CorrectionComment
     }
 
     /**
-     * @param int $points
+     * @param float $points
      * @return CorrectionComment
      */
-    public function withPoints(int $points): CorrectionComment
+    public function withPoints(float $points): CorrectionComment
     {
         $clone = clone $this;
         $clone->points = $points;

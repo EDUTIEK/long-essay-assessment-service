@@ -448,7 +448,7 @@ class Rest extends Base\BaseRest
                             $this->currentCorrectorKey,
                             (string) ($comments_done[$data['comment_key']] ?? $data['comment_key']),
                             (string) $data['criterion_key'],
-                            (int) $data['points']
+                            (float) $data['points']
                         );
 
                         if (!empty($key = $this->context->saveCorrectionPoints($points))) {
