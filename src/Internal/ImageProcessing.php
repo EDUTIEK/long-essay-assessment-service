@@ -154,7 +154,7 @@ class ImageProcessing
                 
             case CorrectionMark::SHAPE_CIRCLE:
             default:
-                return new Shape\Circle($this->getShapeSymbol($mark), '#000000', 80, $pos, $label, $color);
+                return new Shape\Circle($this->getShapeSymbol($mark), '#000000', 40, $pos, $label, $color);
         }
     }
 
