@@ -37,6 +37,13 @@ class PdfGeneration
 
     protected $mono_font = 'courier';
 
+    private function sanitizeHtml(string $html): string
+    {
+        $html = str_replace("\t", '    ', $html);
+        $html = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $html);
+        return $html;
+    }
+
     /**
      * Generate a pdf from an HTML text
      * Compliance with PDF/A-2B shall be achieved
@@ -102,7 +109,7 @@ class PdfGeneration
                         (float) $element->getHeight(),
                         $element->getLeft(),
                         $element->getTop(),
-                        $element->getHtml(),
+                        $this->sanitizeHtml($element->getHtml()),
                         0,      // border
                         0,      // ln
                         false,  // fill
